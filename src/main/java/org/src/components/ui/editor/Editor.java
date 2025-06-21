@@ -11,7 +11,6 @@ import org.src.core.managers.InputManager;
 import org.src.core.callbacks.MouseLeftPressCallback;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL15.glBufferSubData;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class Editor extends Component {
@@ -50,6 +49,18 @@ public final class Editor extends Component {
 			case GLFW_KEY_P:
 				setMode(EditorMode.PAINT_PROVINCES);
 				break;
+			case GLFW_KEY_Z:
+				currentProvince.deleteLastPoint();
+				break;
+			case GLFW_KEY_N:
+				newProvince();
+				break;
+			case GLFW_KEY_F:
+				currentProvince.setDrawFill(!currentProvince.getDrawFill());
+				break;
+			case GLFW_KEY_G:
+				currentProvince.setDrawPoints(!currentProvince.getDrawPoints());
+				break;
 		}
 	};
 
@@ -61,7 +72,7 @@ public final class Editor extends Component {
 
 		mode = EditorMode.ADD_PROVINCES;
 
-		this.editorWindow = new EditorWindow(this);
+		this.editorWindow = new EditorWindow(this, map);
 		this.editorCursor = new EditorCursor();
 
 		InputManager.addMouseLeftPressCallback(leftCallback);
@@ -69,7 +80,9 @@ public final class Editor extends Component {
 		InputManager.addKeyPressCallback(pressCallback);
 	}
 
-	public void passProvince() {
+	public void newProvince() {
+		// we obviously don't want to make a new province while the current is empty
+		if (currentProvince.getIndices().length == 0) { return; }
 		map.addProvinceToMesh(currentProvince);
 		currentProvince = map.createProvince();
 	}

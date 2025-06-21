@@ -6,6 +6,7 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import org.src.components.Map;
 import org.src.core.main.Window;
 
 import static org.lwjgl.opengl.GL11.glDisable;
@@ -21,8 +22,10 @@ public final class EditorWindow {
 
 
 	private final Editor editor;
-	public EditorWindow(final Editor editor) {
+	private final Map map;
+	public EditorWindow(final Editor editor, final Map map) {
 		this.editor = editor;
+		this.map = map;
 
 		this.imGuiImplGl3 = new ImGuiImplGl3();
 		this.imGuiImplGlfw = new ImGuiImplGlfw();
@@ -67,12 +70,20 @@ public final class EditorWindow {
 		tryRenderingForAddProvincesMode();
 
 		ImGui.separator();
-		if (ImGui.checkbox("Draw current province filling", editor.getCurrentProvince().getDrawFill())) {
+		if (ImGui.checkbox("Draw current province filling (f)", editor.getCurrentProvince().getDrawFill())) {
 			editor.getCurrentProvince().setDrawFill(!editor.getCurrentProvince().getDrawFill());
 		}
 
-		if (ImGui.checkbox("Draw current province points", editor.getCurrentProvince().getDrawPoints())) {
+		if (ImGui.checkbox("Draw current province points (g)", editor.getCurrentProvince().getDrawPoints())) {
 			editor.getCurrentProvince().setDrawPoints(!editor.getCurrentProvince().getDrawPoints());
+		}
+
+		if (ImGui.checkbox("Draw other provinces' points (h)", map.getDrawProvincePoints())) {
+			map.setDrawProvincePoints(!map.getDrawProvincePoints());
+		}
+
+		if (ImGui.checkbox("Draw other provinces' fillings (j)", map.getDrawProvinceFillings())) {
+			map.setDrawProvinceFillings(!map.getDrawProvinceFillings());
 		}
 
 		ImGui.separator();
@@ -91,7 +102,7 @@ public final class EditorWindow {
 	private void tryRenderingForAddProvincesMode() {
 		if (editor.getMode() != EditorMode.ADD_PROVINCES) { return; }
 
-		if (ImGui.button("Delete last point")) {
+		if (ImGui.button("Delete last point (z)")) {
 			editor.getCurrentProvince().deleteLastPoint();
 		}
 
@@ -105,8 +116,8 @@ public final class EditorWindow {
 		ImGui.sameLine();
 		ImGui.text("currentProvinceID: ");
 
-		if (ImGui.button("New province")) {
-			editor.passProvince();
+		if (ImGui.button("New province (n)")) {
+			editor.newProvince();
 		}
 	}
 

@@ -6,13 +6,9 @@ import org.src.core.callbacks.*;
 import org.src.core.helper.*;
 import org.src.core.managers.InputManager;
 import org.src.core.main.Window;
-import org.src.core.managers.ShaderManager;
-import org.src.rendering.wrapper.Shader;
 import org.src.rendering.wrapper.UniformBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
-import static org.lwjgl.opengl.GL15.glBufferSubData;
 import static org.lwjgl.opengl.GL31.*;
 import static org.src.core.helper.Helper.FLOAT;
 import static org.src.core.helper.Helper.isInImGuiWindow;

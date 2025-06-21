@@ -29,9 +29,9 @@ public final class Province {
 	public Province() {
 		drawFill = drawPoints = true;
 
-		mesh = new Mesh(new float[]{}, new int[]{}, new byte[]{2, 3});
-
 		shaderStorage = new ShaderStorage(new float[] {}, 1);
+
+		mesh = new Mesh(new float[]{}, new int[]{}, new byte[]{2, 3});
 
 		boxMesh = new Mesh(new float[]{
 				0.0008f,  0.0008f,
@@ -53,15 +53,16 @@ public final class Province {
 	public void addPoint(final float x, final float y) {
 		pointsPositions = Helper.insertElementsToFloatArray(pointsPositions, new float[] {x, y});
 		mesh.setVertices(Helper.insertElementsToFloatArray(mesh.getVertices(), new float[] {x, y, color[0], color[1], color[2]}));
-		final List<Integer> newIndices = Earcut.earcut(Helper.toDoubleArray(pointsPositions));
-		mesh.setIndices(newIndices.stream().mapToInt(Integer::intValue).toArray());
-		shaderStorage.regenerate(pointsPositions);
-		mesh.regenerate();
+		refreshMesh();
 	}
 
 	public void deleteLastPoint() {
 		pointsPositions = Helper.truncateFloatArray(pointsPositions, pointsPositions.length - 2);
 		mesh.setVertices(Helper.truncateFloatArray(mesh.getVertices(), mesh.getVertices().length - 5));
+		refreshMesh();
+	}
+
+	private void refreshMesh() {
 		final List<Integer> newIndices = Earcut.earcut(Helper.toDoubleArray(pointsPositions));
 		mesh.setIndices(newIndices.stream().mapToInt(Integer::intValue).toArray());
 		shaderStorage.regenerate(pointsPositions);
@@ -121,12 +122,20 @@ public final class Province {
 		return mesh.getIndices();
 	}
 
+	public int getMeshOffsetSum() {
+		return mesh.getOffsetSum();
+	}
+
 	public float[] getVertices() {
 		return mesh.getVertices();
 	}
 
 	public float[] getColor() {
 		return color;
+	}
+
+	public float[] getPointsPositions() {
+		return pointsPositions;
 	}
 
 	public boolean getDrawFill() {

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class InputManager {
 	private static final boolean[] keys = new boolean[500]; // 500 is an arbitrary number

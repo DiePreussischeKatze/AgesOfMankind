@@ -11,13 +11,20 @@ public final class ShaderStorage {
 	private int id;
 
 	private int binding;
-
+	// TODO: Create a manager for them; add more constructors
 	public ShaderStorage(final float[] data, final int binding) {
 		this.binding = binding;
 
 		id = glCreateBuffers();
 
 		glNamedBufferData(id, BufferUtils.createFloatBuffer(data.length).put(data).flip(), GL_DYNAMIC_COPY);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding, id);
+	}
+
+	public ShaderStorage(final int binding) {
+		this.binding = binding;
+
+		id = glCreateBuffers();
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding, id);
 	}
 
