@@ -1,0 +1,7 @@
+package org.src.components.ui.editor;
+
+public enum EditorMode {
+	ADD_PROVINCES,
+	EDIT_PROVINCES,
+	PAINT_PROVINCES,
+}

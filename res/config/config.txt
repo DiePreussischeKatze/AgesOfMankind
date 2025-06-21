@@ -1,0 +1,14 @@
+? The config file of Ages of Mankind
+? It's recommended that you change the settings directly in game (if it were only possible)
+? You can make comments using the (?) sign
+? don't change the names of the parameters!
+startWinWidth: 1280
+startWinHeight: 720
+vsyncEnabled: true
+maxFps: 60
+cameraMoveSpeed: 0.01
+antialiasingSamples: 4 ?0 to disable anti-aliasing
+cameraMinZoom: 0.4
+fullscreen: false
+cameraMaxZoom: 20
+cameraDeceleration: 0.0005
