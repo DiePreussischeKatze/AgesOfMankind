@@ -21,6 +21,17 @@ public final class Mesh {
 		this.offsets = offsets;
 		this.indices = indices;
 
+		init();
+	}
+
+	public Mesh(final byte[] offsets) {
+		this.offsets = offsets;
+		this.vertices = new float[0];
+		this.indices = new int[0];
+		init();
+	}
+
+	private void init() {
 		vao = glCreateVertexArrays();
 		vbo = glCreateBuffers();
 		ebo = glCreateBuffers();
@@ -32,7 +43,7 @@ public final class Mesh {
 		glNamedBufferData(vbo, BufferUtils.createFloatBuffer(vertices.length).put(vertices).flip(), GL_STATIC_DRAW);
 		glNamedBufferData(ebo, BufferUtils.createIntBuffer(indices.length).put(indices).flip(), GL_STATIC_DRAW);
 
-		int offsetSum = getOffsetSum();
+		int offsetSum = getStrideSum();
 
 		glVertexArrayVertexBuffer(vao, 0, vbo, 0, offsetSum * Float.BYTES);
 		glVertexArrayElementBuffer(vao, ebo);
@@ -86,7 +97,7 @@ public final class Mesh {
 		this.offsets = offsets;
 	}
 
-	public int getOffsetSum() {
+	public int getStrideSum() {
 		int offsetSum = 0;
 		for (final int offset: offsets) {
 			offsetSum += offset;

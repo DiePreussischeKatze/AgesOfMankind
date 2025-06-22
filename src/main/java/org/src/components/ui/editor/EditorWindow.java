@@ -18,8 +18,7 @@ public final class EditorWindow {
 	private final ImGuiImplGl3 imGuiImplGl3;
 	private final ImGuiImplGlfw imGuiImplGlfw;
 
-	private ImGuiIO imGuiIO;
-
+	private final ImGuiIO imGuiIO;
 
 	private final Editor editor;
 	private final Map map;
@@ -59,17 +58,26 @@ public final class EditorWindow {
 		if (ImGui.selectable("Add provinces (q)", editor.getMode() == EditorMode.ADD_PROVINCES)) {
 			editor.setMode(EditorMode.ADD_PROVINCES);
 		}
+
 		if (ImGui.selectable("Edit provinces (e)", editor.getMode() == EditorMode.EDIT_PROVINCES)) {
 			editor.setMode(EditorMode.EDIT_PROVINCES);
 		}
-		if(ImGui.selectable("Paint provinces (p)", editor.getMode() == EditorMode.PAINT_PROVINCES)) {
+
+		if (ImGui.selectable("Paint provinces (p)", editor.getMode() == EditorMode.PAINT_PROVINCES)) {
 			editor.setMode(EditorMode.PAINT_PROVINCES);
 		}
+
+		if (ImGui.selectable("Select province (l)", editor.getMode() == EditorMode.SELECT_PROVINCES)) {
+			editor.setMode(EditorMode.SELECT_PROVINCES);
+		}
+
 		ImGui.separator();
 
 		tryRenderingForAddProvincesMode();
+		tryRenderingForEditProvincesMode();
 
 		ImGui.separator();
+
 		if (ImGui.checkbox("Draw current province filling (f)", editor.getCurrentProvince().getDrawFill())) {
 			editor.getCurrentProvince().setDrawFill(!editor.getCurrentProvince().getDrawFill());
 		}
@@ -84,6 +92,10 @@ public final class EditorWindow {
 
 		if (ImGui.checkbox("Draw other provinces' fillings (j)", map.getDrawProvinceFillings())) {
 			map.setDrawProvinceFillings(!map.getDrawProvinceFillings());
+		}
+
+		if (ImGui.checkbox("Toggle grid alignment", editor.getGridAlignment())) {
+			editor.setGridAlignment(!editor.getGridAlignment());
 		}
 
 		ImGui.separator();
@@ -119,6 +131,16 @@ public final class EditorWindow {
 		if (ImGui.button("New province (n)")) {
 			editor.newProvince();
 		}
+	}
+
+	private void tryRenderingForEditProvincesMode() {
+		if (editor.getMode() != EditorMode.EDIT_PROVINCES) { return; }
+
+		if (ImGui.button("Delete selected point (DEL)") && editor.getHeldProvincePointIndex() != -1) {
+			editor.getCurrentProvince().deletePoint(editor.getHeldProvincePointIndex());
+			editor.setHeldProvincePointIndex(-1);
+		}
+
 	}
 
 }

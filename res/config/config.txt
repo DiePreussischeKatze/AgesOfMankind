@@ -10,5 +10,5 @@ cameraMoveSpeed: 0.01
 antialiasingSamples: 4 ?0 to disable anti-aliasing
 cameraMinZoom: 0.4
 fullscreen: false
-cameraMaxZoom: 20
+cameraMaxZoom: 40
 cameraDeceleration: 0.0005

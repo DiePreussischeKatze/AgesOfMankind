@@ -15,6 +15,7 @@ public final class EditorCursor extends Component {
 	private float y;
 
 	public EditorCursor() {
+
 		boxMesh = new Mesh(new float[]{
 				0.0008f,  0.0008f,
 				0.0008f, -0.0008f,
@@ -35,7 +36,12 @@ public final class EditorCursor extends Component {
 		if (isInImGuiWindow()) { return; }
 		ShaderManager.get(ShaderID.EDITOR).bind();
 		ShaderManager.get(ShaderID.EDITOR).setFloat2("offset", x, y);
+		ShaderManager.get(ShaderID.EDITOR).setFloat3("color", 0.8f, 0.6f, 0.1f);
 		boxMesh.draw();
+	}
+
+	public Mesh getBoxMesh() {
+		return boxMesh;
 	}
 
 	@Override

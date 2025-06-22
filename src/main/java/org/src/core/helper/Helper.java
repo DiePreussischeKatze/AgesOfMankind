@@ -136,4 +136,15 @@ public final class Helper {
 		return max;
 	}
 
+	/**
+	 * @return the array without the specified elements (it deletes the elements including the start index)
+	 */
+	public static float[] deleteElementsFromFloatArray(final float[] array, final int startIndex, final int deleteCount) {
+		if (array.length == 0) { return new float[0]; }
+		final float[] newArray = new float[array.length - deleteCount];
+		System.arraycopy(array, 0, newArray, 0, array.length - deleteCount);
+		System.arraycopy(array, startIndex + deleteCount, newArray, startIndex, array.length - startIndex - deleteCount);
+		return newArray;
+	}
+
 }

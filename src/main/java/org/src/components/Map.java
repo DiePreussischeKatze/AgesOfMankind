@@ -2,6 +2,7 @@ package org.src.components;
 
 import org.src.components.province.Province;
 import org.src.core.helper.Component;
+import org.src.core.helper.Consts;
 import org.src.core.helper.Helper;
 import org.src.core.helper.ShaderID;
 import org.src.core.managers.ShaderManager;
@@ -54,7 +55,7 @@ public final class Map extends Component {
 				-0.0008f, -0.0008f,
 				-0.0008f,  0.0008f,
 		}, RECTANGLE_INDICES, new byte[] {
-				2
+				Consts.POINT_POSITION_STRIDE
 		});
 
 		float xSize = (float) texture.getWidth() / 1000;
@@ -106,7 +107,7 @@ public final class Map extends Component {
 			ShaderManager.get(ShaderID.MAP_PIVOT).bind();
 			pointShaderStorage.bind();
 			boxMesh.bind();
-			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, provincesPoints.length / 2);
+			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, provincesPoints.length / Consts.POINT_POSITION_STRIDE);
 		}
 
 		if (drawProvinceFillings) {
