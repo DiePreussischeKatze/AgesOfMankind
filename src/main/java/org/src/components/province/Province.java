@@ -15,9 +15,9 @@ import java.util.List;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
-import static org.src.core.helper.Consts.RECTANGLE_INDICES;
 
 public final class Province {
+	// TODO: make some of them not private
 	public static final float POINT_SIZE;
 
 	private final Mesh mesh;
@@ -54,17 +54,12 @@ public final class Province {
 		shaderStorage = new ShaderStorage(1);
 		mesh = new Mesh(new byte[] {2, 3});
 
-		boxMesh = new Mesh(new float[]{
-				 POINT_SIZE,  POINT_SIZE,
-				 POINT_SIZE, -POINT_SIZE,
-				-POINT_SIZE, -POINT_SIZE,
-				-POINT_SIZE,  POINT_SIZE,
-		}, RECTANGLE_INDICES, new byte[] {
-				Consts.POINT_POSITION_STRIDE
-		});
-
+		boxMesh = Helper.createPlainBoxMesh(POINT_SIZE, POINT_SIZE);
 	}
 
+	/**
+	 * @return the index of the point (not the index in the array!)
+	 */
 	public int isInAnyPoint(final float x, final float y) {
 		for (int i = 0; i < pointsPositions.length; i += Consts.POINT_POSITION_STRIDE) {
 			final float pointX = pointsPositions[i] - POINT_SIZE;
@@ -78,12 +73,25 @@ public final class Province {
 	}
 
 	public void addPoint(final float x, final float y) {
-		pointsPositions = Helper.insertElementsToFloatArray(pointsPositions, new float[] {x, y});
-		mesh.setVertices(Helper.insertElementsToFloatArray(mesh.getVertices(), new float[] {
+		if (pointAlreadyExists(x, y) != -1) { return; } // we don't want duplicate points
+
+		pointsPositions = Helper.addElementsToFloatArray(pointsPositions, new float[] {x, y});
+		mesh.setVertices(Helper.addElementsToFloatArray(mesh.getVertices(), new float[] {
 				x, y, color[0], color[1], color[2]
 		}));
 		refreshMesh();
 		refreshMaxPoints();
+	}
+
+	/**
+	 * @return the index of the point (not the index in the array!)
+	 */
+	private int pointAlreadyExists(final float x, final float y) {
+		for (int i = 0; i < pointsPositions.length; i += Consts.POINT_POSITION_STRIDE) {
+			if (pointsPositions[i] == x && pointsPositions[i + 1] == y) { return i / Consts.POINT_POSITION_STRIDE; }
+		}
+
+		return -1; // the point doesn't exist at these coordinates
 	}
 
 	public void deletePoint(final int index) {
@@ -91,6 +99,19 @@ public final class Province {
 		mesh.setVertices(Helper.deleteElementsFromFloatArray(mesh.getVertices(), index * mesh.getStrideSum(), mesh.getStrideSum()));
 		refreshMaxPoints();
 		refreshMesh();
+	}
+
+	public boolean pointInProvince(final Vector2f point) {
+		for (int i = 0; i < mesh.getIndices().length; i += 3) {
+			if (Helper.pointTriangleIntersection(point,
+					new Vector2f(pointsPositions[mesh.getIndices()[i] * 2],     pointsPositions[mesh.getIndices()[i] * 2 + 1]),
+					new Vector2f(pointsPositions[mesh.getIndices()[i + 1] * 2], pointsPositions[mesh.getIndices()[i + 1] * 2 + 1]),
+					new Vector2f(pointsPositions[mesh.getIndices()[i + 2] * 2], pointsPositions[mesh.getIndices()[i + 2] * 2 + 1])
+			)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void refreshMaxPoints() {
@@ -108,6 +129,24 @@ public final class Province {
 				minPos.y = pointsPositions[i + 1];
 			}
 		}
+	}
+
+	/**
+	 * Places a point in between the point a the specified index (not the index in the array!) and the point at index - 1 (again, not the array index)
+	 */
+	public void insertPointBackwards(final int index) {
+		if (index * Consts.POINT_POSITION_STRIDE - Consts.POINT_POSITION_STRIDE < 0) { return; }
+
+		final Vector2f averagePosition = new Vector2f(
+				(pointsPositions[index * Consts.POINT_POSITION_STRIDE] + pointsPositions[index * Consts.POINT_POSITION_STRIDE - Consts.POINT_POSITION_STRIDE]) / 2,
+				(pointsPositions[index * Consts.POINT_POSITION_STRIDE + 1] + pointsPositions[index * Consts.POINT_POSITION_STRIDE - Consts.POINT_POSITION_STRIDE + 1]) / 2
+		);
+
+		// FIXME: this works bizarre
+		pointsPositions = Helper.insertElementsToFloatArray(pointsPositions, index * Consts.POINT_POSITION_STRIDE, new float[] {averagePosition.x, averagePosition.y});
+		mesh.setVertices(Helper.insertElementsToFloatArray(mesh.getVertices(), index * mesh.getStrideSum(), new float[] {averagePosition.x, averagePosition.y, color[0], color[1], color[2]}));
+		refreshMesh();
+		// there's no need for refreshMaxPoints()
 	}
 
 	public void deleteLastPoint() {
@@ -174,7 +213,7 @@ public final class Province {
 		return mesh.getIndices();
 	}
 
-	public int getMeshOffsetSum() {
+	public int getMeshStride() {
 		return mesh.getStrideSum();
 	}
 

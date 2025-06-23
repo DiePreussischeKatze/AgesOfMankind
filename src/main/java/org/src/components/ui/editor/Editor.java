@@ -7,10 +7,13 @@ import org.src.components.province.Province;
 import org.src.core.callbacks.*;
 import org.src.core.helper.Component;
 import org.src.core.helper.Consts;
+import org.src.core.helper.Helper;
 import org.src.core.helper.ShaderID;
 import org.src.core.main.Window;
 import org.src.core.managers.InputManager;
 import org.src.core.managers.ShaderManager;
+
+import java.sql.SQLOutput;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.src.core.helper.Helper.isInImGuiWindow;
@@ -37,35 +40,35 @@ public final class Editor extends Component {
 		adjustedPosition.x = -camera.getPosition().x + camera.getAccumulatedDragDistance().x + (InputManager.getCenteredMouseX() / Window.getWidth()) / camera.getPosition().z * 2;
 		adjustedPosition.y = -camera.getPosition().y - camera.getAccumulatedDragDistance().y - (InputManager.getCenteredMouseY() / Window.getWidth()) / camera.getPosition().z * 2;
 
+		//System.out.println(currentProvince.isInAnyPoint(adjustedPosition.x, adjustedPosition.y));
+		System.out.println(currentProvince.pointInProvince(adjustedPosition));
+
 		switch (mode) {
 			case EditorMode.ADD_PROVINCES:
 				if (!gridAlignmentEnabled) {
-					editorCursor.updatePosition(
-							adjustedPosition.x,
-							adjustedPosition.y
-					);
+					editorCursor.updatePosition(adjustedPosition);
 				} else {
 					editorCursor.updatePosition(
-							(float) Math.floor(adjustedPosition.x * 1000) / 1000 + 0.0005f, // align 'em to the mouse cursor
-							(float) Math.floor(adjustedPosition.y * 1000) / 1000 + 0.0005f
+							(float) Math.floor(adjustedPosition.x * 500) / 500 + 0.001f, // align 'em to the mouse cursor
+							(float) Math.floor(adjustedPosition.y * 500) / 500 + 0.001f
 					);
 				}
 				break;
 			case EditorMode.EDIT_PROVINCES:
-				if (heldProvincePointIndex == -1 || !draggingProvincePoint) { return; }
+				if (!isAnyPointSelected() || !draggingProvincePoint) { return; }
 
 				// modify the mesh
 				// TODO: use drag delta to avoid a small jitter when starting to shift
 				if (gridAlignmentEnabled) {
 					currentProvince.getPointsPositions()[heldProvincePointIndex * Consts.POINT_POSITION_STRIDE] =
-							currentProvince.getVertices()[heldProvincePointIndex * currentProvince.getMeshOffsetSum()] = (float) Math.floor(adjustedPosition.x * 1000) / 1000 + 0.0005f;
+							currentProvince.getVertices()[heldProvincePointIndex * currentProvince.getMeshStride()] = (float) Math.floor(adjustedPosition.x * 500) / 500 + 0.001f;
 					currentProvince.getPointsPositions()[heldProvincePointIndex * Consts.POINT_POSITION_STRIDE + 1] =
-							currentProvince.getVertices()[heldProvincePointIndex * currentProvince.getMeshOffsetSum() + 1] = (float) Math.floor(adjustedPosition.y * 1000) / 1000 + 0.0005f;
+							currentProvince.getVertices()[heldProvincePointIndex * currentProvince.getMeshStride() + 1] = (float) Math.floor(adjustedPosition.y * 500) / 500 + 0.001f;
 				} else {
 					currentProvince.getPointsPositions()[heldProvincePointIndex * Consts.POINT_POSITION_STRIDE] =
-							currentProvince.getVertices()[heldProvincePointIndex * currentProvince.getMeshOffsetSum()] = adjustedPosition.x;
+							currentProvince.getVertices()[heldProvincePointIndex * currentProvince.getMeshStride()] = adjustedPosition.x;
 					currentProvince.getPointsPositions()[heldProvincePointIndex * Consts.POINT_POSITION_STRIDE + 1] =
-							currentProvince.getVertices()[heldProvincePointIndex * currentProvince.getMeshOffsetSum() + 1] = adjustedPosition.y;
+							currentProvince.getVertices()[heldProvincePointIndex * currentProvince.getMeshStride() + 1] = adjustedPosition.y;
 				}
 
 				currentProvince.refreshMesh();
@@ -85,8 +88,8 @@ public final class Editor extends Component {
 					);
 				} else {
 					currentProvince.addPoint(
-							(float) Math.floor(adjustedPosition.x * 1000) / 1000 + 0.0005f, // align 'em to the mouse cursor
-							(float) Math.floor(adjustedPosition.y * 1000) / 1000 + 0.0005f
+							(float) Math.floor(adjustedPosition.x * 500) / 500 + 0.001f, // align 'em to the mouse cursor
+							(float) Math.floor(adjustedPosition.y * 500) / 500 + 0.001f
 					);
 				}
 				break;
@@ -141,9 +144,14 @@ public final class Editor extends Component {
 		} else if (mode == EditorMode.EDIT_PROVINCES) {
 			switch (key) {
 				case GLFW_KEY_DELETE:
+					if (!isAnyPointSelected()) { return; }
 					currentProvince.deletePoint(heldProvincePointIndex);
 					heldProvincePointIndex = -1;
 					break;
+				case GLFW_KEY_C:
+					if (!isAnyPointSelected()) { return; }
+					currentProvince.insertPointBackwards(heldProvincePointIndex);
+					heldProvincePointIndex = -1;
 			}
 		}
 	};
@@ -201,7 +209,7 @@ public final class Editor extends Component {
 	}
 
 	private void drawSelectedPoint() {
-		if (heldProvincePointIndex == -1 || currentProvince.getPointsPositions().length == 0) { return; }
+		if (!isAnyPointSelected() || currentProvince.getPointsPositions().length == 0) { return; }
 
 		ShaderManager.get(ShaderID.EDITOR).bind();
 		ShaderManager.get(ShaderID.EDITOR).setFloat2(
@@ -246,6 +254,10 @@ public final class Editor extends Component {
 
 	public void setHeldProvincePointIndex(int heldProvincePointIndex) {
 		this.heldProvincePointIndex = heldProvincePointIndex;
+	}
+
+	public boolean isAnyPointSelected() {
+		return heldProvincePointIndex != -1;
 	}
 
 	@Override

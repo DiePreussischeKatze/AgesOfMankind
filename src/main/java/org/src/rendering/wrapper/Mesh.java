@@ -65,11 +65,11 @@ public final class Mesh {
 	}
 
 	public void addVertices(final float[] newVertices) {
-		vertices = Helper.insertElementsToFloatArray(vertices, newVertices);
+		vertices = Helper.addElementsToFloatArray(vertices, newVertices);
 	}
 
 	public void addIndices(final int[] newIndices) {
-		indices = Helper.insertElementsToIntArray(indices, newIndices);
+		indices = Helper.addElementsToIntArray(indices, newIndices);
 	}
 
 	public void bind() {

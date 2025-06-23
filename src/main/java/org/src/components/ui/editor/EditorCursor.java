@@ -1,46 +1,50 @@
 package org.src.components.ui.editor;
 
+import org.joml.Vector2f;
 import org.src.core.helper.Component;
+import org.src.core.helper.Helper;
 import org.src.core.helper.ShaderID;
 import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 
+import static org.lwjgl.opengl.GL11.*;
 import static org.src.core.helper.Consts.RECTANGLE_INDICES;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class EditorCursor extends Component {
 	private final Mesh boxMesh;
 
-	private float x;
-	private float y;
+	private Vector2f position;
 
-	public EditorCursor() {
+	EditorCursor() {
+		this.position = new Vector2f();
 
-		boxMesh = new Mesh(new float[]{
-				0.0008f,  0.0008f,
-				0.0008f, -0.0008f,
-				-0.0008f, -0.0008f,
-				-0.0008f,  0.0008f,
-		}, RECTANGLE_INDICES, new byte[] {
-				2
-		});
+		boxMesh = Helper.createPlainBoxMesh(0.0008f, 0.0008f);
 	}
 
-	public void updatePosition(final float x, final float y) {
-		this.x = x;
-		this.y = y;
+	void updatePosition(final float x, final float y) {
+		position.x = x;
+		position.y = y;
+	}
+
+	void updatePosition(final Vector2f position) {
+		this.position = position;
 	}
 
 	@Override
 	public void draw() {
 		if (isInImGuiWindow()) { return; }
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_SRC_COLOR);
 		ShaderManager.get(ShaderID.EDITOR).bind();
-		ShaderManager.get(ShaderID.EDITOR).setFloat2("offset", x, y);
+		ShaderManager.get(ShaderID.EDITOR).setFloat2("offset", position.x, position.y);
 		ShaderManager.get(ShaderID.EDITOR).setFloat3("color", 0.8f, 0.6f, 0.1f);
 		boxMesh.draw();
+		glDisable(GL_BLEND);
 	}
 
-	public Mesh getBoxMesh() {
+	Mesh getBoxMesh() {
 		return boxMesh;
 	}
 

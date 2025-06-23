@@ -1,9 +1,13 @@
 package org.src.core.helper;
 
 import imgui.ImGui;
+import org.joml.Vector2f;
+import org.src.rendering.wrapper.Mesh;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+
+import static org.src.core.helper.Consts.RECTANGLE_INDICES;
 
 /**
  * A class containing a bunch of helper methods like quick string to int conversion
@@ -89,14 +93,14 @@ public final class Helper {
 	}
 
 	// This method should be used in moderation
-	public static float[] insertElementsToFloatArray(final float[] oldArray, final float[] newElements) {
+	public static float[] addElementsToFloatArray(final float[] oldArray, final float[] newElements) {
 		final float[] newArray = new float[oldArray.length + newElements.length];
 		System.arraycopy(oldArray, 0, newArray, 0, oldArray.length);
 		System.arraycopy(newElements, 0, newArray, oldArray.length, newElements.length);
 		return newArray;
 	}
 
-	public static int[] insertElementsToIntArray(final int[] oldArray, final int[] newElements) {
+	public static int[] addElementsToIntArray(final int[] oldArray, final int[] newElements) {
 		final int[] newArray = new int[oldArray.length + newElements.length];
 		System.arraycopy(oldArray, 0, newArray, 0, oldArray.length);
 		System.arraycopy(newElements, 0, newArray, oldArray.length, newElements.length);
@@ -140,11 +144,49 @@ public final class Helper {
 	 * @return the array without the specified elements (it deletes the elements including the start index)
 	 */
 	public static float[] deleteElementsFromFloatArray(final float[] array, final int startIndex, final int deleteCount) {
-		if (array.length == 0) { return new float[0]; }
+		if (array.length == 0) { return array; }
 		final float[] newArray = new float[array.length - deleteCount];
 		System.arraycopy(array, 0, newArray, 0, array.length - deleteCount);
 		System.arraycopy(array, startIndex + deleteCount, newArray, startIndex, array.length - startIndex - deleteCount);
 		return newArray;
+	}
+
+	public static float[] insertElementsToFloatArray(final float[] array, final int startIndex, final float[] newElements) {
+		final float[] newArray = new float[array.length + newElements.length];
+		System.arraycopy(array, 0, newArray, 0, startIndex);
+		System.arraycopy(newElements, 0, newArray, startIndex, newElements.length);
+		System.arraycopy(array, startIndex, newArray, newElements.length + startIndex, newArray.length - startIndex - newElements.length);
+		return newArray;
+	}
+
+	/**
+	 * creates a simple mesh with just x;y coordinates
+	 */
+	public static Mesh createPlainBoxMesh(final float xScale, final float yScale) {
+		return new Mesh(new float[] {
+				 xScale,  yScale,
+				 xScale, -yScale,
+				-xScale, -yScale,
+				-xScale,  yScale,
+		}, RECTANGLE_INDICES, new byte[] { Consts.POINT_POSITION_STRIDE });
+	}
+
+	public static boolean pointTriangleIntersection(final Vector2f point, final Vector2f v0, final Vector2f v1, final Vector2f v2) {
+		// TODO: Make it use some range function for floating point correction
+		return Math.floor(
+				(
+					triangleArea(v0, point, v1) +
+					triangleArea(v0, point, v2) +
+					triangleArea(v1, point, v2)
+				) * 1_000_000) / 1_000_000 ==
+				Math.floor(
+					triangleArea(v0, v1, v2)
+				* 1_000_000) / 1_000_000; // fuck floating point math
+	}
+
+	public static float triangleArea(final Vector2f p0, final Vector2f p1, final Vector2f p2) {
+		// formula taken from: https://www.cuemath.com/geometry/area-of-triangle-in-coordinate-geometry/
+		return Math.abs(p0.x * (p1.y - p2.y) + p1.x * (p2.y - p0.y) + p2.x * (p0.y - p1.y)) / 2;
 	}
 
 }

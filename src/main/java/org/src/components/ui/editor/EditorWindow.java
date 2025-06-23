@@ -6,12 +6,20 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.util.nfd.NFDFilterItem;
 import org.src.components.Map;
 import org.src.core.main.Window;
+
+import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
+import static org.lwjgl.system.MemoryUtil.NULL;
+import static org.lwjgl.util.nfd.NativeFileDialog.NFD_OpenDialog;
 
 public final class EditorWindow {
 
@@ -103,6 +111,17 @@ public final class EditorWindow {
 			editor.getCurrentProvince().updateColor();
 		}
 
+		ImGui.separator();
+
+		if (ImGui.button("Save scenario")) {
+			//PointerBuffer buffer = BufferUtils.createPointerBuffer(1);
+			//NFD_OpenDialog(buffer, null, "C:\\");
+		}
+
+		if (ImGui.button("Load scenario")) {
+			map.removeProvinceFromMesh(map.getProvince(0));
+		}
+
 		ImGui.end();
 
 		ImGui.render();
@@ -136,8 +155,13 @@ public final class EditorWindow {
 	private void tryRenderingForEditProvincesMode() {
 		if (editor.getMode() != EditorMode.EDIT_PROVINCES) { return; }
 
-		if (ImGui.button("Delete selected point (DEL)") && editor.getHeldProvincePointIndex() != -1) {
+		if (ImGui.button("Delete selected point (DEL)") && editor.isAnyPointSelected()) {
 			editor.getCurrentProvince().deletePoint(editor.getHeldProvincePointIndex());
+			editor.setHeldProvincePointIndex(-1);
+		}
+
+		if (ImGui.button("Add new point (c)")) {
+			editor.getCurrentProvince().insertPointBackwards(editor.getHeldProvincePointIndex());
 			editor.setHeldProvincePointIndex(-1);
 		}
 
