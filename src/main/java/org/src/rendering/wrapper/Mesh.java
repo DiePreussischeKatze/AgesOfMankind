@@ -11,10 +11,11 @@ public final class Mesh {
 	private int vao;
 	private int vbo;
 
-	private float[] vertices;
 	private byte[] offsets;
 
-	private int[] indices;
+	// getters and setters for arrays are complete nonsense
+	public float[] vertices;
+	public int[] indices;
 
 	public Mesh(final float[] vertices, final int[] indices, final byte[] offsets) {
 		this.vertices = vertices;
@@ -80,17 +81,9 @@ public final class Mesh {
 		glBindVertexArray(0);
 	}
 
-	public void setIndices(final int[] indices) {
-		this.indices = indices;
-	}
-
 	public void clear() {
 		indices = new int[0];
 		vertices = new float[0];
-	}
-
-	public void setVertices(final float[] vertices) {
-		this.vertices = vertices;
 	}
 
 	public void setOffsets(final byte[] offsets) {
@@ -103,14 +96,6 @@ public final class Mesh {
 			offsetSum += offset;
 		}
 		return offsetSum;
-	}
-
-	public float[] getVertices() {
-		return vertices;
-	}
-
-	public int[] getIndices() {
-		return indices;
 	}
 
 	public void dispose() {

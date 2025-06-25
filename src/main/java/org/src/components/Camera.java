@@ -184,11 +184,11 @@ public final class Camera extends Component {
 		move(deltaTime);
 	}
 
-	public Vector3f getPosition() {
+	public Vector3f getPos() {
 		return position;
 	}
 
-	public Vector2f getAccumulatedDragDistance() {
+	public Vector2f getAccumulatedDragDist() {
 		return accumulatedDragDistance;
 	}
 

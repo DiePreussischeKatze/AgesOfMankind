@@ -74,17 +74,6 @@ public final class Shader {
 		}
 	}
 
-	/**
-	 * Note that this shouldn't be used outside the shader if a method like setInt() exists
-	 * @param parameterName the name of the uniform in the shader code
-	 * @return the index of the parameter
-	 */
-	// TODO: remove when I create more glUniform fillers
-	public int get(final String parameterName) {
-		if (!uniforms.contains(parameterName)) { throw new RuntimeException("Parameter: " + parameterName + " Not found"); }
-		return getUnsafe(parameterName);
-	}
-
 	public int getUnsafe(final String parameterName) {
 		return glGetUniformLocation(this.id, parameterName);
 	}

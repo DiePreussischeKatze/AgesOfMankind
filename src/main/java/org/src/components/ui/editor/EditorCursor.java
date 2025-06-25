@@ -8,7 +8,6 @@ import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.src.core.helper.Consts.RECTANGLE_INDICES;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class EditorCursor extends Component {
@@ -22,12 +21,12 @@ public final class EditorCursor extends Component {
 		boxMesh = Helper.createPlainBoxMesh(0.0008f, 0.0008f);
 	}
 
-	void updatePosition(final float x, final float y) {
+	void updatePos(final float x, final float y) {
 		position.x = x;
 		position.y = y;
 	}
 
-	void updatePosition(final Vector2f position) {
+	void updatePos(final Vector2f position) {
 		this.position = position;
 	}
 

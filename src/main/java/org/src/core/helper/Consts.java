@@ -11,6 +11,6 @@ public final class Consts {
 			1, 2, 3
 	};
 
-	public static final int POINT_POSITION_STRIDE = 2;
+	public static final int POINT_POS_STRIDE = 2;
 
 }

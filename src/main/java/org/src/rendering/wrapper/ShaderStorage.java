@@ -38,6 +38,7 @@ public final class ShaderStorage {
 
 	public void bind() {
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding, id);
 	}
 
 	public int getBinding() {

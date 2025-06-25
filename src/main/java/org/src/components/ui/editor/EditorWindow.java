@@ -6,19 +6,12 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.util.nfd.NFDFilterItem;
 import org.src.components.Map;
 import org.src.core.main.Window;
-
-import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
-import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.util.nfd.NativeFileDialog.NFD_OpenDialog;
 
 public final class EditorWindow {
@@ -86,29 +79,29 @@ public final class EditorWindow {
 
 		ImGui.separator();
 
-		if (ImGui.checkbox("Draw current province filling (f)", editor.getCurrentProvince().getDrawFill())) {
-			editor.getCurrentProvince().setDrawFill(!editor.getCurrentProvince().getDrawFill());
+		if (ImGui.checkbox("Draw current province filling (f)", editor.getProvince().getDrawFill())) {
+			editor.getProvince().toggleDrawFill();
 		}
 
-		if (ImGui.checkbox("Draw current province points (g)", editor.getCurrentProvince().getDrawPoints())) {
-			editor.getCurrentProvince().setDrawPoints(!editor.getCurrentProvince().getDrawPoints());
+		if (ImGui.checkbox("Draw current province points (g)", editor.getProvince().getDrawPoints())) {
+			editor.getProvince().toggleDrawPoints();
 		}
 
 		if (ImGui.checkbox("Draw other provinces' points (h)", map.getDrawProvincePoints())) {
-			map.setDrawProvincePoints(!map.getDrawProvincePoints());
+			map.toggleDrawProvincePoints();
 		}
 
 		if (ImGui.checkbox("Draw other provinces' fillings (j)", map.getDrawProvinceFillings())) {
-			map.setDrawProvinceFillings(!map.getDrawProvinceFillings());
+			map.toggleDrawProvinceFillings();
 		}
 
 		if (ImGui.checkbox("Toggle grid alignment", editor.getGridAlignment())) {
-			editor.setGridAlignment(!editor.getGridAlignment());
+			editor.toggleGridAlignment();
 		}
 
 		ImGui.separator();
-		if (ImGui.colorPicker3("Change province color", editor.getCurrentProvince().getColor())) {
-			editor.getCurrentProvince().updateColor();
+		if (ImGui.colorPicker3("Change province color", editor.getProvince().getColor())) {
+			editor.getProvince().updateColor();
 		}
 
 		ImGui.separator();
@@ -119,7 +112,6 @@ public final class EditorWindow {
 		}
 
 		if (ImGui.button("Load scenario")) {
-			map.removeProvinceFromMesh(map.getProvince(0));
 		}
 
 		ImGui.end();
@@ -134,35 +126,34 @@ public final class EditorWindow {
 		if (editor.getMode() != EditorMode.ADD_PROVINCES) { return; }
 
 		if (ImGui.button("Delete last point (z)")) {
-			editor.getCurrentProvince().deleteLastPoint();
+			editor.getProvince().deleteLastPoint();
 		}
 
 		ImGui.sameLine();
-		ImGui.text("currentPivotID: " + editor.getCurrentProvince().getPivotAmount());
+		ImGui.text("currentPivotID: " + editor.getProvince().getPivotAmount());
+		ImGui.text("currentProvicneId: " + map.lendProvince);
 
 		if (ImGui.button("Clear province points")) {
-			editor.getCurrentProvince().clearProvincePoints();
+			editor.getProvince().clearProvincePoints();
 		}
-
-		ImGui.sameLine();
-		ImGui.text("currentProvinceID: ");
 
 		if (ImGui.button("New province (n)")) {
 			editor.newProvince();
 		}
+
 	}
 
 	private void tryRenderingForEditProvincesMode() {
 		if (editor.getMode() != EditorMode.EDIT_PROVINCES) { return; }
 
 		if (ImGui.button("Delete selected point (DEL)") && editor.isAnyPointSelected()) {
-			editor.getCurrentProvince().deletePoint(editor.getHeldProvincePointIndex());
-			editor.setHeldProvincePointIndex(-1);
+			editor.getProvince().deletePoint(editor.getHeldPointIndex());
+			editor.setHeldPointIndex(-1);
 		}
 
 		if (ImGui.button("Add new point (c)")) {
-			editor.getCurrentProvince().insertPointBackwards(editor.getHeldProvincePointIndex());
-			editor.setHeldProvincePointIndex(-1);
+			editor.getProvince().insertPointBackwards(editor.getHeldPointIndex());
+			editor.setHeldPointIndex(-1);
 		}
 
 	}

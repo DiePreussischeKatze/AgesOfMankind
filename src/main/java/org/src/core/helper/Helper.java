@@ -151,6 +151,14 @@ public final class Helper {
 		return newArray;
 	}
 
+	public static int[] deleteElementsFromIntArray(final int[] array, final int startIndex, final int deleteCount) {
+		if (array.length == 0) { return array; }
+		final int[] newArray = new int[array.length - deleteCount];
+		System.arraycopy(array, 0, newArray, 0, array.length - deleteCount);
+		System.arraycopy(array, startIndex + deleteCount, newArray, startIndex, array.length - startIndex - deleteCount);
+		return newArray;
+	}
+
 	public static float[] insertElementsToFloatArray(final float[] array, final int startIndex, final float[] newElements) {
 		final float[] newArray = new float[array.length + newElements.length];
 		System.arraycopy(array, 0, newArray, 0, startIndex);
@@ -168,25 +176,46 @@ public final class Helper {
 				 xScale, -yScale,
 				-xScale, -yScale,
 				-xScale,  yScale,
-		}, RECTANGLE_INDICES, new byte[] { Consts.POINT_POSITION_STRIDE });
+		}, RECTANGLE_INDICES, new byte[] { Consts.POINT_POS_STRIDE});
 	}
 
 	public static boolean pointTriangleIntersection(final Vector2f point, final Vector2f v0, final Vector2f v1, final Vector2f v2) {
-		// TODO: Make it use some range function for floating point correction
-		return Math.floor(
-				(
-					triangleArea(v0, point, v1) +
-					triangleArea(v0, point, v2) +
-					triangleArea(v1, point, v2)
-				) * 1_000_000) / 1_000_000 ==
-				Math.floor(
-					triangleArea(v0, v1, v2)
-				* 1_000_000) / 1_000_000; // fuck floating point math
+		return inRange(
+				triangleArea(v0, point, v1)
+						+ triangleArea(v0, point, v2)
+						+ triangleArea(v1, point, v2),
+				triangleArea(v0, v1, v2),
+				0.00001f // fuck floating point comparison
+		);
 	}
 
 	public static float triangleArea(final Vector2f p0, final Vector2f p1, final Vector2f p2) {
 		// formula taken from: https://www.cuemath.com/geometry/area-of-triangle-in-coordinate-geometry/
 		return Math.abs(p0.x * (p1.y - p2.y) + p1.x * (p2.y - p0.y) + p2.x * (p0.y - p1.y)) / 2;
+	}
+
+	public static boolean inRange(final float value, final float value2, final float offset) {
+		return value + offset > value2 && value - offset < value2;
+	}
+
+	public static float max(final float... floats) {
+		float max = Float.MIN_VALUE;
+		for (final float f: floats) {
+			if (f > max) {
+				max = f;
+			}
+		}
+		return max;
+	}
+
+	public static float min(final float... floats) {
+		float min = Float.MAX_VALUE;
+		for (final float f: floats) {
+			if (f < min) {
+				min = f;
+			}
+		}
+		return min;
 	}
 
 }

@@ -1,5 +1,6 @@
 package org.src.components;
 
+import org.joml.Vector2f;
 import org.src.components.province.Province;
 import org.src.core.helper.Component;
 import org.src.core.helper.Consts;
@@ -11,9 +12,7 @@ import org.src.rendering.wrapper.Mesh;
 import org.src.rendering.wrapper.ShaderStorage;
 import org.src.rendering.wrapper.Texture;
 
-import javax.xml.transform.Source;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
@@ -36,11 +35,15 @@ public final class Map extends Component {
 	private final Texture texture;
 	private final ArrayList<Province> provinces;
 
+	public int lendProvince;
+
 	public Map() {
 		drawProvinceFillings = true;
 		drawProvincePoints = false;
 		indicesOffset = 0;
 		provincesPoints = new float[0];
+
+		lendProvince = 0;
 
 		pointShaderStorage = new ShaderStorage(2);
 
@@ -69,15 +72,26 @@ public final class Map extends Component {
 	}
 
 	public Province createProvince() {
+		// check if there aren't any empty provinces
+		for (int i = 0; i < provinces.size(); i++) {
+			if (provinces.get(i).getIndices().length == 0) {
+				lendProvince = i;
+				return provinces.get(i);
+			}
+		}
+
 		final Province newProvince = new Province();
 		provinces.add(newProvince);
-	//	System.out.println(provinces.size());
+		lendProvince = provinces.size() - 1;
 		return newProvince;
 	}
 
 	public void addProvinceToMesh(final Province province) {
+		province.setVertexIndex(provinceMesh.vertices.length);
+		province.setIndicesIndex(provinceMesh.indices.length);
+
 		provinceMesh.addVertices(province.getVertices());
-		provincesPoints = Helper.addElementsToFloatArray(provincesPoints, province.getPointsPositions());
+		provincesPoints = Helper.addElementsToFloatArray(provincesPoints, province.getPointsPoses());
 
 		final int[] newIndices = new int[province.getIndices().length];
 		for (int i = 0; i < newIndices.length; i++) {
@@ -91,38 +105,42 @@ public final class Map extends Component {
 		provinceMesh.regenerate();
 	}
 
-	public void removeProvinceFromMesh(final Province province) {
-		int j = 0;
-		int startIndex = -1;
-		// for vertices
-		for (int i = 0; i < provinceMesh.getVertices().length; i += provinceMesh.getStrideSum()) {
-			// if any of the positions of the vertices are the same
-			if (provinceMesh.getVertices()[i] == province.getVertices()[0] &&
-					provinceMesh.getVertices()[i + 1] == province.getVertices()[1]) {
-				startIndex = i;
+	public void takeProvinceOut(final Province province) {
 
-				int matchedTimes = 0;
-				// we still need to check if this isn't a duplicate vertex of another province
-				for (int k = i; k < province.getVertices().length; k += provinceMesh.getStrideSum()) {
-					// any of the vertices doesn't match
-					if (provinceMesh.getVertices()[k] != province.getVertices()[j] &&
-							provinceMesh.getVertices()[k + 1] != province.getVertices()[j + 1]) {
-						break;
-					}
-					matchedTimes++;
-					j += province.getMeshStride();
-				}
-
-				// if the province matches, i.e. the province's vertex count is the same as the times it got a match
-				if (matchedTimes == province.getVertices().length / province.getMeshStride()) {
-					System.out.println("Before deletion: " + Arrays.toString(provinceMesh.getVertices()));
-					provinceMesh.setVertices(Helper.deleteElementsFromFloatArray(provinceMesh.getVertices(), startIndex, j - startIndex));
-					System.out.println("After deletion: " + Arrays.toString(provinceMesh.getVertices()));
-					provinceMesh.regenerate();
-					return;
-				}
-			}
+		for (int i = province.getIndicesIndex() + province.getIndices().length; i < provinceMesh.indices.length; i++) {
+			provinceMesh.indices[i] -= province.getVertices().length / province.getMeshStride();
 		}
+
+		for (final Province changeOffset : provinces) {
+			// the province lays further in the array
+			if (changeOffset.getIndicesIndex() <= province.getIndicesIndex()) { continue; } // we don't want to do that to our province that we are taking out
+
+			changeOffset.setIndicesIndex(changeOffset.getIndicesIndex() - province.getIndices().length);
+			changeOffset.setVertexIndex(changeOffset.getVertexIndex() - province.getVertices().length);
+		}
+
+		indicesOffset -= province.getVertices().length / province.getMeshStride();
+
+		provinceMesh.indices = Helper.deleteElementsFromIntArray(provinceMesh.indices, province.getIndicesIndex(), province.getIndices().length);
+		provinceMesh.vertices = Helper.deleteElementsFromFloatArray(provinceMesh.vertices, province.getVertexIndex(), province.getVertices().length);
+		provinceMesh.regenerate();
+
+		provincesPoints = Helper.deleteElementsFromFloatArray(provincesPoints, province.getVertexIndex() * Consts.POINT_POS_STRIDE / province.getMeshStride(), province.getVertices().length * Consts.POINT_POS_STRIDE / province.getMeshStride());
+		pointShaderStorage.regenerate(provincesPoints);
+	}
+
+	public Province findProvinceUnderPoint(final Vector2f point) {
+		for (final Province province: provinces) {
+			if (province.isInProvince(point)) { return province; }
+		}
+		return null;
+	}
+
+	public int findProvinceIndexUnderPoint(final Vector2f point) {
+		for (int i = 0; i < provinces.size(); i++) {
+			if (provinces.get(i).isInProvince(point)) { return i; }
+		}
+		return -1;
 	}
 
 	@Override
@@ -136,7 +154,7 @@ public final class Map extends Component {
 			ShaderManager.get(ShaderID.MAP_PIVOT).bind();
 			pointShaderStorage.bind();
 			boxMesh.bind();
-			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, provincesPoints.length / Consts.POINT_POSITION_STRIDE);
+			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, provincesPoints.length / Consts.POINT_POS_STRIDE);
 		}
 
 		if (drawProvinceFillings) {
@@ -175,8 +193,20 @@ public final class Map extends Component {
 		this.drawProvincePoints = drawProvincePoints;
 	}
 
+	public void toggleDrawProvincePoints() {
+		drawProvincePoints = !drawProvincePoints;
+	}
+
+	public void toggleDrawProvinceFillings() {
+		drawProvinceFillings = !drawProvinceFillings;
+	}
+
 	public Province getProvince(final int index) {
 		return provinces.get(index);
+	}
+
+	public int getAmountOfProvinces() {
+		return provinces.size();
 	}
 
 }

@@ -10,6 +10,7 @@ public final class UniformBuffer {
 	private int id;
 	private int usage;
 	private int uniformByteSize;
+	private int binding;
 
 	/**
 	 * @param uniformByteSize the size of the buffer in bytes
@@ -18,6 +19,7 @@ public final class UniformBuffer {
 	public UniformBuffer(final int uniformByteSize, final int binding, final int usage) {
 		this.uniformByteSize = uniformByteSize;
 		this.usage = usage;
+		this.binding = binding;
 
 		id = glCreateBuffers();
 
@@ -26,6 +28,8 @@ public final class UniformBuffer {
 	}
 
 	public void regenerate(final float[] newData) {
+		glNamedBufferData(id, uniformByteSize, usage);
+		glBindBufferRange(GL_UNIFORM_BUFFER, binding, id, 0, uniformByteSize);
 		glNamedBufferData(id, newData, usage);
 	}
 
