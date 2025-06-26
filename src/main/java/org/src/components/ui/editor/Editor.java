@@ -3,6 +3,7 @@ package org.src.components.ui.editor;
 import org.joml.Vector2f;
 import org.src.components.Camera;
 import org.src.components.Map;
+import org.src.components.Selection;
 import org.src.components.province.Province;
 import org.src.core.callbacks.*;
 import org.src.core.helper.Component;
@@ -14,16 +15,18 @@ import org.src.core.managers.ShaderManager;
 import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.src.components.ui.editor.EditorMode.*;
 import static org.src.core.helper.Consts.POINT_POS_STRIDE;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class Editor extends Component {
-
+	// TODO: divide the editor into classes containing each mode
 	private final EditorWindow editorWindow;
 	private EditorCursor editorCursor;
 
 	private Camera camera;
 	private Map map;
+	private Selection selection;
 
 	private EditorMode mode;
 	private Province editedProvince;
@@ -43,7 +46,7 @@ public final class Editor extends Component {
 		//System.out.println(editedProvince.isInProvince(adjustedPos));
 
 		switch (mode) {
-			case EditorMode.ADD_PROVINCES:
+			case ADD_PROVINCES:
 				if (!gridAlignmentEnabled) {
 					editorCursor.updatePos(adjustedPos);
 				} else {
@@ -53,7 +56,7 @@ public final class Editor extends Component {
 					);
 				}
 				break;
-			case EditorMode.EDIT_PROVINCES:
+			case EDIT_PROVINCES:
 				if (!isAnyPointSelected() || !draggingPoint) { return; }
 
 				// modify the mesh
@@ -79,7 +82,7 @@ public final class Editor extends Component {
 		if (isInImGuiWindow()) { return; }
 
 		switch (mode) {
-			case EditorMode.ADD_PROVINCES:
+			case ADD_PROVINCES:
 				if (!gridAlignmentEnabled) {
 					editedProvince.addPoint(
 							adjustedPos.x,
@@ -92,12 +95,14 @@ public final class Editor extends Component {
 					);
 				}
 				break;
-			case EditorMode.EDIT_PROVINCES:
-				draggingPoint = true;
-
+			case EDIT_PROVINCES:
 				heldPointIndex = editedProvince.isInAnyPoint(adjustedPos.x, adjustedPos.y);
+				if (heldPointIndex != -1) {
+					draggingPoint = true;
+					selection.setEnabled(false);
+				}
 				break;
-			case EditorMode.SELECT_PROVINCES:
+			case SELECT_PROVINCES:
 				final Province nullCheck = map.findProvinceUnderPoint(adjustedPos);
 				if (nullCheck == null) {
 					break;
@@ -114,21 +119,27 @@ public final class Editor extends Component {
 	};
 
 	private final MouseLeftReleaseCallback leftReleaseCallback = () -> {
-		if (mode != EditorMode.EDIT_PROVINCES) { return; }
+		if (draggingPoint) {
+			selection.setEnabled(true);
+			selection.clear();
+		}
 
-		draggingPoint = false;
+		if (mode == EDIT_PROVINCES) {
+			draggingPoint = false;
+		}
+
 	};
 
 	private final KeyPressCallback pressCallback = (final long window, final int key, final int action, final int mods) -> {
 		switch (key) {
 			case GLFW_KEY_Q:
-				setMode(EditorMode.ADD_PROVINCES);
+				setMode(ADD_PROVINCES);
 				break;
 			case GLFW_KEY_E:
-				setMode(EditorMode.EDIT_PROVINCES);
+				setMode(EDIT_PROVINCES);
 				break;
 			case GLFW_KEY_P:
-				setMode(EditorMode.PAINT_PROVINCES);
+				setMode(PAINT_PROVINCES);
 				break;
 			case GLFW_KEY_F:
 				editedProvince.setDrawFill(!editedProvince.getDrawFill());
@@ -142,9 +153,12 @@ public final class Editor extends Component {
 			case GLFW_KEY_H:
 				map.setDrawProvincePoints(!map.getDrawProvincePoints());
 				break;
+			case GLFW_KEY_L:
+				setMode(SELECT_PROVINCES);
+				break;
 		}
 
-		if (mode == EditorMode.ADD_PROVINCES) {
+		if (mode == ADD_PROVINCES) {
 			switch (key) {
 				case GLFW_KEY_Z:
 					editedProvince.deleteLastPoint();
@@ -153,7 +167,7 @@ public final class Editor extends Component {
 					newProvince();
 					break;
 			}
-		} else if (mode == EditorMode.EDIT_PROVINCES) {
+		} else if (mode == EDIT_PROVINCES) {
 			switch (key) {
 				case GLFW_KEY_DELETE:
 					if (!isAnyPointSelected()) { return; }
@@ -168,9 +182,10 @@ public final class Editor extends Component {
 		}
 	};
 
-	public Editor(final Camera camera, final Map map) {
+	public Editor(final Camera camera, final Map map, final Selection selection) {
 		this.camera = camera;
 		this.map = map;
+		this.selection = selection;
 
 		this.editorWindow = new EditorWindow(this, map);
 		this.editorCursor = new EditorCursor();
@@ -179,7 +194,7 @@ public final class Editor extends Component {
 
 		editedProvince = map.createProvince();
 
-		mode = EditorMode.ADD_PROVINCES;
+		mode = ADD_PROVINCES;
 
 		this.gridAlignmentEnabled = true;
 		this.draggingPoint = false;
@@ -196,9 +211,9 @@ public final class Editor extends Component {
 	public void draw() {
 		editedProvince.drawAlone();
 
-		if (mode == EditorMode.ADD_PROVINCES) {
+		if (mode == ADD_PROVINCES) {
 			editorCursor.draw();
-		} else if (mode == EditorMode.EDIT_PROVINCES) {
+		} else if (mode == EDIT_PROVINCES) {
 			drawForEditMode();
 			drawSelectedPoint();
 		}
@@ -261,6 +276,7 @@ public final class Editor extends Component {
 	}
 
 	public void setMode(EditorMode mode) {
+		selection.setEnabled(mode == EDIT_PROVINCES);
 		this.mode = mode;
 	}
 

@@ -32,6 +32,14 @@ public final class Mesh {
 		init();
 	}
 
+	public Mesh(final int[] indices, final byte[] offsets) {
+		this.offsets = offsets;
+		this.indices = indices;
+		this.vertices = new float[0];
+
+		init();
+	}
+
 	private void init() {
 		vao = glCreateVertexArrays();
 		vbo = glCreateBuffers();

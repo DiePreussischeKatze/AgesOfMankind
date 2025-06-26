@@ -7,6 +7,7 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import org.src.components.Map;
+import org.src.components.ScenarioSaver;
 import org.src.core.main.Window;
 
 import static org.lwjgl.opengl.GL11.glDisable;
@@ -15,6 +16,8 @@ import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 import static org.lwjgl.util.nfd.NativeFileDialog.NFD_OpenDialog;
 
 public final class EditorWindow {
+
+	private final ScenarioSaver scenarioSaver;
 
 	private final ImGuiImplGl3 imGuiImplGl3;
 	private final ImGuiImplGlfw imGuiImplGlfw;
@@ -26,6 +29,8 @@ public final class EditorWindow {
 	public EditorWindow(final Editor editor, final Map map) {
 		this.editor = editor;
 		this.map = map;
+
+		this.scenarioSaver = new ScenarioSaver(this.map);
 
 		this.imGuiImplGl3 = new ImGuiImplGl3();
 		this.imGuiImplGlfw = new ImGuiImplGlfw();
@@ -109,9 +114,11 @@ public final class EditorWindow {
 		if (ImGui.button("Save scenario")) {
 			//PointerBuffer buffer = BufferUtils.createPointerBuffer(1);
 			//NFD_OpenDialog(buffer, null, "C:\\");
+			scenarioSaver.saveScenario();
 		}
 
 		if (ImGui.button("Load scenario")) {
+			scenarioSaver.loadScenario();
 		}
 
 		ImGui.end();
@@ -135,6 +142,7 @@ public final class EditorWindow {
 
 		if (ImGui.button("Clear province points")) {
 			editor.getProvince().clearProvincePoints();
+			editor.setHeldPointIndex(-1);
 		}
 
 		if (ImGui.button("New province (n)")) {

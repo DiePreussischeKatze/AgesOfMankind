@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
-import static org.src.core.helper.Consts.RECTANGLE_INDICES;
+import static org.src.core.helper.Consts.RECT_INDICES;
 
 public final class Map extends Component {
 	private final Mesh overlayMapMesh;
@@ -64,7 +64,7 @@ public final class Map extends Component {
 				 xSize, -ySize, 1.0f, 0.0f,
 				-xSize, -ySize, 0.0f, 0.0f,
 				-xSize,  ySize, 0.0f, 1.0f,
-		}, RECTANGLE_INDICES
+		}, RECT_INDICES
 		,new byte[] {
 				2, 2
 		});
@@ -207,6 +207,10 @@ public final class Map extends Component {
 
 	public int getAmountOfProvinces() {
 		return provinces.size();
+	}
+
+	public ArrayList<Province> getProvinces() {
+		return provinces;
 	}
 
 }

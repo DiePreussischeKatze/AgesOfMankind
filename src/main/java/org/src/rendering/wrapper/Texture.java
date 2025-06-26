@@ -36,9 +36,9 @@ public final class Texture {
 	}
 
 	public void regenerate() {
-		int[] imgWidth = new int[1];
-		int[] imgHeight = new int[1];
-		int[] imgChannels = new int[1];
+		final int[] imgWidth = new int[1];
+		final int[] imgHeight = new int[1];
+		final int[] imgChannels = new int[1];
 		final ByteBuffer image = stbi_load(fileName, imgWidth, imgHeight, imgChannels, 3);
 
 		width = imgWidth[0];

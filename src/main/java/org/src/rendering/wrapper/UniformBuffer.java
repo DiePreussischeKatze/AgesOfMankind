@@ -7,10 +7,10 @@ import static org.lwjgl.opengl.GL45.glCreateBuffers;
 import static org.lwjgl.opengl.GL45.glNamedBufferData;
 
 public final class UniformBuffer {
-	private int id;
-	private int usage;
-	private int uniformByteSize;
-	private int binding;
+	private final int id;
+	private final int usage;
+	private final int uniformByteSize;
+	private final int binding;
 
 	/**
 	 * @param uniformByteSize the size of the buffer in bytes

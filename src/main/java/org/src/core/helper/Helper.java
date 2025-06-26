@@ -7,7 +7,7 @@ import org.src.rendering.wrapper.Mesh;
 import java.io.*;
 import java.nio.ByteBuffer;
 
-import static org.src.core.helper.Consts.RECTANGLE_INDICES;
+import static org.src.core.helper.Consts.RECT_INDICES;
 
 /**
  * A class containing a bunch of helper methods like quick string to int conversion
@@ -176,7 +176,7 @@ public final class Helper {
 				 xScale, -yScale,
 				-xScale, -yScale,
 				-xScale,  yScale,
-		}, RECTANGLE_INDICES, new byte[] { Consts.POINT_POS_STRIDE});
+		}, RECT_INDICES, new byte[] { Consts.POINT_POS_STRIDE});
 	}
 
 	public static boolean pointTriangleIntersection(final Vector2f point, final Vector2f v0, final Vector2f v1, final Vector2f v2) {

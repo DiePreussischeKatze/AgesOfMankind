@@ -14,11 +14,9 @@ import static org.lwjgl.opengl.GL20.*;
 public final class Shader {
 	private final int id;
 
-	private final ArrayList<String> uniforms;
 	private final HashMap<String, Integer> cache; // for optimization
 
 	public Shader(final String vertexPath, final String fragmentPath) {
-		uniforms = new ArrayList<>();
 		cache = new HashMap<>();
 
 		final int vertexSource = glCreateShader(GL_VERTEX_SHADER);
@@ -39,28 +37,26 @@ public final class Shader {
 		glDeleteShader(vertexSource);
 		glDeleteShader(fragmentSource);
 
-		listUniforms();
 		fillCache();
 	}
 
-	// To be removed in final production code
-	private void listUniforms() {
-		int[] count = new int[1];
-		int[] bufferSize = new int[1];
-		int[] size = new int[1];
-		int[] type = new int[1];
+	private void fillCache() {
+		final ArrayList<String> uniforms = new ArrayList<>();
+
+		final int[] count = new int[1];
+		final int[] bufferSize = new int[1];
+		final int[] size = new int[1];
+		final int[] type = new int[1];
 		bufferSize[0] = 32;
-		ByteBuffer name = BufferUtils.createByteBuffer(bufferSize[0]);
+		final ByteBuffer uniformName = BufferUtils.createByteBuffer(bufferSize[0]);
 
 		glGetProgramiv(id, GL_ACTIVE_UNIFORMS, count);
 		for (int i = 0; i < count[0]; i++) {
-			glGetActiveUniform(id, i, bufferSize, size, type, name);
+			glGetActiveUniform(id, i, bufferSize, size, type, uniformName);
 
-			uniforms.add(Helper.byteBufferToString(name));
+			uniforms.add(Helper.byteBufferToString(uniformName));
 		}
-	}
 
-	private void fillCache() {
 		for (final String name: uniforms) {
 			cache.put(name, getUnsafe(name));
 		}

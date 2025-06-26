@@ -8,9 +8,9 @@ import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 import static org.lwjgl.opengl.GL45.*;
 
 public final class ShaderStorage {
-	private int id;
+	private final int id;
+	private final int binding;
 
-	private int binding;
 	// TODO: Create a manager for them; add more constructors
 	public ShaderStorage(final float[] data, final int binding) {
 		this.binding = binding;
