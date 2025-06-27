@@ -5,7 +5,7 @@
 startWinWidth: 1280
 startWinHeight: 720
 vsyncEnabled: true
-maxFps: 60
+maxFps: 6000
 cameraMoveSpeed: 0.01
 antialiasingSamples: 4 ?0 to disable anti-aliasing
 cameraMinZoom: 0.4

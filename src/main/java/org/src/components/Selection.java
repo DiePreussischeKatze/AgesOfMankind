@@ -12,8 +12,10 @@ import org.src.core.managers.InputManager;
 import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 
+
 import static org.lwjgl.opengl.GL11.*;
 import static org.src.core.helper.Consts.RECT_INDICES;
+import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class Selection extends Component {
 	private Mesh box;
@@ -29,8 +31,9 @@ public final class Selection extends Component {
 
 	private boolean enabled;
 	private boolean active;
+	private boolean movedMouse; // to fix a bug where a weird shape taking the entire screen would show up
 
-	private final Camera camera;
+	private Camera camera;
 
 	private final MouseMoveCallback moveCallback = () -> {
 		if (!enabled || !active) { return; }
@@ -40,6 +43,11 @@ public final class Selection extends Component {
 
 		screenAdjustedEnd.x = InputManager.getCenteredMouseX() / Window.getWidth() * 2;
 		screenAdjustedEnd.y = -InputManager.getCenteredMouseY() / Window.getHeight() * 2;
+
+		cameraAdjustedEnd.x = -camera.getPos().x + camera.getAccumulatedDragDist().x + (InputManager.getCenteredMouseX() / Window.getWidth()) / camera.getPos().z * 2;
+		cameraAdjustedEnd.y = -camera.getPos().y - camera.getAccumulatedDragDist().y - (InputManager.getCenteredMouseY() / Window.getWidth()) / camera.getPos().z * 2;
+
+		movedMouse = true;
 
 		// maybe this isn't exactly the most efficient
 		box.vertices = new float[]
@@ -53,7 +61,7 @@ public final class Selection extends Component {
 	};
 
 	private final MouseLeftPressCallback leftPressCallback = () -> {
-		if (!enabled) { return; }
+		if (!enabled || isInImGuiWindow()) { return; }
 		active = true;
 
 		start.x = InputManager.getMouseX();
@@ -61,6 +69,9 @@ public final class Selection extends Component {
 
 		screenAdjustedStart.x = InputManager.getCenteredMouseX() / Window.getWidth() * 2;
 		screenAdjustedStart.y = -InputManager.getCenteredMouseY() / Window.getHeight() * 2;
+
+		cameraAdjustedStart.x = -camera.getPos().x + camera.getAccumulatedDragDist().x + (InputManager.getCenteredMouseX() / Window.getWidth()) / camera.getPos().z * 2;
+		cameraAdjustedStart.y = -camera.getPos().y - camera.getAccumulatedDragDist().y - (InputManager.getCenteredMouseY() / Window.getWidth()) / camera.getPos().z * 2;
 
 		box.vertices = new float[1];
 		box.regenerate();
@@ -93,10 +104,10 @@ public final class Selection extends Component {
 
 	@Override
 	public void draw() {
-		if (!active) { return; }
+		if (!active || !movedMouse) { return; }
 
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_SRC_COLOR);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		ShaderManager.get(ShaderID.SELECTION).bind();
 		box.draw();
 		glDisable(GL_BLEND);
@@ -105,7 +116,7 @@ public final class Selection extends Component {
 	public void clear() {
 		active = false;
 
-		start.x = start.y = end.x = end.y = screenAdjustedEnd.x = screenAdjustedEnd.y = screenAdjustedStart.x = screenAdjustedStart.y = 0;
+		movedMouse = false;
 
 		box.vertices = new float[1];
 		box.regenerate();
@@ -117,7 +128,26 @@ public final class Selection extends Component {
 	}
 
 	public Rect2D get() {
-		return new Rect2D(start.x, start.y, end.x - start.x, end.y - start.y);
+		final Vector2f start = new Vector2f();
+		final Vector2f end = new Vector2f();
+
+		if (cameraAdjustedStart.x > cameraAdjustedEnd.x) {
+			start.x = cameraAdjustedEnd.x;
+			end.x = cameraAdjustedStart.x - cameraAdjustedEnd.x;
+		} else {
+			start.x = cameraAdjustedStart.x;
+			end.x = cameraAdjustedEnd.x - cameraAdjustedStart.x;
+		}
+
+		if (cameraAdjustedStart.y < cameraAdjustedEnd.y) {
+			start.y = cameraAdjustedStart.y;
+			end.y = cameraAdjustedEnd.y - cameraAdjustedStart.y;
+		} else {
+			start.y = cameraAdjustedEnd.y;
+			end.y = cameraAdjustedStart.y - cameraAdjustedEnd.y;
+		}
+
+		return new Rect2D(start.x, start.y, end.x, end.y);
 	}
 
 	public boolean isEnabled() {

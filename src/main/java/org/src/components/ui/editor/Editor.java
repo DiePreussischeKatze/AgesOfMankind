@@ -38,6 +38,8 @@ public final class Editor extends Component {
 
 	private int heldPointIndex;
 
+	private int[] selectedPointsIndices;
+
 	private final MouseMoveCallback moveCallback = () -> {
 		adjustedPos.x = -camera.getPos().x + camera.getAccumulatedDragDist().x + (InputManager.getCenteredMouseX() / Window.getWidth()) / camera.getPos().z * 2;
 		adjustedPos.y = -camera.getPos().y - camera.getAccumulatedDragDist().y - (InputManager.getCenteredMouseY() / Window.getWidth()) / camera.getPos().z * 2;
@@ -83,6 +85,8 @@ public final class Editor extends Component {
 
 		switch (mode) {
 			case ADD_PROVINCES:
+				heldPointIndex = -1;
+
 				if (!gridAlignmentEnabled) {
 					editedProvince.addPoint(
 							adjustedPos.x,
@@ -103,6 +107,7 @@ public final class Editor extends Component {
 				}
 				break;
 			case SELECT_PROVINCES:
+				heldPointIndex = -1;
 				final Province nullCheck = map.findProvinceUnderPoint(adjustedPos);
 				if (nullCheck == null) {
 					break;
@@ -111,6 +116,8 @@ public final class Editor extends Component {
 				if (editedProvince == nullCheck) {
 					break;
 				}
+
+				map.setLendProvince(map.findProvinceIndexUnderPoint(adjustedPos));
 				map.addProvinceToMesh(editedProvince);
 				editedProvince = nullCheck;
 				map.takeProvinceOut(nullCheck);
@@ -169,7 +176,7 @@ public final class Editor extends Component {
 			}
 		} else if (mode == EDIT_PROVINCES) {
 			switch (key) {
-				case GLFW_KEY_DELETE:
+				case GLFW_KEY_X:
 					if (!isAnyPointSelected()) { return; }
 					editedProvince.deletePoint(heldPointIndex);
 					heldPointIndex = -1;
@@ -221,7 +228,7 @@ public final class Editor extends Component {
 	}
 
 	private void drawForEditMode() {
-		int i = editedProvince.isInAnyPoint(adjustedPos.x, adjustedPos.y);
+		final int i = editedProvince.isInAnyPoint(adjustedPos.x, adjustedPos.y);
 
 		if (i == -1 || i == heldPointIndex) { return; }
 
@@ -237,6 +244,9 @@ public final class Editor extends Component {
 
 	private void drawSelectedPoint() {
 		if (!isAnyPointSelected() || editedProvince.getPointsPoses().length == 0) { return; }
+
+		// TODO: Find the cause
+		if (heldPointIndex > editedProvince.getPointsPoses().length || heldPointIndex < 0) { return; } // this was causing too many crashes
 
 		ShaderManager.get(ShaderID.EDITOR).bind();
 		ShaderManager.get(ShaderID.EDITOR).setFloat2(

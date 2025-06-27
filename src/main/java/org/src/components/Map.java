@@ -35,7 +35,7 @@ public final class Map extends Component {
 	private final Texture texture;
 	private final ArrayList<Province> provinces;
 
-	public int lendProvince;
+	private int lendProvince;
 
 	public Map() {
 		drawProvinceFillings = true;
@@ -207,6 +207,14 @@ public final class Map extends Component {
 
 	public int getAmountOfProvinces() {
 		return provinces.size();
+	}
+
+	public int getLendProvinceId() {
+		return lendProvince;
+	}
+
+	public void setLendProvince(int lendProvince) {
+		this.lendProvince = lendProvince;
 	}
 
 	public ArrayList<Province> getProvinces() {

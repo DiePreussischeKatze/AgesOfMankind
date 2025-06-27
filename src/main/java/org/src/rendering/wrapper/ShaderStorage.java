@@ -11,7 +11,6 @@ public final class ShaderStorage {
 	private final int id;
 	private final int binding;
 
-	// TODO: Create a manager for them; add more constructors
 	public ShaderStorage(final float[] data, final int binding) {
 		this.binding = binding;
 

@@ -4,6 +4,7 @@ import earcut4j.Earcut;
 import org.joml.Vector2f;
 import org.src.core.helper.Consts;
 import org.src.core.helper.Helper;
+import org.src.core.helper.Rect2D;
 import org.src.core.helper.ShaderID;
 import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
@@ -14,9 +15,7 @@ import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 
 public final class Province {
 	// TODO: make some of them not private
@@ -31,7 +30,6 @@ public final class Province {
 	private final ShaderStorage shaderStorage;
 
 	// for optimization
-	// TODO: use for mouse selection optimization
 	private final Vector2f minPos;
 	private final Vector2f maxPos;
 
@@ -216,6 +214,24 @@ public final class Province {
 		mesh.regenerate();
 	}
 
+	public int[] getSelectedPointsIndices(final Rect2D what) {
+		int[] points = new int[0];
+
+		for (int i = 0; i < pointsPoses.length; i += Consts.POINT_POS_STRIDE) {
+
+			if (what.intersects(new Rect2D(
+					pointsPoses[i],
+					pointsPoses[i + 1],
+					0.000001f,
+					0.000001f
+			))) {
+				points = Helper.addElementsToIntArray(points, new int[] {i, i + 1});
+			}
+		}
+
+		return points;
+	}
+
 	public void update() {
 
 	}
@@ -247,6 +263,17 @@ public final class Province {
 
 	public float[] getPointsPoses() {
 		return pointsPoses;
+	}
+
+	/**
+	 * The function only sets the data without regenerating the mesh
+	 */
+	public void setVertices(final float[] data) {
+		mesh.vertices = data;
+	}
+
+	public void setPointsPoses(final float[] data) {
+		pointsPoses = data;
 	}
 
 	public boolean getDrawFill() {
@@ -288,4 +315,5 @@ public final class Province {
 	public void setIndicesIndex(int indicesIndex) {
 		this.indicesIndex = indicesIndex;
 	}
+
 }

@@ -13,7 +13,6 @@ import org.src.core.main.Window;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
-import static org.lwjgl.util.nfd.NativeFileDialog.NFD_OpenDialog;
 
 public final class EditorWindow {
 
@@ -132,13 +131,12 @@ public final class EditorWindow {
 	private void tryRenderingForAddProvincesMode() {
 		if (editor.getMode() != EditorMode.ADD_PROVINCES) { return; }
 
+		ImGui.text("current pivot ID: " + editor.getProvince().getPivotAmount());
+		ImGui.text("current province ID: " + map.getLendProvinceId());
+
 		if (ImGui.button("Delete last point (z)")) {
 			editor.getProvince().deleteLastPoint();
 		}
-
-		ImGui.sameLine();
-		ImGui.text("currentPivotID: " + editor.getProvince().getPivotAmount());
-		ImGui.text("currentProvicneId: " + map.lendProvince);
 
 		if (ImGui.button("Clear province points")) {
 			editor.getProvince().clearProvincePoints();
@@ -154,7 +152,7 @@ public final class EditorWindow {
 	private void tryRenderingForEditProvincesMode() {
 		if (editor.getMode() != EditorMode.EDIT_PROVINCES) { return; }
 
-		if (ImGui.button("Delete selected point (DEL)") && editor.isAnyPointSelected()) {
+		if (ImGui.button("Delete selected point (x)") && editor.isAnyPointSelected()) {
 			editor.getProvince().deletePoint(editor.getHeldPointIndex());
 			editor.setHeldPointIndex(-1);
 		}

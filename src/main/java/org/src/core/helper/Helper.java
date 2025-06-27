@@ -23,6 +23,8 @@ public final class Helper {
 				file.append(line).append('\n');
 				line = reader.readLine();
 			}
+
+			reader.close();
 		} catch (IOException e) {
 			System.err.println(
 					"File: " + fileName + " Not found!"
@@ -216,6 +218,39 @@ public final class Helper {
 			}
 		}
 		return min;
+	}
+
+	public static int[] INT_ARR(String string) {
+		// delete unwanted characters for safety
+		string = string.replace("[", "");
+		string = string.replace("]", "");
+		string = string.replace(" ", "");
+
+		final String[] nums = string.split(",");
+		final int[] ints = new int[nums.length];
+
+		for (int i = 0; i < ints.length; i++) {
+			ints[i] = INT(nums[i]);
+		}
+
+
+		return ints;
+	}
+
+	public static float[] FLOAT_ARR(String string) {
+		// delete unwanted characters for safety
+		string = string.replace("[", "");
+		string = string.replace("]", "");
+		string = string.replace(" ", "");
+
+		final String[] nums = string.split(",");
+		final float[] floats = new float[nums.length];
+
+		for (int i = 0; i < floats.length; i++) {
+			floats[i] = FLOAT(nums[i]);
+		}
+
+		return floats;
 	}
 
 }

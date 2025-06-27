@@ -16,7 +16,7 @@ public final class Rect2D {
 	}
 
 	public boolean intersects(final Rect2D what) {
-		return this.x + this.width > what.x && this.x < what.x + what.width && this.y + this.height > what.y && this.y < what.y + what.height;
+		return this.x + this.width >= what.x && this.x <= what.x + what.width && this.y + this.height >= what.y && this.y <= what.y + what.height;
 	}
 
 	public boolean intersects(final float x, final float y, final float width, final float height) {
