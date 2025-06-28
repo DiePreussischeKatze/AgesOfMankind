@@ -1,5 +1,6 @@
 package org.src.components;
 
+import org.src.components.map.Map;
 import org.src.components.province.Province;
 import org.src.core.helper.Consts;
 import org.src.core.helper.Helper;
@@ -21,9 +22,7 @@ public final class ScenarioSaver {
 			saveFile
 					.append(";v:")
 					.append(Arrays.toString(map.getProvince(i).getVertices()).replace(" ", ""))
-					.append(";c:")
-					.append(Arrays.toString(map.getProvince(i).getColor()).replace(" ", ""))
-
+					.append(";")
 					.append('\n');
 		}
 
@@ -63,9 +62,18 @@ public final class ScenarioSaver {
 				j += Consts.POINT_POS_STRIDE;
 			}
 
+			// TODO: Keep an eye on this code
+			final float[] color = {
+					vertices[Consts.POINT_POS_STRIDE],
+					vertices[Consts.POINT_POS_STRIDE + 1],
+					vertices[Consts.POINT_POS_STRIDE + 2],
+			};
+
 			province.setVertices(vertices);
 			province.setPointsPoses(pointPositions);
+			province.setColor(color);
 			province.refreshMesh();
+			province.refreshMaxPoints();
 
 			map.addProvinceToMesh(province);
 		}

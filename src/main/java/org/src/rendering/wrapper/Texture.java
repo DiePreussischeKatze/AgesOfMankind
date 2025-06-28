@@ -57,6 +57,9 @@ public final class Texture {
 
 		glTextureStorage2D(id, 1, GL_RGB8, width, height);
 		glTextureSubImage2D(id, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+		// HUGE memory leak fixed
+		stbi_image_free(image);
 	}
 
 	public int getSlot() {

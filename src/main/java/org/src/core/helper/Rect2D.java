@@ -15,6 +15,13 @@ public final class Rect2D {
 		this.height = height;
 	}
 
+	public Rect2D() {
+		this.x = 0;
+		this.y = 0;
+		this.width = 0;
+		this.height = 0;
+	}
+
 	public boolean intersects(final Rect2D what) {
 		return this.x + this.width >= what.x && this.x <= what.x + what.width && this.y + this.height >= what.y && this.y <= what.y + what.height;
 	}
@@ -56,6 +63,13 @@ public final class Rect2D {
 	}
 
 	public void setHeight(float height) {
+		this.height = height;
+	}
+
+	public void setDimensions(final float x, final float y, final float width, final float height) {
+		this.x = x;
+		this.y = y;
+		this.width = width;
 		this.height = height;
 	}
 

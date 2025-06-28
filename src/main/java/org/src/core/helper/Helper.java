@@ -6,6 +6,7 @@ import org.src.rendering.wrapper.Mesh;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import static org.src.core.helper.Consts.RECT_INDICES;
 
@@ -109,6 +110,15 @@ public final class Helper {
 		return newArray;
 	}
 
+	public static int[] INT_ARR(final ArrayList<Integer> arrayList) {
+		final int[] array = new int[arrayList.size()];
+		for (int i = 0; i < array.length; i++) {
+			array[i] = arrayList.get(i);
+		}
+
+		return array;
+	}
+
 	/**
 	 * This method will take the old array and truncate it to a given size, for instance for an array of [0.5, 0.6, 0.3]
 	 * and new size of 2 the return value will be [0.5, 0.6]
@@ -165,7 +175,7 @@ public final class Helper {
 		final float[] newArray = new float[array.length + newElements.length];
 		System.arraycopy(array, 0, newArray, 0, startIndex);
 		System.arraycopy(newElements, 0, newArray, startIndex, newElements.length);
-		System.arraycopy(array, startIndex, newArray, newElements.length + startIndex, newArray.length - startIndex - newElements.length);
+		System.arraycopy(array, startIndex, newArray, newElements.length + startIndex, array.length - startIndex);
 		return newArray;
 	}
 

@@ -47,6 +47,10 @@ public final class EditorCursor extends Component {
 		return boxMesh;
 	}
 
+	public Vector2f getPosition() {
+		return position;
+	}
+
 	@Override
 	public void update(double deltaTime) {}
 

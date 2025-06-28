@@ -157,9 +157,9 @@ public final class Window {
 
 		while (!glfwWindowShouldClose(id)) {
 			now = glfwGetTime();
-			glfwPollEvents();
 
 			if (now - then > UPS_PER_SECOND) {
+				glfwPollEvents();
 				loop.doLogic((now - then) / UPS_PER_SECOND);
 				then = now;
 			}

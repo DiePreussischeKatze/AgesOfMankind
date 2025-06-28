@@ -10,12 +10,14 @@ import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 import org.src.rendering.wrapper.ShaderStorage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
+import static org.src.core.helper.Helper.*;
 
 public final class Province {
 	// TODO: make some of them not private
@@ -34,7 +36,7 @@ public final class Province {
 	private final Vector2f maxPos;
 
 	private final float[] color;
-	private float[] pointsPoses;
+	private float[] pointsPoses; // I mean I could just loop over the vertices but that would complicate stuff a lot
 
 	private boolean drawFill;
 	private boolean drawPoints;
@@ -96,16 +98,20 @@ public final class Province {
 		return -1; // the point doesn't exist at these coordinates
 	}
 
-	public void deletePoint(final int index) {
-		pointsPoses = Helper.deleteElementsFromFloatArray(pointsPoses, index * Consts.POINT_POS_STRIDE, Consts.POINT_POS_STRIDE);
-		mesh.vertices = Helper.deleteElementsFromFloatArray(mesh.vertices, index * mesh.getStrideSum(), mesh.getStrideSum());
+	public void deletePoint(final int id) {
+		deletePointWithoutRefresh(id);
 		refreshMaxPoints();
 		refreshMesh();
 	}
 
+	public void deletePointWithoutRefresh(final int id) {
+		pointsPoses = Helper.deleteElementsFromFloatArray(pointsPoses, id * Consts.POINT_POS_STRIDE, Consts.POINT_POS_STRIDE);
+		mesh.vertices = Helper.deleteElementsFromFloatArray(mesh.vertices, id * mesh.getStrideSum(), mesh.getStrideSum());
+	}
+
 	public boolean isInProvince(final Vector2f point) {
 		// check if it even makes sense to do the other checks
-		if (point.x > minPos.x && point.x < maxPos.x && point.y > minPos.y && point.y < maxPos.y) {
+		if (isInMaxPoints(point)) {
 			for (int i = 0; i < mesh.indices.length; i += 3) {
 				// calculate the bounds of the triangle (fix and also an optimization)
 				final Vector2f triangleMax = new Vector2f(
@@ -132,7 +138,7 @@ public final class Province {
 		return false;
 	}
 
-	private void refreshMaxPoints() {
+	public void refreshMaxPoints() {
 		for (int i = 0; i < pointsPoses.length; i += Consts.POINT_POS_STRIDE) {
 			// i is x, i + 1 i y
 			if (pointsPoses[i] > maxPos.x) {
@@ -162,6 +168,7 @@ public final class Province {
 
 		pointsPoses = Helper.insertElementsToFloatArray(pointsPoses, index * Consts.POINT_POS_STRIDE, new float[] {averagePosition.x, averagePosition.y});
 		mesh.vertices = Helper.insertElementsToFloatArray(mesh.vertices, index * mesh.getStrideSum(), new float[] {averagePosition.x, averagePosition.y, color[0], color[1], color[2]});
+		System.out.println(pointsPoses.length);
 		refreshMesh();
 		// there's no need for refreshMaxPoints()
 	}
@@ -214,8 +221,8 @@ public final class Province {
 		mesh.regenerate();
 	}
 
-	public int[] getSelectedPointsIndices(final Rect2D what) {
-		int[] points = new int[0];
+	public int[] getIntersectedPointIndices(final Rect2D what) {
+		final ArrayList<Integer> points = new ArrayList<>();
 
 		for (int i = 0; i < pointsPoses.length; i += Consts.POINT_POS_STRIDE) {
 
@@ -225,11 +232,42 @@ public final class Province {
 					0.000001f,
 					0.000001f
 			))) {
-				points = Helper.addElementsToIntArray(points, new int[] {i, i + 1});
+				points.add(i);
+				points.add(i + 1);
 			}
 		}
 
-		return points;
+		return INT_ARR(points);
+	}
+
+	private boolean isInMaxPoints(final float x, final float y) {
+		return x > minPos.x && x < maxPos.x && y > minPos.y && y < maxPos.y;
+	}
+
+	private boolean isInMaxPoints(final Vector2f point) {
+		return point.x > minPos.x && point.x < maxPos.x && point.y > minPos.y && point.y < maxPos.y;
+	}
+
+	/**
+	 *
+	 * @param what the rectangle to check collisions for
+	 * @return the index in the pointPoses array of the x value of the point (-1 if we don't hit anything)
+	 */
+	public int getFirstIntersectedPointIndex(final Rect2D what) {
+		if (!what.intersects(minPos.x, minPos.y, maxPos.x - minPos.x, maxPos.y - minPos.y)) { return -1; }
+
+		for (int i = 0; i < pointsPoses.length; i += Consts.POINT_POS_STRIDE) {
+			if (what.intersects(
+					pointsPoses[i],
+					pointsPoses[i + 1],
+					0.000001f,
+					0.000001f
+			)) {
+				return i;
+			}
+		}
+
+		return -1;
 	}
 
 	public void update() {
@@ -259,6 +297,14 @@ public final class Province {
 
 	public float[] getColor() {
 		return color;
+	}
+
+	public void setColor(final float[] color) {
+		this.color[0] = color[0];
+		this.color[1] = color[1];
+		this.color[2] = color[2];
+
+		updateColor();
 	}
 
 	public float[] getPointsPoses() {

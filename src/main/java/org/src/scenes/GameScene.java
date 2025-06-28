@@ -1,7 +1,7 @@
 package org.src.scenes;
 
 import org.src.components.Camera;
-import org.src.components.Map;
+import org.src.components.map.Map;
 import org.src.components.Selection;
 import org.src.components.ui.editor.Editor;
 import org.src.core.helper.Scene;

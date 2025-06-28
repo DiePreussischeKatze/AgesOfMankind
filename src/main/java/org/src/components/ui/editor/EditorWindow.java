@@ -1,12 +1,13 @@
 package org.src.components.ui.editor;
 
+import imgui.ImFont;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImVec2;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-import org.src.components.Map;
+import org.src.components.map.Map;
 import org.src.components.ScenarioSaver;
 import org.src.core.main.Window;
 
@@ -14,6 +15,7 @@ import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 
+// TODO: implement a good ui design
 public final class EditorWindow {
 
 	private final ScenarioSaver scenarioSaver;
@@ -30,6 +32,7 @@ public final class EditorWindow {
 		this.map = map;
 
 		this.scenarioSaver = new ScenarioSaver(this.map);
+		scenarioSaver.loadScenario();
 
 		this.imGuiImplGl3 = new ImGuiImplGl3();
 		this.imGuiImplGlfw = new ImGuiImplGlfw();
@@ -41,6 +44,8 @@ public final class EditorWindow {
 
 		imGuiIO = ImGui.getIO();
 		imGuiIO.getFonts().addFontDefault();
+
+
 	}
 
 	public void dispose() {
@@ -99,15 +104,6 @@ public final class EditorWindow {
 			map.toggleDrawProvinceFillings();
 		}
 
-		if (ImGui.checkbox("Toggle grid alignment", editor.getGridAlignment())) {
-			editor.toggleGridAlignment();
-		}
-
-		ImGui.separator();
-		if (ImGui.colorPicker3("Change province color", editor.getProvince().getColor())) {
-			editor.getProvince().updateColor();
-		}
-
 		ImGui.separator();
 
 		if (ImGui.button("Save scenario")) {
@@ -131,8 +127,10 @@ public final class EditorWindow {
 	private void tryRenderingForAddProvincesMode() {
 		if (editor.getMode() != EditorMode.ADD_PROVINCES) { return; }
 
-		ImGui.text("current pivot ID: " + editor.getProvince().getPivotAmount());
+		ImGui.text("province length: " + editor.getProvince().getPivotAmount());
 		ImGui.text("current province ID: " + map.getLendProvinceId());
+
+		ImGui.separator();
 
 		if (ImGui.button("Delete last point (z)")) {
 			editor.getProvince().deleteLastPoint();
@@ -145,6 +143,16 @@ public final class EditorWindow {
 
 		if (ImGui.button("New province (n)")) {
 			editor.newProvince();
+		}
+
+		ImGui.separator();
+
+		if (ImGui.checkbox("Toggle province magnet (t)", editor.getEnabledMagnet())) {
+			editor.setEnabledMagnet(!editor.getEnabledMagnet());
+		}
+
+		if (ImGui.checkbox("Toggle grid alignment", editor.getGridAlignment())) {
+			editor.toggleGridAlignment();
 		}
 
 	}
@@ -160,6 +168,14 @@ public final class EditorWindow {
 		if (ImGui.button("Add new point (c)")) {
 			editor.getProvince().insertPointBackwards(editor.getHeldPointIndex());
 			editor.setHeldPointIndex(-1);
+		}
+
+		if (ImGui.button("Delete all selected points (DEL)")) {
+			editor.deleteAllSelectedPoints();
+		}
+
+		if (ImGui.colorPicker3("Change province color", editor.getProvince().getColor())) {
+			editor.getProvince().updateColor();
 		}
 
 	}
