@@ -18,11 +18,14 @@ public final class ScenarioSaver {
 	public void saveScenario() {
 		final StringBuilder saveFile = new StringBuilder();
 		// TODO: remember when loading to not loop over the last province as it will be empty
-		for (int i = 0; i < map.getAmountOfProvinces() - 1; i++) {
+		for (int i = 0; i < map.getAmountOfProvinces(); i++) {
 			saveFile
 					.append(";v:")
 					.append(Arrays.toString(map.getProvince(i).getVertices()).replace(" ", ""))
-					.append(";")
+					.append(";n:")
+					.append(map.getProvince(i).name)
+					.append(";p:")
+					.append(map.getProvince(i).populationCount)
 					.append('\n');
 		}
 
@@ -32,7 +35,9 @@ public final class ScenarioSaver {
 	public void loadScenario() {
 		final String[] lines = Helper.loadFileAsString("res/saves/save1.txt").split("\n");
 
-		for (final String provinceData: lines) {
+		for (int i = 0; i < lines.length; i++) {
+			final String provinceData = lines[i];
+
 			final Province province = map.createProvince();
 
 			// get all the indices of the semicolons
@@ -44,21 +49,13 @@ public final class ScenarioSaver {
 				currentSemicolonIndex = provinceData.indexOf(';', currentSemicolonIndex + 1);
 			}
 
-			final int verticesStartIndex = provinceData.indexOf(";v:") + 3; // we want to skip the 3 characters
-			int verticesStopIndex = -1;
-			for (final int semicolon : semicolonIndices) {
-				if (verticesStartIndex < semicolon) {
-					verticesStopIndex = semicolon;
-				}
-			}
-
-			final float[] vertices = Helper.FLOAT_ARR(provinceData.substring(verticesStartIndex, verticesStopIndex));
+			final float[] vertices = Helper.FLOAT_ARR(getProperty(provinceData, semicolonIndices, ";v:"));
 
 			final float[] pointPositions = new float[vertices.length / province.getMeshStride() * Consts.POINT_POS_STRIDE];
 			     int j = 0;
-			for (int i = 0; i < vertices.length; i += province.getMeshStride()) {
-				pointPositions[j] = vertices[i];
-				pointPositions[j + 1] = vertices[i + 1];
+			for (int k = 0; k < vertices.length; k += province.getMeshStride()) {
+				pointPositions[j] = vertices[k];
+				pointPositions[j + 1] = vertices[k + 1];
 				j += Consts.POINT_POS_STRIDE;
 			}
 
@@ -69,14 +66,28 @@ public final class ScenarioSaver {
 					vertices[Consts.POINT_POS_STRIDE + 2],
 			};
 
+			final String name = getProperty(provinceData, semicolonIndices, ";n:");
+
 			province.setVertices(vertices);
 			province.setPointsPoses(pointPositions);
 			province.setColor(color);
 			province.refreshMesh();
 			province.refreshMaxPoints();
+			province.name.set(name);
 
+			if (i == 0) { continue; }
 			map.addProvinceToMesh(province);
 		}
+	}
+
+	private String getProperty(final String provinceData,  final ArrayList<Integer> semicolonIndices, final String label) {
+		final int startIndex = provinceData.indexOf(label) + label.length(); // we want to skip the 3 characters
+		for (final int semicolon : semicolonIndices) {
+			if (startIndex <= semicolon) {
+				return provinceData.substring(startIndex, semicolon);
+			}
+		}
+		return null; // dummy return
 	}
 
 }

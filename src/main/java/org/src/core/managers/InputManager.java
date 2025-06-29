@@ -1,6 +1,7 @@
 package org.src.core.managers;
 
 import org.src.core.callbacks.*;
+import org.src.core.helper.Helper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +49,7 @@ public final class InputManager {
 			final int action,
 			final int mods
 	) {
+		if (Helper.guiInputActive()) { return; }
 
 		if (action == GLFW_PRESS) {
 			keys[key] = true;

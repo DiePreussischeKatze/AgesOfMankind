@@ -263,4 +263,8 @@ public final class Helper {
 		return floats;
 	}
 
+	public static boolean guiInputActive() {
+		return ImGui.getIO().getWantTextInput();
+	}
+
 }

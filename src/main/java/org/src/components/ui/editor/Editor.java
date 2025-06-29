@@ -7,6 +7,7 @@ import org.src.components.Selection;
 import org.src.components.province.Province;
 import org.src.core.callbacks.*;
 import org.src.core.helper.Component;
+import org.src.core.helper.Helper;
 import org.src.core.helper.Rect2D;
 import org.src.core.helper.ShaderID;
 import org.src.core.main.Window;
@@ -36,8 +37,12 @@ public final class Editor extends Component {
 	private boolean draggingPoint;
 
 	private boolean usedSelection;
-
 	private boolean magnetEnabled;
+
+	private boolean drawProvinceFill;
+	private boolean drawProvincePoints;
+
+	private boolean valueRandomizerEnabled;
 
 	private Rect2D magnetHitbox;
 
@@ -46,7 +51,9 @@ public final class Editor extends Component {
 	private int[] selectedPointsIndices;
 
 	private final int GRID_ALIGN = 500;
+
 	private final float MAGNET_SIZE = 0.001f;
+	public final float VALUE_RANDOMIZER_RANGE = 0.07f; // percent
 
 	private final MouseMoveCallback moveCallback = () -> {
 		adjustedPos.x = -camera.getPos().x + camera.getAccumulatedDragDist().x + (InputManager.getCenteredMouseX() / Window.getWidth()) / camera.getPos().z * 2;
@@ -109,6 +116,9 @@ public final class Editor extends Component {
 				heldPointIndex = -1;
 				final Province nullCheck = map.findProvinceUnderPoint(adjustedPos);
 				if (nullCheck == null) {
+					// de-select the province
+					map.addProvinceToMesh(editedProvince);
+					editedProvince = map.createProvince();
 					break;
 				}
 				// trying to remove a province that is being edited WILL cause trouble with the indexes
@@ -155,10 +165,10 @@ public final class Editor extends Component {
 				setMode(PAINT_PROVINCES);
 				break;
 			case GLFW_KEY_F:
-				editedProvince.setDrawFill(!editedProvince.getDrawFill());
+				drawProvinceFill = !drawProvinceFill;
 				break;
 			case GLFW_KEY_G:
-				editedProvince.setDrawPoints(!editedProvince.getDrawPoints());
+				drawProvincePoints = !drawProvincePoints;
 				break;
 			case GLFW_KEY_J:
 				map.setDrawProvinceFillings(!map.getDrawProvinceFillings());
@@ -198,6 +208,9 @@ public final class Editor extends Component {
 				case GLFW_KEY_DELETE:
 					deleteAllSelectedPoints();
 					break;
+				case GLFW_KEY_V:
+					setValueRandomizerEnabled(!isValueRandomizerEnabled());
+					break;
 			}
 		}
 	};
@@ -210,9 +223,6 @@ public final class Editor extends Component {
 		this.usedSelection = false;
 		this.selectedPointsIndices = new int[0];
 
-		this.editorWindow = new EditorWindow(this, map);
-		this.editorCursor = new EditorCursor();
-
 		this.adjustedPos = new Vector2f();
 		this.magnetHitbox = new Rect2D();
 
@@ -223,17 +233,22 @@ public final class Editor extends Component {
 		this.gridAlignmentEnabled = true;
 		this.draggingPoint = false;
 
+		drawProvincePoints = drawProvinceFill = true;
+
 		this.heldPointIndex = -1;
 
 		InputManager.addMouseLeftPressCallback(leftCallback);
 		InputManager.addMouseMoveCallback(moveCallback);
 		InputManager.addKeyPressCallback(pressCallback);
 		InputManager.addMouseLeftReleaseCallback(leftReleaseCallback);
+
+		this.editorWindow = new EditorWindow(this, map);
+		this.editorCursor = new EditorCursor();
 	}
 
 	@Override
 	public void draw() {
-		editedProvince.drawAlone();
+		editedProvince.drawAlone(drawProvincePoints, drawProvinceFill);
 
 		if (mode == ADD_PROVINCES) {
 			editorCursor.draw();
@@ -281,13 +296,9 @@ public final class Editor extends Component {
 					editorCursor.getPosition().x, editorCursor.getPosition().y
 			);
 		} else {
-			//editedProvince.addPoint(
-			//		(float) Math.floor(adjustedPos.x * GRID_ALIGN) / GRID_ALIGN + 0.001f, // align 'em to the mouse cursor
-			//		(float) Math.floor(adjustedPos.y * GRID_ALIGN) / GRID_ALIGN + 0.001f
-			//);
 			editedProvince.addPoint(
-					(float) Math.floor(editorCursor.getPosition().x * GRID_ALIGN) / GRID_ALIGN,
-					(float) Math.floor(editorCursor.getPosition().y * GRID_ALIGN) / GRID_ALIGN
+					(float) Math.floor(editorCursor.getPosition().x * GRID_ALIGN) / GRID_ALIGN + 0.001f,
+					(float) Math.floor(editorCursor.getPosition().y * GRID_ALIGN) / GRID_ALIGN + 0.001f
 			);
 		}
 	}
@@ -326,6 +337,7 @@ public final class Editor extends Component {
 	public void newProvince() {
 		// we obviously don't want to make a new province while the current is empty
 		if (editedProvince.getIndices().length == 0) { return; }
+
 		map.addProvinceToMesh(editedProvince);
 		editedProvince = map.createProvince();
 	}
@@ -381,6 +393,39 @@ public final class Editor extends Component {
 		magnetEnabled = value;
 		gridAlignmentEnabled = false;
 	}
+
+	public boolean isValueRandomizerEnabled() {
+		return valueRandomizerEnabled;
+	}
+
+	public void setValueRandomizerEnabled(boolean valueRandomizerEnabled) {
+		this.valueRandomizerEnabled = valueRandomizerEnabled;
+	}
+
+	public boolean getDrawFill() {
+		return drawProvinceFill;
+	}
+
+	public void setDrawFill(boolean drawFill) {
+		this.drawProvinceFill = drawFill;
+	}
+
+	public void toggleDrawFill() {
+		drawProvinceFill = !drawProvinceFill;
+	}
+
+	public boolean getDrawPoints() {
+		return drawProvincePoints;
+	}
+
+	public void setDrawPoints(boolean drawPoints) {
+		this.drawProvincePoints = drawPoints;
+	}
+
+	public void toggleDrawPoints() {
+		drawProvincePoints = !drawProvincePoints;
+	}
+
 
 	@Override
 	public void dispose() {}

@@ -165,9 +165,9 @@ public final class Window {
 			}
 
 			if (now - thenFps > FRAMES_PER_SECOND) {
-				fps++;
 				renderer.render();
 				glfwSwapBuffers(id);
+				fps++;
 				thenFps = now;
 			}
 

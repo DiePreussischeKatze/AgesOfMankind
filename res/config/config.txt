@@ -4,7 +4,7 @@
 ? don't change the names of the parameters!
 startWinWidth: 1280
 startWinHeight: 720
-vsyncEnabled: true
+vsyncEnabled: false
 maxFps: 60
 cameraMoveSpeed: 0.01
 antialiasingSamples: 0 ?0 to disable anti-aliasing

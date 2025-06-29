@@ -1,6 +1,7 @@
 package org.src.components.province;
 
 import earcut4j.Earcut;
+import imgui.type.ImString;
 import org.joml.Vector2f;
 import org.src.core.helper.Consts;
 import org.src.core.helper.Helper;
@@ -38,16 +39,25 @@ public final class Province {
 	private final float[] color;
 	private float[] pointsPoses; // I mean I could just loop over the vertices but that would complicate stuff a lot
 
-	private boolean drawFill;
-	private boolean drawPoints;
+	public ImString name;
+
+	public int populationCount;
+
+	public int elevation;
+
+	public float averageTemperature;
+	public float maxTemperature;
+	public float minTemperature;
+	public float climateCharacter;
 
 	static {
 		POINT_SIZE = 0.0008f;
 	}
 
 	public Province() {
-		drawFill = drawPoints = true;
+		name = new ImString(50);
 
+		this.populationCount = 0;
 		pointsPoses = new float[0];
 		vertexIndex = indicesIndex = -1;
 
@@ -194,7 +204,7 @@ public final class Province {
 		mesh.regenerate();
 	}
 
-	public void drawAlone() {
+	public void drawAlone(final boolean drawPoints, final boolean drawFill) {
 		if (drawPoints) {
 			ShaderManager.get(ShaderID.PIVOT).bind();
 			shaderStorage.bind();
@@ -320,30 +330,6 @@ public final class Province {
 
 	public void setPointsPoses(final float[] data) {
 		pointsPoses = data;
-	}
-
-	public boolean getDrawFill() {
-		return drawFill;
-	}
-
-	public void setDrawFill(boolean drawFill) {
-		this.drawFill = drawFill;
-	}
-
-	public void toggleDrawFill() {
-		drawFill = !drawFill;
-	}
-
-	public boolean getDrawPoints() {
-		return drawPoints;
-	}
-
-	public void setDrawPoints(boolean drawPoints) {
-		this.drawPoints = drawPoints;
-	}
-
-	public void toggleDrawPoints() {
-		drawPoints = !drawPoints;
 	}
 
 	public int getVertexIndex() {

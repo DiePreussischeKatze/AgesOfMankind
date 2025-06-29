@@ -1,12 +1,13 @@
 package org.src.components.ui.editor;
 
-import imgui.ImFont;
-import imgui.ImGui;
-import imgui.ImGuiIO;
-import imgui.ImVec2;
+import imgui.*;
+import imgui.callback.ImGuiInputTextCallback;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import imgui.type.ImInt;
+import imgui.type.ImString;
 import org.src.components.map.Map;
 import org.src.components.ScenarioSaver;
 import org.src.core.main.Window;
@@ -44,7 +45,6 @@ public final class EditorWindow {
 
 		imGuiIO = ImGui.getIO();
 		imGuiIO.getFonts().addFontDefault();
-
 
 	}
 
@@ -88,12 +88,12 @@ public final class EditorWindow {
 
 		ImGui.separator();
 
-		if (ImGui.checkbox("Draw current province filling (f)", editor.getProvince().getDrawFill())) {
-			editor.getProvince().toggleDrawFill();
+		if (ImGui.checkbox("Draw current province filling (f)", editor.getDrawFill())) {
+			editor.toggleDrawFill();
 		}
 
-		if (ImGui.checkbox("Draw current province points (g)", editor.getProvince().getDrawPoints())) {
-			editor.getProvince().toggleDrawPoints();
+		if (ImGui.checkbox("Draw current province points (g)", editor.getDrawPoints())) {
+			editor.toggleDrawPoints();
 		}
 
 		if (ImGui.checkbox("Draw other provinces' points (h)", map.getDrawProvincePoints())) {
@@ -178,6 +178,30 @@ public final class EditorWindow {
 			editor.getProvince().updateColor();
 		}
 
+		ImGui.separator();
+
+		//inputString("Name", editor.getProvince().name);
+
+
+		ImGui.inputText("Name", editor.getProvince().name);
+
+		editor.getProvince().populationCount = inputInt("Population count", editor.getProvince().populationCount);
+
+		if (ImGui.button("Randomize values")) {
+			editor.getProvince().populationCount += randomizeValue(editor.getProvince().populationCount);
+		}
+	}
+
+	private int randomizeValue(final int value) {
+		return (int) ((float) (Math.random() - 0.5) * editor.VALUE_RANDOMIZER_RANGE * value);
+	}
+
+	private int inputInt(final String label, final int value) {
+		final ImInt i = new ImInt(value);
+		if (ImGui.inputInt(label, i, 0)) {
+			return i.get();
+		}
+		return value;
 	}
 
 }
