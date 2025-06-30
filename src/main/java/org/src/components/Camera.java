@@ -42,7 +42,9 @@ public final class Camera extends Component {
 	private boolean dragging;
 
 	private final MouseRightPressCallback rightPressCallback = () -> {
-		if (isInImGuiWindow()) { return; }
+		if (isInImGuiWindow()) {
+			return;
+		}
 
 		dragStart.x = InputManager.getMouseX();
 		dragStart.y = InputManager.getMouseY();
@@ -73,7 +75,9 @@ public final class Camera extends Component {
 	};
 
 	private final KeyPressCallback pressCallback = (final long window, final int key, final int action, final int mods) -> {
-		if (InputManager.keyPressed(GLFW_KEY_LEFT_CONTROL) || InputManager.keyPressed(GLFW_KEY_LEFT_ALT)) { return; }
+		if (InputManager.keyPressed(GLFW_KEY_LEFT_CONTROL) || InputManager.keyPressed(GLFW_KEY_LEFT_ALT)) {
+			return;
+		}
 
 		keyHeld(key, true);
 	};
@@ -106,13 +110,17 @@ public final class Camera extends Component {
 	}
 
 	private final KeyReleaseCallback releaseCallback = (final long window, final int key, final int action, final int mods) -> {
-		if (InputManager.keyPressed(GLFW_KEY_LEFT_CONTROL) || InputManager.keyPressed(GLFW_KEY_LEFT_ALT)) { return; }
+		if (InputManager.keyPressed(GLFW_KEY_LEFT_CONTROL) || InputManager.keyPressed(GLFW_KEY_LEFT_ALT)) {
+			return;
+		}
 
 		keyHeld(key, false);
 	};
 
 	private final MouseScrollCallback upScrollCallback = () -> {
-		if (position.z >= MAX_ZOOM - 0.2f || isInImGuiWindow()) { return; }
+		if (position.z >= MAX_ZOOM - 0.2f || isInImGuiWindow()) {
+			return;
+		}
 
 		// This is done in order to get rid of the jitter when the camera is very close to MAX_ZOOM
 		final float zoomEfficiency = 0.1f * position.z;
@@ -129,7 +137,9 @@ public final class Camera extends Component {
 	};
 
 	private final MouseScrollCallback downScrollCallback = () -> {
-		if (position.z <= MIN_ZOOM + 0.002f || isInImGuiWindow()) { return; }
+		if (position.z <= MIN_ZOOM + 0.002f || isInImGuiWindow()) {
+			return;
+		}
 
 		final float zoomEfficiency = 0.1f * position.z;
 		final float positionZThen = position.z;
@@ -171,7 +181,7 @@ public final class Camera extends Component {
 	@Override
 	public void draw() {
 		uniformBuffer.bind();
-		uniformBuffer.regenerate(new float[] {
+		uniformBuffer.regenerate(new float[]{
 			position.x - accumulatedDragDistance.x,
 			position.y + accumulatedDragDistance.y,
 			position.z,
@@ -235,7 +245,7 @@ public final class Camera extends Component {
 
 		if (acceleration.z > 0) {
 			acceleration.z -= (float) (position.z / 1000 * deltaTime);
-		} else if (acceleration.z < 0 ) {
+		} else if (acceleration.z < 0) {
 			acceleration.z += (float) (position.z / 1000 * deltaTime);
 		}
 

@@ -10,9 +10,15 @@ import java.util.Arrays;
 
 public final class ScenarioSaver {
 
+	private final ArrayList<Integer> semicolonIndices;
+	private String provinceData;
+
 	private final Map map;
 	public ScenarioSaver(final Map map) {
 		this.map = map;
+
+		this.semicolonIndices = new ArrayList<>();
+		this.provinceData = "";
 	}
 
 	public void saveScenario() {
@@ -35,21 +41,19 @@ public final class ScenarioSaver {
 	public void loadScenario() {
 		final String[] lines = Helper.loadFileAsString("res/saves/save1.txt").split("\n");
 
-		for (int i = 0; i < lines.length; i++) {
-			final String provinceData = lines[i];
+		for (int i = 0; i < lines.length - 1; i++) {
+			provinceData = lines[i];
 
 			final Province province = map.createProvince();
 
 			// get all the indices of the semicolons
-			final ArrayList<Integer> semicolonIndices = new ArrayList<>();
-
 			int currentSemicolonIndex = provinceData.indexOf(';');
 			while (currentSemicolonIndex >= 0) {
 				semicolonIndices.add(currentSemicolonIndex);
 				currentSemicolonIndex = provinceData.indexOf(';', currentSemicolonIndex + 1);
 			}
 
-			final float[] vertices = Helper.FLOAT_ARR(getProperty(provinceData, semicolonIndices, ";v:"));
+			final float[] vertices = Helper.FLOAT_ARR(getProperty(";v:"));
 
 			final float[] pointPositions = new float[vertices.length / province.getMeshStride() * Consts.POINT_POS_STRIDE];
 			     int j = 0;
@@ -66,7 +70,7 @@ public final class ScenarioSaver {
 					vertices[Consts.POINT_POS_STRIDE + 2],
 			};
 
-			final String name = getProperty(provinceData, semicolonIndices, ";n:");
+			final String name = getProperty(";n:");
 
 			province.setVertices(vertices);
 			province.setPointsPoses(pointPositions);
@@ -75,19 +79,24 @@ public final class ScenarioSaver {
 			province.refreshMaxPoints();
 			province.name.set(name);
 
+			provinceData = "";
+			semicolonIndices.clear();
+
 			if (i == 0) { continue; }
 			map.addProvinceToMesh(province);
+			// NO OTHER CODE HERE!!!
 		}
 	}
 
-	private String getProperty(final String provinceData,  final ArrayList<Integer> semicolonIndices, final String label) {
+	private String getProperty(final String label) {
 		final int startIndex = provinceData.indexOf(label) + label.length(); // we want to skip the 3 characters
 		for (final int semicolon : semicolonIndices) {
 			if (startIndex <= semicolon) {
 				return provinceData.substring(startIndex, semicolon);
 			}
 		}
-		return null; // dummy return
+		System.err.println("No property of the name: " + label + " was found!");
+		return ""; // if no property of such name is found
 	}
 
 }

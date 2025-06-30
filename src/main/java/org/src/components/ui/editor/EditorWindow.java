@@ -1,13 +1,13 @@
 package org.src.components.ui.editor;
 
 import imgui.*;
-import imgui.callback.ImGuiInputTextCallback;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiColorEditFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImInt;
-import imgui.type.ImString;
 import org.src.components.map.Map;
 import org.src.components.ScenarioSaver;
 import org.src.core.main.Window;
@@ -45,7 +45,7 @@ public final class EditorWindow {
 
 		imGuiIO = ImGui.getIO();
 		imGuiIO.getFonts().addFontDefault();
-
+		setStyle();
 	}
 
 	public void dispose() {
@@ -60,9 +60,11 @@ public final class EditorWindow {
 		this.imGuiImplGlfw.newFrame();
 
 		ImGui.newFrame();
+		//ImGui.showStyleEditor();
 		ImGui.begin("Editor", ImGuiWindowFlags.NoMove);
 
-		ImGui.getWindowDrawList().addCircle(new ImVec2(0.5f, 0.5f), 10f, 2000);
+		ImGui.setWindowSize(new ImVec2(ImGui.getWindowSizeX(), Window.getHeight()));
+
 		ImGui.text("Modes:");
 
 		if (ImGui.selectable("Add provinces (q)", editor.getMode() == EditorMode.ADD_PROVINCES)) {
@@ -85,6 +87,7 @@ public final class EditorWindow {
 
 		tryRenderingForAddProvincesMode();
 		tryRenderingForEditProvincesMode();
+		tryRenderingForSelectProvinceMode();
 
 		ImGui.separator();
 
@@ -174,14 +177,22 @@ public final class EditorWindow {
 			editor.deleteAllSelectedPoints();
 		}
 
-		if (ImGui.colorPicker3("Change province color", editor.getProvince().getColor())) {
+		tryRenderingForSelectAndEditProvincesMode();
+
+	}
+
+	private void tryRenderingForSelectProvinceMode() {
+		if (editor.getMode() != EditorMode.SELECT_PROVINCES) { return; }
+
+		tryRenderingForSelectAndEditProvincesMode();
+	}
+
+	private void tryRenderingForSelectAndEditProvincesMode() {
+		if (editor.getMode() != EditorMode.SELECT_PROVINCES && editor.getMode() != EditorMode.EDIT_PROVINCES) { return; }
+
+		if (ImGui.colorPicker3("Color", editor.getProvince().getColor())) {
 			editor.getProvince().updateColor();
 		}
-
-		ImGui.separator();
-
-		//inputString("Name", editor.getProvince().name);
-
 
 		ImGui.inputText("Name", editor.getProvince().name);
 
@@ -203,5 +214,54 @@ public final class EditorWindow {
 		}
 		return value;
 	}
+
+	private void setStyle() {
+		ImGuiStyle style = ImGui.getStyle();
+		style.setCircleTessellationMaxError(5);
+		style.setFrameRounding(12);
+		style.setWindowPadding(20, 10);
+		style.setFramePadding(20, 5);
+		style.setItemSpacing(12, 8);
+		style.setItemInnerSpacing(10, 4);
+		style.setGrabMinSize(17);
+		style.setScrollbarSize(8);
+		style.setWindowBorderSize(0);
+		style.setFrameBorderSize(1);
+		style.setWindowTitleAlign(0.5f, 0.5f);
+		style.setSelectableTextAlign(0.5f, 0.5f);
+		style.setGrabRounding(12);
+
+		style.setColor(ImGuiCol.Text, 0, 255, 0, 255);
+		style.setColor(ImGuiCol.TextDisabled, 0, 150, 0, 255);
+		style.setColor(ImGuiCol.WindowBg, 0, 0, 0, 255);
+		style.setColor(ImGuiCol.Border, 0, 255, 0, 150);
+		style.setColor(ImGuiCol.FrameBg, 0, 0, 0, 0);
+		style.setColor(ImGuiCol.FrameBgHovered, 0, 100, 0, 80);
+		style.setColor(ImGuiCol.FrameBgActive, 0, 150, 0, 150);
+		style.setColor(ImGuiCol.TitleBgActive, 0, 100, 0, 255);
+		style.setColor(ImGuiCol.TitleBg, 0, 0, 0, 255);
+		style.setColor(ImGuiCol.CheckMark, 0, 255, 0, 255);
+		style.setColor(ImGuiCol.ScrollbarBg, 0, 0, 0, 0);
+		style.setColor(ImGuiCol.Button, 0, 0, 0, 255);
+		style.setColor(ImGuiCol.ButtonHovered, 0, 255, 0, 60);
+		style.setColor(ImGuiCol.ButtonActive, 0, 255, 0, 120);
+		style.setColor(ImGuiCol.SliderGrab, 0, 255, 0, 100);
+		style.setColor(ImGuiCol.SliderGrabActive, 0, 255, 0, 255);
+		style.setColor(ImGuiCol.Separator, 0, 255, 0, 255);
+		style.setColor(ImGuiCol.Header, 0, 255, 0, 100);
+		style.setColor(ImGuiCol.HeaderHovered, 0, 255, 0, 50);
+		style.setColor(ImGuiCol.HeaderActive, 0, 255, 0, 150);
+		style.setColor(ImGuiCol.ScrollbarGrab, 0, 255, 0, 50);
+		style.setColor(ImGuiCol.ScrollbarGrabHovered, 0, 255, 0, 100);
+		style.setColor(ImGuiCol.ScrollbarGrabActive, 0, 255, 0, 150);
+		style.setColor(ImGuiCol.TextSelectedBg, 0, 255, 0, 170);
+		style.setColor(ImGuiCol.SeparatorActive, 0, 255, 0, 255);
+		style.setColor(ImGuiCol.SeparatorHovered, 0, 255, 0, 255);
+		// TODO: implement own resizing
+		style.setColor(ImGuiCol.ResizeGrip, 0, 0, 0, 0);
+		style.setColor(ImGuiCol.ResizeGripHovered, 0, 0, 0, 0);
+		style.setColor(ImGuiCol.ResizeGripActive, 0, 0, 0, 0);
+	}
+
 
 }
