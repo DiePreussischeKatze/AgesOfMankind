@@ -17,9 +17,9 @@ public final class Map extends Component {
 	public Map() {
 		this.renderer = new MapRenderer(this);
 
-		provinces = new ArrayList<>();
+		this.provinces = new ArrayList<>();
 
-		lendProvince = 0;
+		this.lendProvince = 0;
 	}
 
 	public Province createProvince() {
@@ -65,37 +65,24 @@ public final class Map extends Component {
 	}
 
 	@Override
-	public void update(double deltaTime) {
-		provinces.forEach(Province::update);
-	}
-
-	@Override
 	public void dispose() {
 		renderer.dispose();
-	}
-
-	public boolean getDrawProvinceFillings() {
-		return renderer.getDrawProvinceFillings();
 	}
 
 	public void setDrawProvinceFillings(boolean drawProvinceFillings) {
 		renderer.setDrawProvinceFillings(drawProvinceFillings);
 	}
 
+	public void setLendProvince(int lendProvince) {
+		this.lendProvince = lendProvince;
+	}
+
+	public boolean getDrawProvinceFillings() {
+		return renderer.getDrawProvinceFillings();
+	}
+
 	public boolean getDrawProvincePoints() {
 		return renderer.getDrawProvincePoints();
-	}
-
-	public void setDrawProvincePoints(boolean drawProvincePoints) {
-		renderer.setDrawProvincePoints(drawProvincePoints);
-	}
-
-	public void toggleDrawProvincePoints() {
-		renderer.setDrawProvincePoints(!renderer.getDrawProvincePoints());
-	}
-
-	public void toggleDrawProvinceFillings() {
-		renderer.setDrawProvinceFillings(!renderer.getDrawProvinceFillings());
 	}
 
 	public Province getProvince(final int index) {
@@ -107,15 +94,22 @@ public final class Map extends Component {
 	}
 
 	public int getLendProvinceId() {
-		return lendProvince;
-	}
-
-	public void setLendProvince(int lendProvince) {
-		this.lendProvince = lendProvince;
+		return this.lendProvince;
 	}
 
 	public ArrayList<Province> getProvinces() {
-		return provinces;
+		return this.provinces;
 	}
+
+	public void toggleDrawProvincePoints() {
+		renderer.setDrawProvincePoints(!renderer.getDrawProvincePoints());
+	}
+
+	public void toggleDrawProvinceFillings() {
+		renderer.setDrawProvinceFillings(!renderer.getDrawProvinceFillings());
+	}
+
+	@Override
+	public void update(double deltaTime){}
 
 }

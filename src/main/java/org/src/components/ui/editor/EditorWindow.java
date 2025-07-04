@@ -2,8 +2,6 @@ package org.src.components.ui.editor;
 
 import imgui.*;
 import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiColorEditFlags;
-import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
@@ -16,7 +14,6 @@ import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 
-// TODO: implement a good ui design
 public final class EditorWindow {
 
 	private final ScenarioSaver scenarioSaver;
@@ -28,7 +25,7 @@ public final class EditorWindow {
 
 	private final Editor editor;
 	private final Map map;
-	public EditorWindow(final Editor editor, final Map map) {
+	EditorWindow(final Editor editor, final Map map) {
 		this.editor = editor;
 		this.map = map;
 
@@ -67,28 +64,30 @@ public final class EditorWindow {
 
 		ImGui.text("Modes:");
 
-		if (ImGui.selectable("Add provinces (q)", editor.getMode() == EditorMode.ADD_PROVINCES)) {
-			editor.setMode(EditorMode.ADD_PROVINCES);
+		if (ImGui.selectable("Add provinces (q)", editor.isModeAddProvinces())) {
+			editor.setMode(EEditorMode.ADD_PROVINCES);
 		}
 
-		if (ImGui.selectable("Edit provinces (e)", editor.getMode() == EditorMode.EDIT_PROVINCES)) {
-			editor.setMode(EditorMode.EDIT_PROVINCES);
+		if (ImGui.selectable("Edit provinces (e)", editor.isModeEditProvinces())) {
+			editor.setMode(EEditorMode.EDIT_PROVINCES);
 		}
 
-		if (ImGui.selectable("Paint provinces (p)", editor.getMode() == EditorMode.PAINT_PROVINCES)) {
-			editor.setMode(EditorMode.PAINT_PROVINCES);
-		}
+//		if (ImGui.selectable("Paint provinces (p)", editor.)) {
+//			editor.setMode(EEditorMode.PAINT_PROVINCES);
+//		}
 
-		if (ImGui.selectable("Select province (l)", editor.getMode() == EditorMode.SELECT_PROVINCES)) {
-			editor.setMode(EditorMode.SELECT_PROVINCES);
+		if (ImGui.selectable("Select province (l)", editor.isModeSelectProvinces())) {
+			editor.setMode(EEditorMode.SELECT_PROVINCES);
 		}
 
 		ImGui.separator();
 
-		tryRenderingForAddProvincesMode();
-		tryRenderingForEditProvincesMode();
-		tryRenderingForSelectProvinceMode();
+		editor.drawModeUI();
 
+		//tryRenderingForAddProvincesMode();
+		//tryRenderingForEditProvincesMode();
+		//tryRenderingForSelectProvinceMode();
+//
 		ImGui.separator();
 
 		if (ImGui.checkbox("Draw current province filling (f)", editor.getDrawFill())) {
@@ -128,86 +127,86 @@ public final class EditorWindow {
 	}
 
 	private void tryRenderingForAddProvincesMode() {
-		if (editor.getMode() != EditorMode.ADD_PROVINCES) { return; }
-
-		ImGui.text("province length: " + editor.getProvince().getPivotAmount());
-		ImGui.text("current province ID: " + map.getLendProvinceId());
-
-		ImGui.separator();
-
-		if (ImGui.button("Delete last point (z)")) {
-			editor.getProvince().deleteLastPoint();
-		}
-
-		if (ImGui.button("Clear province points")) {
-			editor.getProvince().clearProvincePoints();
-			editor.setHeldPointIndex(-1);
-		}
-
-		if (ImGui.button("New province (n)")) {
-			editor.newProvince();
-		}
-
-		ImGui.separator();
-
-		if (ImGui.checkbox("Toggle province magnet (t)", editor.getEnabledMagnet())) {
-			editor.setEnabledMagnet(!editor.getEnabledMagnet());
-		}
-
-		if (ImGui.checkbox("Toggle grid alignment", editor.getGridAlignment())) {
-			editor.toggleGridAlignment();
-		}
+		//if (editor.getMode() != EEditorMode.ADD_PROVINCES) { return; }
+//
+		//ImGui.text("province length: " + editor.getProvince().getPivotAmount());
+		//ImGui.text("current province ID: " + map.getLendProvinceId());
+//
+		//ImGui.separator();
+//
+		//if (ImGui.button("Delete last point (z)")) {
+		//	editor.getProvince().deleteLastPoint();
+		//}
+//
+		//if (ImGui.button("Clear province points")) {
+		//	editor.getProvince().clearProvincePoints();
+		//	editor.setHeldPointIndex(-1);
+		//}
+//
+		//if (ImGui.button("New province (n)")) {
+		//	editor.newProvince();
+		//}
+//
+		//ImGui.separator();
+//
+		//if (ImGui.checkbox("Toggle province magnet (t)", editor.getMagnetEnabled())) {
+		//	editor.setEnabledMagnet(!editor.getMagnetEnabled());
+		//}
+//
+		//if (ImGui.checkbox("Toggle grid alignment", editor.getGridAlignment())) {
+		//	editor.toggleGridAlignment();
+		//}
 
 	}
 
 	private void tryRenderingForEditProvincesMode() {
-		if (editor.getMode() != EditorMode.EDIT_PROVINCES) { return; }
-
-		if (ImGui.button("Delete selected point (x)") && editor.isAnyPointSelected()) {
-			editor.getProvince().deletePoint(editor.getHeldPointIndex());
-			editor.setHeldPointIndex(-1);
-		}
-
-		if (ImGui.button("Add new point (c)")) {
-			editor.getProvince().insertPointBackwards(editor.getHeldPointIndex());
-			editor.setHeldPointIndex(-1);
-		}
-
-		if (ImGui.button("Delete all selected points (DEL)")) {
-			editor.deleteAllSelectedPoints();
-		}
+		//if (editor.getMode() != EEditorMode.EDIT_PROVINCES) { return; }
+//
+		//if (ImGui.button("Delete selected point (x)") && editor.isAnyPointSelected()) {
+		//	editor.getProvince().deletePoint(editor.getHeldPointIndex());
+		//	editor.setHeldPointIndex(-1);
+		//}
+//
+		//if (ImGui.button("Add new point (c)")) {
+		//	editor.getProvince().insertPointBackwards(editor.getHeldPointIndex());
+		//	editor.setHeldPointIndex(-1);
+		//}
+//
+		//if (ImGui.button("Delete all selected points (DEL)")) {
+		//	editor.deleteAllSelectedPoints();
+		//}
 
 		tryRenderingForSelectAndEditProvincesMode();
 
 	}
 
 	private void tryRenderingForSelectProvinceMode() {
-		if (editor.getMode() != EditorMode.SELECT_PROVINCES) { return; }
-
-		tryRenderingForSelectAndEditProvincesMode();
+		//if (editor.getMode() != EEditorMode.SELECT_PROVINCES) { return; }
+//
+		//tryRenderingForSelectAndEditProvincesMode();
 	}
 
 	private void tryRenderingForSelectAndEditProvincesMode() {
-		if (editor.getMode() != EditorMode.SELECT_PROVINCES && editor.getMode() != EditorMode.EDIT_PROVINCES) { return; }
-
-		if (ImGui.colorPicker3("Color", editor.getProvince().getColor())) {
-			editor.getProvince().updateColor();
-		}
-
-		ImGui.inputText("Name", editor.getProvince().name);
-
-		editor.getProvince().populationCount = inputInt("Population count", editor.getProvince().populationCount);
-
-		if (ImGui.button("Randomize values")) {
-			editor.getProvince().populationCount += randomizeValue(editor.getProvince().populationCount);
-		}
+		//if (editor.getMode() != EEditorMode.SELECT_PROVINCES && editor.getMode() != EEditorMode.EDIT_PROVINCES) { return; }
+//
+		//if (ImGui.colorPicker3("Color", editor.getProvince().getColor())) {
+		//	editor.getProvince().updateColor();
+		//}
+//
+		//ImGui.inputText("Name", editor.getProvince().name);
+//
+		//editor.getProvince().populationCount = inputInt("Population count", editor.getProvince().populationCount);
+//
+		//if (ImGui.button("Randomize values")) {
+		//	editor.getProvince().populationCount += randomizeValue(editor.getProvince().populationCount);
+		//}
 	}
 
-	private int randomizeValue(final int value) {
-		return (int) ((float) (Math.random() - 0.5) * editor.VALUE_RANDOMIZER_RANGE * value);
+	static int randomizeValue(final int value) {
+		return (int) ((float) (Math.random() - 0.5) * Editor.VALUE_RANDOMIZER_RANGE * value);
 	}
 
-	private int inputInt(final String label, final int value) {
+	static int inputInt(final String label, final int value) {
 		final ImInt i = new ImInt(value);
 		if (ImGui.inputInt(label, i, 0)) {
 			return i.get();

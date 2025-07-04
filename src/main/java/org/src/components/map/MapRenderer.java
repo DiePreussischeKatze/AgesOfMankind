@@ -22,11 +22,11 @@ import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 import static org.src.core.helper.Consts.RECT_INDICES;
-// TODO: Make it swap textures for low res ones when zooming out very far
+
 public final class MapRenderer {
 
+	// TODO: Divide the large textures into a bunch of small ones that can be unloaded (for the game consumes fucking 4GB)
 	private final Texture[] mapOverlays;
-	private int activeOverlay;
 
 	private final Mesh overlayMapMesh;
 	private final Mesh provinceMesh;
@@ -37,6 +37,7 @@ public final class MapRenderer {
 	private float[] provincesPoints;
 
 	private int indicesOffset;
+	private int activeOverlay;
 
 	private boolean drawProvincePoints;
 	private boolean drawProvinceFillings;
@@ -56,17 +57,19 @@ public final class MapRenderer {
 	public MapRenderer(final Map map) {
 		this.map = map;
 
-		drawProvinceFillings = true;
-		drawProvincePoints = false;
-		indicesOffset = 0;
-		provincesPoints = new float[0];
+		this.drawProvinceFillings = true;
+		this.drawProvincePoints = false;
 
-		pointShaderStorage = new ShaderStorage(2);
+		this.indicesOffset = 0;
 
-		mapOverlays = new Texture[2];
+		this.provincesPoints = new float[0];
 
-		mapOverlays[0] = TextureManager.createTexture("res/images/map0.png");
-		mapOverlays[1] = TextureManager.createTexture("res/images/map1.jpg");
+		this.mapOverlays = new Texture[2];
+
+		this.mapOverlays[0] = TextureManager.createTexture("res/images/map0.png");
+		this.mapOverlays[1] = TextureManager.createTexture("res/images/map1.jpg");
+
+		this.pointShaderStorage = new ShaderStorage(2);
 
 		this.provinceMesh = new Mesh(new byte[] {
 				2, 3
@@ -77,7 +80,7 @@ public final class MapRenderer {
 		final float xSize = (float) mapOverlays[0].getWidth() / 1000;
 		final float ySize = (float) mapOverlays[0].getHeight() / 1000;
 
-		overlayMapMesh = new Mesh(new float[]{
+		this.overlayMapMesh = new Mesh(new float[]{
 				xSize,  ySize, 1.0f, 1.0F,
 				xSize, -ySize, 1.0f, 0.0f,
 				-xSize, -ySize, 0.0f, 0.0f,
@@ -169,12 +172,12 @@ public final class MapRenderer {
 		return drawProvincePoints;
 	}
 
-	public void setDrawProvincePoints(boolean drawProvincePoints) {
-		this.drawProvincePoints = drawProvincePoints;
-	}
-
 	public boolean getDrawProvinceFillings() {
 		return drawProvinceFillings;
+	}
+
+	public void setDrawProvincePoints(boolean drawProvincePoints) {
+		this.drawProvincePoints = drawProvincePoints;
 	}
 
 	public void setDrawProvinceFillings(boolean drawProvinceFillings) {

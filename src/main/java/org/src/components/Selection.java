@@ -30,13 +30,13 @@ public final class Selection extends Component {
 	private Vector2f screenAdjustedEnd;
 
 	private boolean enabled;
-	private boolean active;
+	private boolean used;
 	private boolean movedMouse; // to fix a bug where a weird shape taking the entire screen would show up
 
 	private Camera camera;
 
 	private final MouseMoveCallback moveCallback = () -> {
-		if (!enabled || !active) { return; }
+		if (!enabled || !used) { return; }
 
 		end.x = InputManager.getMouseX();
 		end.y = -InputManager.getMouseY();
@@ -62,7 +62,7 @@ public final class Selection extends Component {
 
 	private final MouseLeftPressCallback leftPressCallback = () -> {
 		if (!enabled || isInImGuiWindow()) { return; }
-		active = true;
+		used = true;
 
 		start.x = InputManager.getMouseX();
 		start.y = -InputManager.getMouseY();
@@ -104,7 +104,7 @@ public final class Selection extends Component {
 
 	@Override
 	public void draw() {
-		if (!active || !movedMouse) { return; }
+		if (!used || !movedMouse) { return; }
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -114,7 +114,7 @@ public final class Selection extends Component {
 	}
 
 	public void clear() {
-		active = false;
+		used = false;
 
 		movedMouse = false;
 

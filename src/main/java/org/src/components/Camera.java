@@ -155,19 +155,20 @@ public final class Camera extends Component {
 	};
 
 	public Camera() {
+		this.sPressed = this.wPressed = this.aPressed = this.dPressed = false;
+		this.dragging = false;
+
+		this.uniformBuffer = new UniformBuffer(16, 0, GL_DYNAMIC_DRAW);
+
 		// position - (x - y), (y - y) (z - scaling factor)
 		this.position = new Vector3f(0.0f, 0.0f, 5.0f);
 		this.acceleration = new Vector3f(0.0f, 0.0f, 0.0f);
-		sPressed = wPressed = aPressed = dPressed = false;
-		dragging = false;
 
-		uniformBuffer = new UniformBuffer(16, 0, GL_DYNAMIC_DRAW);
-
-		dragStart = new Vector2f();
-		draggedDistance = new Vector2f();
-		dragDelta = new Vector2f();
-		dragEnd = new Vector2f();
-		accumulatedDragDistance = new Vector2f();
+		this.dragStart = new Vector2f();
+		this.draggedDistance = new Vector2f();
+		this.dragDelta = new Vector2f();
+		this.dragEnd = new Vector2f();
+		this.accumulatedDragDistance = new Vector2f();
 
 		InputManager.addKeyPressCallback(pressCallback);
 		InputManager.addKeyReleaseCallback(releaseCallback);

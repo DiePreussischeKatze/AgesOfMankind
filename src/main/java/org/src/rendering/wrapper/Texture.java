@@ -50,14 +50,12 @@ public final class Texture {
 	public void regenerate(final ByteBuffer image) {
 		id = glCreateTextures(GL_TEXTURE_2D);
 
-		glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
 		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureStorage2D(id, 3, GL_RGB8, width, height);
 
-		glTextureStorage2D(id, 1, GL_RGB8, width, height);
 		glTextureSubImage2D(id, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
-
+		glGenerateTextureMipmap(id);
 		// HUGE memory leak fixed
 		stbi_image_free(image);
 	}

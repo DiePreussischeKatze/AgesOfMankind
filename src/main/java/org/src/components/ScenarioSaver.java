@@ -65,9 +65,9 @@ public final class ScenarioSaver {
 
 			// TODO: Keep an eye on this code
 			final float[] color = {
-					vertices[Consts.POINT_POS_STRIDE],
-					vertices[Consts.POINT_POS_STRIDE + 1],
-					vertices[Consts.POINT_POS_STRIDE + 2],
+				vertices[Consts.POINT_POS_STRIDE],
+				vertices[Consts.POINT_POS_STRIDE + 1],
+				vertices[Consts.POINT_POS_STRIDE + 2],
 			};
 
 			final String name = getProperty(";n:");
