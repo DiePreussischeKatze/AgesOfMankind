@@ -53,8 +53,8 @@ public final class EditorWindow {
 
 	public void draw() {
 		glDisable(GL_MULTISAMPLE);
-		this.imGuiImplGl3.newFrame();
-		this.imGuiImplGlfw.newFrame();
+		imGuiImplGl3.newFrame();
+		imGuiImplGlfw.newFrame();
 
 		ImGui.newFrame();
 		//ImGui.showStyleEditor();
@@ -72,22 +72,18 @@ public final class EditorWindow {
 			editor.setMode(EEditorMode.EDIT_PROVINCES);
 		}
 
-//		if (ImGui.selectable("Paint provinces (p)", editor.)) {
-//			editor.setMode(EEditorMode.PAINT_PROVINCES);
-//		}
-
 		if (ImGui.selectable("Select province (l)", editor.isModeSelectProvinces())) {
 			editor.setMode(EEditorMode.SELECT_PROVINCES);
+		}
+
+		if (ImGui.selectable("Paint provinces (p)", editor.isModePaintProvinces())) {
+			editor.setMode(EEditorMode.PAINT_PROVINCES);
 		}
 
 		ImGui.separator();
 
 		editor.drawModeUI();
 
-		//tryRenderingForAddProvincesMode();
-		//tryRenderingForEditProvincesMode();
-		//tryRenderingForSelectProvinceMode();
-//
 		ImGui.separator();
 
 		if (ImGui.checkbox("Draw current province filling (f)", editor.getDrawFill())) {
@@ -126,82 +122,6 @@ public final class EditorWindow {
 		glEnable(GL_MULTISAMPLE);
 	}
 
-	private void tryRenderingForAddProvincesMode() {
-		//if (editor.getMode() != EEditorMode.ADD_PROVINCES) { return; }
-//
-		//ImGui.text("province length: " + editor.getProvince().getPivotAmount());
-		//ImGui.text("current province ID: " + map.getLendProvinceId());
-//
-		//ImGui.separator();
-//
-		//if (ImGui.button("Delete last point (z)")) {
-		//	editor.getProvince().deleteLastPoint();
-		//}
-//
-		//if (ImGui.button("Clear province points")) {
-		//	editor.getProvince().clearProvincePoints();
-		//	editor.setHeldPointIndex(-1);
-		//}
-//
-		//if (ImGui.button("New province (n)")) {
-		//	editor.newProvince();
-		//}
-//
-		//ImGui.separator();
-//
-		//if (ImGui.checkbox("Toggle province magnet (t)", editor.getMagnetEnabled())) {
-		//	editor.setEnabledMagnet(!editor.getMagnetEnabled());
-		//}
-//
-		//if (ImGui.checkbox("Toggle grid alignment", editor.getGridAlignment())) {
-		//	editor.toggleGridAlignment();
-		//}
-
-	}
-
-	private void tryRenderingForEditProvincesMode() {
-		//if (editor.getMode() != EEditorMode.EDIT_PROVINCES) { return; }
-//
-		//if (ImGui.button("Delete selected point (x)") && editor.isAnyPointSelected()) {
-		//	editor.getProvince().deletePoint(editor.getHeldPointIndex());
-		//	editor.setHeldPointIndex(-1);
-		//}
-//
-		//if (ImGui.button("Add new point (c)")) {
-		//	editor.getProvince().insertPointBackwards(editor.getHeldPointIndex());
-		//	editor.setHeldPointIndex(-1);
-		//}
-//
-		//if (ImGui.button("Delete all selected points (DEL)")) {
-		//	editor.deleteAllSelectedPoints();
-		//}
-
-		tryRenderingForSelectAndEditProvincesMode();
-
-	}
-
-	private void tryRenderingForSelectProvinceMode() {
-		//if (editor.getMode() != EEditorMode.SELECT_PROVINCES) { return; }
-//
-		//tryRenderingForSelectAndEditProvincesMode();
-	}
-
-	private void tryRenderingForSelectAndEditProvincesMode() {
-		//if (editor.getMode() != EEditorMode.SELECT_PROVINCES && editor.getMode() != EEditorMode.EDIT_PROVINCES) { return; }
-//
-		//if (ImGui.colorPicker3("Color", editor.getProvince().getColor())) {
-		//	editor.getProvince().updateColor();
-		//}
-//
-		//ImGui.inputText("Name", editor.getProvince().name);
-//
-		//editor.getProvince().populationCount = inputInt("Population count", editor.getProvince().populationCount);
-//
-		//if (ImGui.button("Randomize values")) {
-		//	editor.getProvince().populationCount += randomizeValue(editor.getProvince().populationCount);
-		//}
-	}
-
 	static int randomizeValue(final int value) {
 		return (int) ((float) (Math.random() - 0.5) * Editor.VALUE_RANDOMIZER_RANGE * value);
 	}
@@ -209,13 +129,14 @@ public final class EditorWindow {
 	static int inputInt(final String label, final int value) {
 		final ImInt i = new ImInt(value);
 		if (ImGui.inputInt(label, i, 0)) {
+			System.out.println(i.get());
 			return i.get();
 		}
 		return value;
 	}
 
 	private void setStyle() {
-		ImGuiStyle style = ImGui.getStyle();
+		final ImGuiStyle style = ImGui.getStyle();
 		style.setCircleTessellationMaxError(5);
 		style.setFrameRounding(12);
 		style.setWindowPadding(20, 10);

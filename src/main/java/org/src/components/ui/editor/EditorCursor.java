@@ -18,7 +18,7 @@ public final class EditorCursor extends Component {
 	EditorCursor() {
 		this.position = new Vector2f();
 
-		boxMesh = Helper.createPlainBoxMesh(0.0008f, 0.0008f);
+		this.boxMesh = Helper.createPlainBoxMesh(0.0008f, 0.0008f);
 	}
 
 	void updatePos(final float x, final float y) {

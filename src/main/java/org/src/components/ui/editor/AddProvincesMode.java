@@ -6,13 +6,13 @@ import org.src.components.province.Province;
 import org.src.core.helper.Rect2D;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.src.components.ui.editor.Editor.GRID_ALIGN;
 
 public final class AddProvincesMode extends EditorMode {
 
 	private final Rect2D magnetHitbox;
 
 	private final float MAGNET_SIZE = 0.001f;
+	private final int GRID_ALIGN = 500;
 
 	private final Map map;
 
@@ -73,7 +73,7 @@ public final class AddProvincesMode extends EditorMode {
 
 	@Override
 	public void mouseLeftPressedAction() {
-		editor.setHeldPointIndex(-1);
+		editor.deselectPoint();
 		addPointToProvince();
 		editor.lookForNeighbors();
 	}
@@ -106,7 +106,7 @@ public final class AddProvincesMode extends EditorMode {
 
 		if (ImGui.button("Clear province points")) {
 			editor.getProvince().clearProvincePoints();
-			editor.setHeldPointIndex(-1);
+			editor.deselectPoint();
 		}
 
 		if (ImGui.button("New province (n)")) {
@@ -122,6 +122,16 @@ public final class AddProvincesMode extends EditorMode {
 		if (ImGui.checkbox("Toggle grid alignment", editor.isGridAlignmentEnabled())) {
 			editor.toggleGridAlignment();
 		}
+	}
+
+	@Override
+	public void draw() {
+		editor.getCursor().draw();
+	}
+
+	@Override
+	public void update(final double deltaTime) {
+
 	}
 
 	private void addPointToProvince() {

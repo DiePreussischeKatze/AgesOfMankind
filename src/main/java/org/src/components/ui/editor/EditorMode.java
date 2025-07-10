@@ -20,5 +20,8 @@ public abstract class EditorMode {
 	public abstract void mouseRightReleasedAction();
 
 	public abstract void renderGui();
+	public abstract void draw();
+
+	public abstract void update(final double deltaTime);
 
 }

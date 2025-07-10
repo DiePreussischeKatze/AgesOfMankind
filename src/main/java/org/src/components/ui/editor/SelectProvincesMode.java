@@ -4,16 +4,18 @@ import imgui.ImGui;
 import org.src.components.map.Map;
 import org.src.components.province.Province;
 
-import static org.src.components.ui.editor.EditorWindow.inputInt;
-import static org.src.components.ui.editor.EditorWindow.randomizeValue;
+import static org.src.components.ui.editor.EEditorMode.EDIT_PROVINCES;
 
 public final class SelectProvincesMode extends EditorMode {
 	private final Map map;
+
+	private boolean shouldChangeToEditProvincesOnClick;
 
 	SelectProvincesMode(final Editor editor, final Map map) {
 		super(editor);
 
 		this.map = map;
+		this.shouldChangeToEditProvincesOnClick = true;
 
 		// kinda ironic
 		editor.getSelection().setEnabled(false);
@@ -36,7 +38,8 @@ public final class SelectProvincesMode extends EditorMode {
 
 	@Override
 	public void mouseLeftPressedAction() {
-		editor.setHeldPointIndex(-1);
+		editor.deselectPoint(); // for safety measures
+
 		final Province nullCheck = map.findProvinceUnderPoint(editor.getAdjustedPos());
 		if (nullCheck == null) {
 			// de-select the province
@@ -53,6 +56,10 @@ public final class SelectProvincesMode extends EditorMode {
 		map.addProvinceToMesh(editor.getProvince());
 		editor.setEditedProvince(nullCheck);
 		map.takeProvinceFromMesh(nullCheck);
+
+		if (shouldChangeToEditProvincesOnClick) {
+			editor.setMode(EDIT_PROVINCES);
+		}
 	}
 
 	@Override
@@ -72,18 +79,20 @@ public final class SelectProvincesMode extends EditorMode {
 
 	@Override
 	public void renderGui() {
-
-		if (ImGui.colorPicker3("Color", editor.getProvince().getColor())) {
-			editor.getProvince().updateColor();
+		if (ImGui.checkbox("Change to edit provinces", shouldChangeToEditProvincesOnClick)) {
+			shouldChangeToEditProvincesOnClick = !shouldChangeToEditProvincesOnClick;
 		}
 
-		ImGui.inputText("Name", editor.getProvince().name);
+	}
 
-		editor.getProvince().populationCount = inputInt("Population count", editor.getProvince().populationCount);
+	@Override
+	public void update(final double deltaTime) {
 
-		if (ImGui.button("Randomize values")) {
-			editor.getProvince().populationCount += randomizeValue(editor.getProvince().populationCount);
-		}
+	}
+
+	@Override
+	public void draw() {
+
 	}
 
 }

@@ -9,9 +9,9 @@ import org.src.core.callbacks.*;
 import org.src.core.helper.*;
 import org.src.core.main.Window;
 import org.src.core.managers.InputManager;
-import org.src.core.managers.ShaderManager;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.src.components.ui.editor.EEditorMode.*;
 import static org.src.core.helper.Consts.POINT_POS_STRIDE;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
@@ -20,7 +20,7 @@ public final class Editor extends Component {
 	private final EditorWindow editorWindow;
 	private final EditorCursor editorCursor;
 
-	private EditorMode currentMode;
+	private EditorMode mode;
 
 	private final Selection selection;
 	private Camera camera;
@@ -41,50 +41,54 @@ public final class Editor extends Component {
 
 	private int heldPointIndex;
 
-	public static final int GRID_ALIGN = 500;
-
 	public static final float VALUE_RANDOMIZER_RANGE = 0.07f; // percent
 
 	private final MouseMoveCallback moveCallback = () -> {
 		adjustedPos.x = -camera.getPos().x + camera.getAccumulatedDragDist().x + (InputManager.getCenteredMouseX() / Window.getWidth()) / camera.getPos().z * 2;
 		adjustedPos.y = -camera.getPos().y - camera.getAccumulatedDragDist().y - (InputManager.getCenteredMouseY() / Window.getWidth()) / camera.getPos().z * 2;
-		currentMode.mouseMovedAction();
+		mode.mouseMovedAction();
 	};
 
 	private final MouseLeftPressCallback leftCallback = () -> {
 		if (isInImGuiWindow()) { return; }
-		currentMode.mouseLeftPressedAction();
+		mode.mouseLeftPressedAction();
 	};
 
 	private final MouseLeftReleaseCallback leftReleaseCallback = () -> {
-		currentMode.mouseLeftReleasedAction();
+		mode.mouseLeftReleasedAction();
 	};
 
 	private final KeyPressCallback pressCallback = (final long window, final int key, final int action, final int mods) -> {
 		switch (key) {
 			case GLFW_KEY_Q:
-				this.currentMode = new AddProvincesMode(this, map);
+				setMode(ADD_PROVINCES);
 				break;
 			case GLFW_KEY_E:
-				this.currentMode = new EditProvincesMode(this);
+				setMode(EDIT_PROVINCES);
 				break;
 			case GLFW_KEY_L:
-				this.currentMode = new SelectProvincesMode(this, map);
+				setMode(SELECT_PROVINCES);
 				break;
+			case GLFW_KEY_P:
+				setMode(PAINT_PROVINCES);
 			case GLFW_KEY_F:
-				drawProvinceFill = !drawProvinceFill;
+				toggleDrawFill();
 				break;
 			case GLFW_KEY_G:
-				drawProvincePoints = !drawProvincePoints;
+				toggleDrawPoints();
 				break;
 			case GLFW_KEY_J:
-				map.setDrawProvinceFillings(!map.getDrawProvinceFillings());
+				map.toggleDrawProvinceFillings();
 				break;
 			case GLFW_KEY_H:
 				map.toggleDrawProvincePoints();
 				break;
 		}
-		currentMode.keyPressAction(key);
+		mode.keyPressAction(key);
+	};
+
+	private final KeyReleaseCallback releaseCallback = (final long window, final int key, final int action, final int mods) -> {
+		mode.keyReleaseAction(key);
 	};
 
 	public Editor(final Camera camera, final Map map, final Selection selection) {
@@ -102,7 +106,7 @@ public final class Editor extends Component {
 
 		this.heldPointIndex = -1;
 
-		this.currentMode = new SelectProvincesMode(this, map);
+		this.mode = new SelectProvincesMode(this, map);
 
 		this.editorWindow = new EditorWindow(this, map);
 		this.editorCursor = new EditorCursor();
@@ -110,6 +114,7 @@ public final class Editor extends Component {
 		InputManager.addMouseLeftPressCallback(leftCallback);
 		InputManager.addMouseMoveCallback(moveCallback);
 		InputManager.addKeyPressCallback(pressCallback);
+		InputManager.addKeyReleaseCallback(releaseCallback);
 		InputManager.addMouseLeftReleaseCallback(leftReleaseCallback);
 	}
 
@@ -138,19 +143,14 @@ public final class Editor extends Component {
 	}
 
 	public void drawModeUI() {
-		currentMode.renderGui();
+		mode.renderGui();
 	}
 
 	@Override
 	public void draw() {
 		editedProvince.drawAlone(drawProvincePoints, drawProvinceFill);
 
-		if (isModeAddProvinces()) {
-			editorCursor.draw();
-		} else if (isModeEditProvinces()) {
-			drawForEditMode();
-			drawSelectedProvincePoint();
-		}
+		mode.draw();
 		editorWindow.draw();
 	}
 
@@ -158,38 +158,6 @@ public final class Editor extends Component {
 		editedProvince.deletePoint(id);
 		lookForNeighbors();
 	}
-
-	private void drawForEditMode() {
-		final int i = editedProvince.isInAnyPoint(adjustedPos.x, adjustedPos.y);
-
-		if (i == -1 || i == heldPointIndex) { return; }
-
-		ShaderManager.get(ShaderID.EDITOR).bind();
-		ShaderManager.get(ShaderID.EDITOR).setFloat2(
-				"offset",
-				editedProvince.getPointsPoses()[i * POINT_POS_STRIDE],
-				editedProvince.getPointsPoses()[i * POINT_POS_STRIDE + 1]
-		);
-		ShaderManager.get(ShaderID.EDITOR).setFloat3("color", 1f, 0.8f, 0.2f);
-		editorCursor.getBoxMesh().draw();
-	}
-
-	private void drawSelectedProvincePoint() {
-		if (!isAnyPointSelected() || editedProvince.getPointsPoses().length == 0) { return; }
-
-		// TODO: Find the cause
-		if (heldPointIndex > editedProvince.getPointsPoses().length || heldPointIndex < 0) { return; } // this was causing too many crashes
-
-		ShaderManager.get(ShaderID.EDITOR).bind();
-		ShaderManager.get(ShaderID.EDITOR).setFloat2(
-				"offset",
-				editedProvince.getPointsPoses()[heldPointIndex * POINT_POS_STRIDE],
-				editedProvince.getPointsPoses()[heldPointIndex * POINT_POS_STRIDE + 1]
-		);
-		ShaderManager.get(ShaderID.EDITOR).setFloat3("color", 0.8f, 0.6f, 0.1f);
-		editorCursor.getBoxMesh().draw();
-	}
-
 
 	public void lookForNeighbors() {
 		editedProvince.clearNeighbors();
@@ -241,13 +209,17 @@ public final class Editor extends Component {
 		this.heldPointIndex = heldPointIndex;
 	}
 
+	public void deselectPoint() {
+		this.heldPointIndex = 0;
+	}
+
 	public boolean isAnyPointSelected() {
 		return heldPointIndex != -1;
 	}
 
 	@Override
 	public void update(double deltaTime) {
-
+		mode.update(deltaTime);
 	}
 
 	public boolean getMagnetEnabled() {
@@ -291,28 +263,34 @@ public final class Editor extends Component {
 	public void dispose() {}
 
 	public boolean isModeAddProvinces() {
-		return currentMode instanceof AddProvincesMode;
+		return mode instanceof AddProvincesMode;
 	}
 
 	public boolean isModeEditProvinces() {
-		return currentMode instanceof EditProvincesMode;
+		return mode instanceof EditProvincesMode;
 	}
 
 	public boolean isModeSelectProvinces() {
-		return currentMode instanceof SelectProvincesMode;
+		return mode instanceof SelectProvincesMode;
+	}
+
+	public boolean isModePaintProvinces() {
+		return mode instanceof PaintProvincesMode;
 	}
 
 	public void setMode(final EEditorMode mode) {
 		switch (mode) {
 			case ADD_PROVINCES:
-				currentMode = new AddProvincesMode(this, map);
+				this.mode = new AddProvincesMode(this, map);
 				break;
 			case EDIT_PROVINCES:
-				currentMode = new EditProvincesMode(this);
+				this.mode = new EditProvincesMode(this);
 				break;
 			case SELECT_PROVINCES:
-				currentMode = new SelectProvincesMode(this, map);
+				this.mode = new SelectProvincesMode(this, map);
 				break;
+			case PAINT_PROVINCES:
+				this.mode = new PaintProvincesMode(this, map);
 		}
 	}
 

@@ -12,7 +12,6 @@ import org.src.core.managers.InputManager;
 import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 
-
 import static org.lwjgl.opengl.GL11.*;
 import static org.src.core.helper.Consts.RECT_INDICES;
 import static org.src.core.helper.Helper.isInImGuiWindow;
