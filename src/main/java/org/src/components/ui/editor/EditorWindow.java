@@ -5,6 +5,7 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import org.src.components.map.Map;
 import org.src.components.ScenarioSaver;
@@ -129,8 +130,15 @@ public final class EditorWindow {
 	static int inputInt(final String label, final int value) {
 		final ImInt i = new ImInt(value);
 		if (ImGui.inputInt(label, i, 0)) {
-			System.out.println(i.get());
 			return i.get();
+		}
+		return value;
+	}
+
+	static double inputDouble(final String label, final double value) {
+		final ImDouble d = new ImDouble(value);
+		if (ImGui.inputDouble(label, d, 0)) {
+			return d.get();
 		}
 		return value;
 	}

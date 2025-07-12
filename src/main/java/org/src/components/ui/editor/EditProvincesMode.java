@@ -2,7 +2,6 @@ package org.src.components.ui.editor;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
-import org.src.components.province.ProvinceType;
 import org.src.core.helper.ShaderID;
 import org.src.core.managers.ShaderManager;
 
@@ -187,11 +186,11 @@ public final class EditProvincesMode extends EditorMode {
 
 	private void dragProvincePoint() {
 		if (editor.isGridAlignmentEnabled()) {
-			editor.getProvince().getPointsPoses()[editor.getHeldPointIndex() * POINT_POS_STRIDE] = editor.getProvince().getVertices()[editor.getHeldPointIndex() * editor.getProvince().getMeshStride()] = (float) Math.floor(editor.getAdjustedPos().x * 500) / 500 + 0.001f;
-			editor.getProvince().getPointsPoses()[editor.getHeldPointIndex() * POINT_POS_STRIDE + 1] = editor.getProvince().getVertices()[editor.getHeldPointIndex() * editor.getProvince().getMeshStride() + 1] = (float) Math.floor(editor.getAdjustedPos().y * 500) / 500 + 0.001f;
+			editor.getProvince().getPointsPoses()[editor.getHeldPointIndex() * POINT_POS_STRIDE] = editor.getProvince().getVertices()[editor.getHeldPointIndex() * editor.getProvince().getVertexStride()] = (float) Math.floor(editor.getAdjustedPos().x * 500) / 500 + 0.001f;
+			editor.getProvince().getPointsPoses()[editor.getHeldPointIndex() * POINT_POS_STRIDE + 1] = editor.getProvince().getVertices()[editor.getHeldPointIndex() * editor.getProvince().getVertexStride() + 1] = (float) Math.floor(editor.getAdjustedPos().y * 500) / 500 + 0.001f;
 		} else {
-			editor.getProvince().getPointsPoses()[editor.getHeldPointIndex() * POINT_POS_STRIDE] = editor.getProvince().getVertices()[editor.getHeldPointIndex() * editor.getProvince().getMeshStride()] = editor.getAdjustedPos().x;
-			editor.getProvince().getPointsPoses()[editor.getHeldPointIndex() * POINT_POS_STRIDE + 1] = editor.getProvince().getVertices()[editor.getHeldPointIndex() * editor.getProvince().getMeshStride() + 1] = editor.getAdjustedPos().y;
+			editor.getProvince().getPointsPoses()[editor.getHeldPointIndex() * POINT_POS_STRIDE] = editor.getProvince().getVertices()[editor.getHeldPointIndex() * editor.getProvince().getVertexStride()] = editor.getAdjustedPos().x;
+			editor.getProvince().getPointsPoses()[editor.getHeldPointIndex() * POINT_POS_STRIDE + 1] = editor.getProvince().getVertices()[editor.getHeldPointIndex() * editor.getProvince().getVertexStride() + 1] = editor.getAdjustedPos().y;
 		}
 
 		editor.getProvince().refreshMesh();

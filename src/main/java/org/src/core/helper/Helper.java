@@ -69,7 +69,7 @@ public final class Helper {
 	}
 
 	/**
-	 * For whatever reason when I use ByteBuffer.array() it crashes
+	 * For hwatever reason when I use ByteBuffer.array() it crashes
 	 * @return The string made from individual characters of the byte buffer
 	 */
 	public static String byteBufferToString(final ByteBuffer buffer) {

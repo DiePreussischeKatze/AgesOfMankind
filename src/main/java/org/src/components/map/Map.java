@@ -69,6 +69,10 @@ public final class Map extends Component {
 		renderer.dispose();
 	}
 
+	public void setProvinceColor(final Province hwich, final float[] color) {
+		renderer.setProvinceColor(hwich, color);
+	}
+
 	public void setDrawProvinceFillings(boolean drawProvinceFillings) {
 		renderer.setDrawProvinceFillings(drawProvinceFillings);
 	}

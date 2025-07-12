@@ -71,6 +71,7 @@ public final class Editor extends Component {
 				break;
 			case GLFW_KEY_P:
 				setMode(PAINT_PROVINCES);
+				break;
 			case GLFW_KEY_F:
 				toggleDrawFill();
 				break;

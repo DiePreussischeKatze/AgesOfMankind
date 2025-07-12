@@ -90,6 +90,10 @@ public final class Province {
 		renderer.refreshMesh();
 	}
 
+	public boolean intersectsMaxRectangle(final Rect2D hwat) {
+		return renderer.intersectsMaxRectangle(hwat);
+	}
+
 	public void refreshMaxPoints() {
 		renderer.refreshMaxPoints();
 	}
@@ -111,11 +115,11 @@ public final class Province {
 	}
 
 	/**
-	 * @param what the rectangle to check collisions for
+	 * @param hwat the rectangle to check collisions for
 	 * @return the index in the pointPoses array of the x value of the point (-1 if we don't hit anything)
 	 */
-	public int getFirstIntersectedPointIndex(final Rect2D what) {
-		return renderer.getFirstIntersectedPointIndex(what);
+	public int getFirstIntersectedPointIndex(final Rect2D hwat) {
+		return renderer.getFirstIntersectedPointIndex(hwat);
 	}
 
 	public void dispose() {
@@ -124,6 +128,10 @@ public final class Province {
 
 	public void setColor(final float[] color) {
 		renderer.setColor(color);
+	}
+
+	public void shallowSetColor(final float[] color) {
+		renderer.shallowSetColor(color);
 	}
 
 	/**
@@ -161,7 +169,7 @@ public final class Province {
 		return renderer.getIndices();
 	}
 
-	public int getMeshStride() {
+	public int getVertexStride() {
 		return renderer.getMeshStride();
 	}
 

@@ -1,6 +1,5 @@
 package org.src.components.map;
 
-import org.lwjgl.glfw.GLFW;
 import org.src.components.province.Province;
 import org.src.core.callbacks.KeyPressCallback;
 import org.src.core.helper.Consts;
@@ -126,16 +125,26 @@ public final class MapRenderer {
 		}
 		provinceMesh.addIndices(newIndices);
 
-		indicesOffset += province.getVertices().length / province.getMeshStride();
+		indicesOffset += province.getVertices().length / province.getVertexStride();
 
 		pointShaderStorage.regenerate(provincesPoints);
+		provinceMesh.regenerate();
+	}
+
+	public void setProvinceColor(final Province province, final float[] color) {
+		province.setColor(color);
+		for (int i = province.getVertexIndex(); i < province.getVertexIndex() + province.getVertices().length; i += province.getVertexStride()) {
+			provinceMesh.vertices[i + 2] = color[0];
+			provinceMesh.vertices[i + 3] = color[1];
+			provinceMesh.vertices[i + 4] = color[2];
+		}
 		provinceMesh.regenerate();
 	}
 
 	public void takeProvinceFromMesh(final Province province) {
 
 		for (int i = province.getIndicesIndex() + province.getIndices().length; i < provinceMesh.indices.length; i++) {
-			provinceMesh.indices[i] -= province.getVertices().length / province.getMeshStride();
+			provinceMesh.indices[i] -= province.getVertices().length / province.getVertexStride();
 		}
 
 		for (final Province changeOffset : map.getProvinces()) {
@@ -146,13 +155,13 @@ public final class MapRenderer {
 			changeOffset.setVertexIndex(changeOffset.getVertexIndex() - province.getVertices().length);
 		}
 
-		indicesOffset -= province.getVertices().length / province.getMeshStride();
+		indicesOffset -= province.getVertices().length / province.getVertexStride();
 
 		provinceMesh.indices = Helper.deleteElementsFromIntArray(provinceMesh.indices, province.getIndicesIndex(), province.getIndices().length);
 		provinceMesh.vertices = Helper.deleteElementsFromFloatArray(provinceMesh.vertices, province.getVertexIndex(), province.getVertices().length);
 		provinceMesh.regenerate();
 
-		provincesPoints = Helper.deleteElementsFromFloatArray(provincesPoints, province.getVertexIndex() * Consts.POINT_POS_STRIDE / province.getMeshStride(), province.getVertices().length * Consts.POINT_POS_STRIDE / province.getMeshStride());
+		provincesPoints = Helper.deleteElementsFromFloatArray(provincesPoints, province.getVertexIndex() * Consts.POINT_POS_STRIDE / province.getVertexStride(), province.getVertices().length * Consts.POINT_POS_STRIDE / province.getVertexStride());
 		pointShaderStorage.regenerate(provincesPoints);
 	}
 

@@ -1,7 +1,6 @@
 package org.src.components.province;
 
 import earcut4j.Earcut;
-import imgui.type.ImString;
 import org.joml.Vector2f;
 import org.src.core.helper.Consts;
 import org.src.core.helper.Helper;
@@ -10,7 +9,6 @@ import org.src.core.helper.ShaderID;
 import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 import org.src.rendering.wrapper.ShaderStorage;
-import org.w3c.dom.css.Rect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -241,6 +239,16 @@ public final class ProvinceRenderer {
 		mesh.regenerate();
 	}
 
+	public void shallowSetColor(final float[] color) {
+		for (int i = 0; i < mesh.vertices.length; i += mesh.getStrideSum()) {
+			// i + 2 for the first 2 indices are reserved for position
+			mesh.vertices[i + 2] = color[0];
+			mesh.vertices[i + 3] = color[1];
+			mesh.vertices[i + 4] = color[2];
+		}
+		mesh.regenerate();
+	}
+
 	public int[] getIntersectedPointIndices(final Rect2D what) {
 		final ArrayList<Integer> points = new ArrayList<>();
 
@@ -260,18 +268,18 @@ public final class ProvinceRenderer {
 	}
 
 	/*
-	 * @param what the rectangle to check collisions for
+	 * @param hwat the rectangle to check collisions for
 	 * 
 	 * @return the index in the pointPoses array of the x value of the point (-1 if
 	 * we don't hit anything)
 	 */
-	public int getFirstIntersectedPointIndex(final Rect2D what) {
-		if (!what.intersects(minPos.x, minPos.y, maxPos.x - minPos.x, maxPos.y - minPos.y)) {
+	public int getFirstIntersectedPointIndex(final Rect2D hwat) {
+		if (!hwat.intersects(minPos.x, minPos.y, maxPos.x - minPos.x, maxPos.y - minPos.y)) {
 			return -1;
 		}
 
 		for (int i = 0; i < pointsPoses.length; i += Consts.POINT_POS_STRIDE) {
-			if (what.intersects(
+			if (hwat.intersects(
 					pointsPoses[i],
 					pointsPoses[i + 1],
 					0.000001f,
@@ -281,6 +289,10 @@ public final class ProvinceRenderer {
 		}
 
 		return -1;
+	}
+
+	public boolean intersectsMaxRectangle(final Rect2D hwat) {
+		return hwat.intersects(minPos.x, minPos.y, maxPos.x - minPos.x, maxPos.y - minPos.y);
 	}
 
 	private boolean isInMaxPoints(final float x, final float y) {

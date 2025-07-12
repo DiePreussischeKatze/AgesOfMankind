@@ -55,9 +55,9 @@ public final class ScenarioSaver {
 
 			final float[] vertices = Helper.FLOAT_ARR(getProperty(";v:"));
 
-			final float[] pointPositions = new float[vertices.length / province.getMeshStride() * Consts.POINT_POS_STRIDE];
+			final float[] pointPositions = new float[vertices.length / province.getVertexStride() * Consts.POINT_POS_STRIDE];
 			     int j = 0;
-			for (int k = 0; k < vertices.length; k += province.getMeshStride()) {
+			for (int k = 0; k < vertices.length; k += province.getVertexStride()) {
 				pointPositions[j] = vertices[k];
 				pointPositions[j + 1] = vertices[k + 1];
 				j += Consts.POINT_POS_STRIDE;
