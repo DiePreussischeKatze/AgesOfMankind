@@ -2,9 +2,12 @@ package org.src.components.province;
 
 import imgui.type.ImString;
 import org.joml.Vector2f;
+import org.src.core.helper.Helper;
 import org.src.core.helper.Rect2D;
 
 import java.util.HashSet;
+
+import static org.src.core.helper.Consts.*;
 
 public final class Province {
 	private final ProvinceRenderer renderer;
@@ -38,6 +41,8 @@ public final class Province {
 		this.populationCount = 0;
 
 		this.type = ProvinceType.DEEP_SEA;
+
+		setColorToType();
 	}
 
 	public void setType(final int intType) {
@@ -50,6 +55,8 @@ public final class Province {
 			case 5: type = ProvinceType.HIGHLANDS; break;
 			case 6: type = ProvinceType.MOUNTAINS; break;
 		}
+
+		setColorToType();
 	}
 
 	/**
@@ -128,6 +135,27 @@ public final class Province {
 
 	public void setColor(final float[] color) {
 		renderer.setColor(color);
+	}
+
+	private void setColorToType() {
+		// TODO: Add some variation to the colors
+		float[] color = new float[3];
+
+		switch (type) {
+			case DEEP_SEA -> color = DEEP_SEA_COLORS;
+			case SHALLOW_SEA -> color = SHALLOW_SEA_COLORS;
+			case COSTAL_SEA -> color = COSTAL_SEA_COLORS;
+			case BOG -> color = BOG_COLORS;
+			case LOWLANDS -> color = LOWLANDS_COLORS;
+			case HIGHLANDS -> color = HIGHLANDS_COLORS;
+			case MOUNTAINS -> color = MOUNTAINS_COLORS;
+		}
+
+		color[0] += (float) Helper.rand(-0.02, 0.02);
+		color[1] += (float) Helper.rand(-0.02, 0.02);
+		color[2] += (float) Helper.rand(-0.02, 0.02);
+
+		setColor(color);
 	}
 
 	public void shallowSetColor(final float[] color) {

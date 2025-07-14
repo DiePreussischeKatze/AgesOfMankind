@@ -13,4 +13,11 @@ public final class Consts {
 
 	public static final int POINT_POS_STRIDE = 2;
 
+	public static final float[] DEEP_SEA_COLORS = { 0.0f, 0.05f, 0.1f };
+	public static final float[] SHALLOW_SEA_COLORS = { 0.0f, 0.05f, 0.4f };
+	public static final float[] COSTAL_SEA_COLORS = { 0.25f, 0.3f, 0.9f };
+	public static final float[] BOG_COLORS = { 0f, 0.4f, 0.05f };
+	public static final float[] LOWLANDS_COLORS = { 0.1f, 0.6f, 0.1f };
+	public static final float[] HIGHLANDS_COLORS = { 0.1f, 0.9f, 0.1f };
+	public static final float[] MOUNTAINS_COLORS = { 0.5f, 0.5f, 0.5f };
 }

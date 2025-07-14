@@ -3,6 +3,7 @@ package org.src.components.ui.editor;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import org.joml.Vector2f;
+import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
 import org.src.components.province.Province;
 import org.src.core.helper.Consts;
@@ -19,6 +20,7 @@ import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_COLOR;
 import static org.src.components.ui.editor.EditorWindow.inputDouble;
 
+import static org.src.components.ui.editor.EditorWindow.randomizeValue;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class PaintProvincesMode extends EditorMode {
@@ -29,7 +31,6 @@ public final class PaintProvincesMode extends EditorMode {
 	private float brushGrowth;
 
 	private boolean mousePressed;
-	private boolean randomizeValues;
 
 	private double SETValue;
 	private double ADDValue;
@@ -50,7 +51,6 @@ public final class PaintProvincesMode extends EditorMode {
 
 		this.brushGrowth = 0;
 		this.mousePressed = false;
-		this.randomizeValues = false;
 		paramID = new ImInt();
 
 		this.SETValue = this.ADDValue = 0;
@@ -59,6 +59,8 @@ public final class PaintProvincesMode extends EditorMode {
 		this.boxMesh = new Mesh(new byte[]{2});
 		this.boxMesh.indices = Consts.RECT_INDICES;
 		this.brushSize = new Rect2D(editor.getAdjustedPos().x - 0.01f, editor.getAdjustedPos().y - 0.01f, 0.02f, 0.02f);
+
+		editor.getSelection().setEnabled(false);
 	}
 
 	@Override
@@ -109,7 +111,6 @@ public final class PaintProvincesMode extends EditorMode {
 
 	@Override
 	public void mouseRightPressedAction() {
-
 	}
 
 	@Override
@@ -129,8 +130,8 @@ public final class PaintProvincesMode extends EditorMode {
 
 		ImGui.separator();
 
-		if (ImGui.checkbox("Randomize values", randomizeValues)) {
-			randomizeValues = !randomizeValues;
+		if (ImGui.button("Randomize values")) {
+			randomizeValues();
 		}
 
 		if (ImGui.combo("Edited param", paramID, params)) {
@@ -141,25 +142,16 @@ public final class PaintProvincesMode extends EditorMode {
 		SETValue = inputDouble("SET value", SETValue);
 	}
 
-	// It sucks java doesn't have references
 	public void changeMapDisplay() {
 		editor.getProvince().shallowSetColor(
 				new float[] {
-						Math.clamp(editor.getProvince().populationCount / 1000.0f, 0.1f, 1.0f),
+						Math.max(editor.getProvince().populationCount / (float) map.getMaxPopulation(), 0.1f),
 						0.1f,
 						0.1f
 				}
 		);
 
-		for (final Province province: map.getProvinces()) {
-			if (province == editor.getProvince()) { continue; } // we cannot change this province as it's not in the mesh
-
-			map.setProvinceColor(province, new float[] {
-					Math.clamp(province.populationCount / 1000.0f, 0.1f, 1.0f),
-					0.1f,
-					0.1f
-			});
-		}
+		map.setDisplayMode(DisplayMode.POPULATION);
 	}
 
 	@Override
@@ -168,12 +160,18 @@ public final class PaintProvincesMode extends EditorMode {
 		if (mousePressed) { paint(deltaTime); }
 	}
 
+	private void randomizeValues() {
+		for (final Province province: map.getProvinces()) {
+			province.populationCount = randomizeValue(province.populationCount);
+		}
+	}
+
 	private void paint(final double deltaTime) {
 		// due to my stupid implementation we need to split the box mesh into a grid of points
 		final ArrayList<Vector2f> points = new ArrayList<>();
 		// First time I ever did a for loop on a float (looks a bit cursed)
-		for (float xx = brushSize.getX() - brushSize.getWidth(); xx < brushSize.getX() + brushSize.getWidth() * 2; xx += 0.001f) {
-			for (float yy = brushSize.getY() - brushSize.getHeight(); yy < brushSize.getY() + brushSize.getHeight() * 2; yy += 0.001f) {
+		for (float xx = brushSize.getX() - brushSize.getWidth(); xx < brushSize.getX() + brushSize.getWidth(); xx += 0.002f) {
+			for (float yy = brushSize.getY() - brushSize.getHeight(); yy < brushSize.getY() + brushSize.getHeight(); yy += 0.002f) {
 				points.add(new Vector2f(xx, yy));
 			}
 		}
@@ -186,7 +184,7 @@ public final class PaintProvincesMode extends EditorMode {
 
 				for (final Vector2f point: points) {
 					if (province.isInProvince(point)) {
-						// TODO: Make it to something
+						SETEditParam(province);
 						break;
 					}
 				}
@@ -205,16 +203,17 @@ public final class PaintProvincesMode extends EditorMode {
 				}
 			}
 		}
+		map.findMaxParams();
 	}
 
 	private void updateBrush(final double deltaTime) {
 		if (brushGrowth != 0) {
 			brushSize.setWidth((float) Math.max(brushSize.getWidth() + brushGrowth * deltaTime, 0));
 			brushSize.setHeight((float) Math.max(brushSize.getHeight() + brushGrowth * deltaTime, 0));
-			updateMesh();
 		}
 		brushSize.setX(editor.getAdjustedPos().x);
 		brushSize.setY(editor.getAdjustedPos().y);
+		updateMesh();
 	}
 
 	@Override
@@ -229,6 +228,7 @@ public final class PaintProvincesMode extends EditorMode {
 		glDisable(GL_BLEND);
 	}
 
+	// It sucks java doesn't have references
 	// TODO: Figure out how to put 'em into a single switch
 	private void ADDEditParam(final Province province) {
 		switch (params[paramID.get()].toLowerCase().trim()) {
@@ -245,7 +245,7 @@ public final class PaintProvincesMode extends EditorMode {
 	}
 
 	private void SETEditParam(final Province province) {
-		switch(params[paramID.get()].toLowerCase().trim()) {
+		switch (params[paramID.get()].toLowerCase().trim()) {
 			case "population count":
 				province.populationCount = (int) SETValue;
 				break;
@@ -256,6 +256,17 @@ public final class PaintProvincesMode extends EditorMode {
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
 		}
+	}
+
+	private float getPaintingValue(final Province province) {
+		return switch (params[paramID.get()].toLowerCase().trim()) {
+			case "population count" -> province.populationCount;
+			case "elevation" -> province.elevation;
+			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
+			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
+			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
+			default -> Float.MIN_VALUE;
+		};
 	}
 
 }

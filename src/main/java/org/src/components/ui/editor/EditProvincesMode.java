@@ -2,6 +2,7 @@ package org.src.components.ui.editor;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
+import org.src.components.map.Map;
 import org.src.core.helper.ShaderID;
 import org.src.core.managers.ShaderManager;
 
@@ -17,8 +18,11 @@ public final class EditProvincesMode extends EditorMode {
 
 	private int[] selectedPointsIndices;
 
-	EditProvincesMode(Editor editor) {
+	private final Map map;
+	EditProvincesMode(final Editor editor, final Map map) {
 		super(editor);
+
+		this.map = map;
 
 		draggingPoint = false;
 		usedSelection = false;
@@ -90,8 +94,7 @@ public final class EditProvincesMode extends EditorMode {
 		}
 
 		if (usedSelection) {
-			selectedPointsIndices = editor.getProvince()
-					.getIntersectedPointIndices(editor.getSelection().get());
+			selectedPointsIndices = editor.getProvince().getIntersectedPointIndices(editor.getSelection().get());
 			usedSelection = false;
 		} else {
 			selectedPointsIndices = new int[0]; // to be sure there aren't gonna be any crashes
@@ -134,7 +137,6 @@ public final class EditProvincesMode extends EditorMode {
 		final String[] types = { "Deep sea", "Shallow sea", "Costal sea", "Bog", "Lowlands", "Highlands", "Mountains" };
 		if (ImGui.combo("Province type", type, types)) {
 			editor.getProvince().setType(type.get());
-			System.out.println(editor.getProvince().type);
 		}
 
 		ImGui.inputText("Name", editor.getProvince().name);
@@ -143,6 +145,10 @@ public final class EditProvincesMode extends EditorMode {
 
 		if (ImGui.button("Randomize values")) {
 			editor.getProvince().populationCount += randomizeValue(editor.getProvince().populationCount);
+		}
+
+		if (ImGui.isWindowFocused()) {
+			map.findMaxParams();
 		}
 	}
 
@@ -201,8 +207,7 @@ public final class EditProvincesMode extends EditorMode {
 		for (int i = 0; i < selectedPointsIndices.length; i += POINT_POS_STRIDE) {
 			editor.getProvince().deletePointWithoutRefresh(selectedPointsIndices[i] / 2);
 
-			// we have to offset the indices of the array as we have modified the array
-			// itself
+			// we have to offset the indices of the array as we have modified the array itself
 			for (int j = i + POINT_POS_STRIDE; j < selectedPointsIndices.length; j += POINT_POS_STRIDE) {
 				// no need to update the odd indices as they come in x;y pairs (might actually
 				// only wanna store the actual ids of the points)

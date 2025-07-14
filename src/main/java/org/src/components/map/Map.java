@@ -14,12 +14,15 @@ public final class Map extends Component {
 
 	private int lendProvince;
 
+	private int maxPopulation;
+
 	public Map() {
 		this.renderer = new MapRenderer(this);
 
 		this.provinces = new ArrayList<>();
 
 		this.lendProvince = 0;
+		this.maxPopulation = -1;
 	}
 
 	public Province createProvince() {
@@ -73,6 +76,10 @@ public final class Map extends Component {
 		renderer.setProvinceColor(hwich, color);
 	}
 
+	public void setDisplayMode(final DisplayMode mode) {
+		renderer.setDisplayMode(mode);
+	}
+
 	public void setDrawProvinceFillings(boolean drawProvinceFillings) {
 		renderer.setDrawProvinceFillings(drawProvinceFillings);
 	}
@@ -111,6 +118,16 @@ public final class Map extends Component {
 
 	public void toggleDrawProvinceFillings() {
 		renderer.setDrawProvinceFillings(!renderer.getDrawProvinceFillings());
+	}
+
+	public void findMaxParams() {
+		for (final Province province: provinces) {
+			maxPopulation = Math.max(maxPopulation, province.populationCount);
+		}
+	}
+
+	public int getMaxPopulation() {
+		return maxPopulation;
 	}
 
 	@Override

@@ -16,7 +16,6 @@ import static org.src.core.helper.Consts.POINT_POS_STRIDE;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class Editor extends Component {
-	// TODO: divide the editor into classes containing each mode
 	private final EditorWindow editorWindow;
 	private final EditorCursor editorCursor;
 
@@ -111,6 +110,10 @@ public final class Editor extends Component {
 
 		this.editorWindow = new EditorWindow(this, map);
 		this.editorCursor = new EditorCursor();
+
+		// that's a wacky way of not having any province selected when starting the editor
+		map.addProvinceToMesh(this.editedProvince);
+		this.editedProvince = map.createProvince();
 
 		InputManager.addMouseLeftPressCallback(leftCallback);
 		InputManager.addMouseMoveCallback(moveCallback);
@@ -282,15 +285,19 @@ public final class Editor extends Component {
 	public void setMode(final EEditorMode mode) {
 		switch (mode) {
 			case ADD_PROVINCES:
+				if (isModeAddProvinces()) { break; }
 				this.mode = new AddProvincesMode(this, map);
 				break;
 			case EDIT_PROVINCES:
-				this.mode = new EditProvincesMode(this);
+				if (isModeEditProvinces()) { break; }
+				this.mode = new EditProvincesMode(this, map);
 				break;
 			case SELECT_PROVINCES:
+				if (isModeSelectProvinces()) { break; }
 				this.mode = new SelectProvincesMode(this, map);
 				break;
 			case PAINT_PROVINCES:
+				if (isModePaintProvinces()) { break; }
 				this.mode = new PaintProvincesMode(this, map);
 		}
 	}

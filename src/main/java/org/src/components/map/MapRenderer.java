@@ -131,13 +131,38 @@ public final class MapRenderer {
 		provinceMesh.regenerate();
 	}
 
+	// this does not change the display mode of the editor's currently held province
+	public void setDisplayMode(final DisplayMode mode) {
+		for (int i = 0; i < map.getProvinces().size(); i++) {
+			if (i == map.getLendProvinceId()) { continue; } // because the province is not in the mesh
+
+			float[] color = new float[3];
+
+			switch (mode) {
+				case POPULATION:
+					System.out.println("got here");
+					color[0] = Math.max(map.getProvince(i).populationCount / (float) map.getMaxPopulation(), 0.1f);
+					color[1] = 0.1f;
+					color[2] = 0.1f;
+					break;
+				case TERRAIN:
+					map.getProvince(i).shallowSetColor(map.getProvince(i).getColor());
+					break;
+			}
+
+			setProvinceColor(map.getProvince(i), color);
+		}
+	}
+
 	public void setProvinceColor(final Province province, final float[] color) {
-		province.setColor(color);
+		province.shallowSetColor(color);
+
 		for (int i = province.getVertexIndex(); i < province.getVertexIndex() + province.getVertices().length; i += province.getVertexStride()) {
 			provinceMesh.vertices[i + 2] = color[0];
 			provinceMesh.vertices[i + 3] = color[1];
 			provinceMesh.vertices[i + 4] = color[2];
 		}
+
 		provinceMesh.regenerate();
 	}
 

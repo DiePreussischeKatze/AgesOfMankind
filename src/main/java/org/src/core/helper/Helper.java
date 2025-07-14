@@ -83,6 +83,14 @@ public final class Helper {
 		return string.toString();
 	}
 
+	public static int rand(final int min, final int max) {
+		return (int) (Math.random() * (max - min)) + min;
+	}
+
+	public static double rand(final double min, final double max) {
+		return Math.random() * (max - min) + min;
+	}
+
 	public static boolean insideRange(final int value, final int max, final int min) {
 		return value >= min && value <= max;
 	}
