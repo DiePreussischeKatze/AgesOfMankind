@@ -2,13 +2,14 @@ package org.src.components.ui.editor;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
+import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
+import org.src.core.helper.Consts;
 import org.src.core.helper.ShaderID;
 import org.src.core.managers.ShaderManager;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
-import static org.src.components.ui.editor.EditorWindow.inputInt;
 import static org.src.components.ui.editor.EditorWindow.randomizeValue;
 import static org.src.core.helper.Consts.POINT_POS_STRIDE;
 
@@ -18,9 +19,13 @@ public final class EditProvincesMode extends EditorMode {
 
 	private int[] selectedPointsIndices;
 
+	private boolean didInputSomething;
+
 	private final Map map;
 	EditProvincesMode(final Editor editor, final Map map) {
 		super(editor);
+
+		editor.deselectPoint();
 
 		this.map = map;
 
@@ -114,7 +119,14 @@ public final class EditProvincesMode extends EditorMode {
 	}
 
 	@Override
+	public void dispose() {
+
+	}
+
+	@Override
 	public void renderGui() {
+		didInputSomething = false;
+
 		if (ImGui.button("Delete selected point (x)") && editor.isAnyPointSelected()) {
 			editor.getProvince().deletePoint(editor.getHeldPointIndex());
 			editor.deselectPoint();
@@ -134,9 +146,11 @@ public final class EditProvincesMode extends EditorMode {
 		//}
 
 		final ImInt type = new ImInt(editor.getProvince().type.ordinal());
-		final String[] types = { "Deep sea", "Shallow sea", "Costal sea", "Bog", "Lowlands", "Highlands", "Mountains" };
-		if (ImGui.combo("Province type", type, types)) {
-			editor.getProvince().setType(type.get());
+
+		if (map.getDisplayMode() == DisplayMode.TERRAIN) {
+			if (ImGui.combo("Province type", type, Consts.PROVINCE_TYPE_STRINGS)) {
+				editor.getProvince().setType(type.get());
+			}
 		}
 
 		ImGui.inputText("Name", editor.getProvince().name);
@@ -145,11 +159,23 @@ public final class EditProvincesMode extends EditorMode {
 
 		if (ImGui.button("Randomize values")) {
 			editor.getProvince().populationCount += randomizeValue(editor.getProvince().populationCount);
+
+			didInputSomething = true;
 		}
 
-		if (ImGui.isWindowFocused()) {
+		if (didInputSomething) {
 			map.findMaxParams();
+			editor.changeMapDisplay(map.getDisplayMode());
 		}
+	}
+
+	private int inputInt(final String label, final int value) {
+		final ImInt i = new ImInt(value);
+		if (ImGui.inputInt(label, i, 0)) {
+			didInputSomething = true;
+			return i.get();
+		}
+		return value;
 	}
 
 	@Override
@@ -159,6 +185,11 @@ public final class EditProvincesMode extends EditorMode {
 
 	@Override
 	public void draw() {
+		drawHighlight();
+		drawSelected();
+	}
+
+	private void drawHighlight() {
 		final int i = editor.getProvince().isInAnyPoint(editor.getAdjustedPos().x, editor.getAdjustedPos().y);
 
 		if (i == -1 || i == editor.getHeldPointIndex()) { return; }
@@ -171,7 +202,9 @@ public final class EditProvincesMode extends EditorMode {
 		);
 		ShaderManager.get(ShaderID.EDITOR).setFloat3("color", 1f, 0.8f, 0.2f);
 		editor.getCursor().getBoxMesh().draw();
+	}
 
+	private void drawSelected() {
 		if (!editor.isAnyPointSelected() || editor.getProvince().getPointsPoses().length == 0) { return; }
 
 		// TODO: Find the cause
@@ -200,6 +233,7 @@ public final class EditProvincesMode extends EditorMode {
 		}
 
 		editor.getProvince().refreshMesh();
+		editor.getProvince().refreshMaxPoints();
 		editor.lookForNeighbors();
 	}
 
@@ -209,8 +243,7 @@ public final class EditProvincesMode extends EditorMode {
 
 			// we have to offset the indices of the array as we have modified the array itself
 			for (int j = i + POINT_POS_STRIDE; j < selectedPointsIndices.length; j += POINT_POS_STRIDE) {
-				// no need to update the odd indices as they come in x;y pairs (might actually
-				// only wanna store the actual ids of the points)
+				// no need to update the odd indices as they come in x;y pairs (might actually only wanna store the actual ids of the points)
 				selectedPointsIndices[j] -= POINT_POS_STRIDE;
 			}
 		}

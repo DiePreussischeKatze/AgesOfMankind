@@ -1,11 +1,13 @@
 package org.src.components.ui.editor;
 
 import imgui.ImGui;
+import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import org.joml.Vector2f;
 import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
 import org.src.components.province.Province;
+import org.src.components.province.ProvinceType;
 import org.src.core.helper.Consts;
 import org.src.core.helper.Rect2D;
 import org.src.core.helper.ShaderID;
@@ -18,29 +20,20 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_COLOR;
-import static org.src.components.ui.editor.EditorWindow.inputDouble;
 
 import static org.src.components.ui.editor.EditorWindow.randomizeValue;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class PaintProvincesMode extends EditorMode {
 
-	private Rect2D brushSize;
-	private Mesh boxMesh;
+	private final Rect2D brushSize;
+	private final Mesh boxMesh;
 
 	private float brushGrowth;
 
 	private boolean mousePressed;
 
-	private double SETValue;
-	private double ADDValue;
-
-	private ImInt paramID;
-
-	private String[] params = {
-		"Population count",
-		"Elevation"
-	};
+	private ProvinceType provinceType;
 
 	private PaintingMode mode;
 
@@ -49,16 +42,18 @@ public final class PaintProvincesMode extends EditorMode {
 		super(editor);
 		this.map = map;
 
+		editor.deselectPoint();
+
 		this.brushGrowth = 0;
 		this.mousePressed = false;
-		paramID = new ImInt();
 
-		this.SETValue = this.ADDValue = 0;
 		this.mode = PaintingMode.ADD;
+		this.provinceType = ProvinceType.DEEP_SEA;
 
-		this.boxMesh = new Mesh(new byte[]{2});
+		this.boxMesh = new Mesh(new byte[] { 2 });
 		this.boxMesh.indices = Consts.RECT_INDICES;
 		this.brushSize = new Rect2D(editor.getAdjustedPos().x - 0.01f, editor.getAdjustedPos().y - 0.01f, 0.02f, 0.02f);
+		updateMesh();
 
 		editor.getSelection().setEnabled(false);
 	}
@@ -134,28 +129,29 @@ public final class PaintProvincesMode extends EditorMode {
 			randomizeValues();
 		}
 
-		if (ImGui.combo("Edited param", paramID, params)) {
-			changeMapDisplay();
-		}
+		editor.setPaintADDValue(inputDouble("ADD value", editor.getPaintADDValue()));
+		editor.setPaintSETValue(inputDouble("SET value", editor.getPaintSETValue()));
 
-		ADDValue = inputDouble("ADD value", ADDValue);
-		SETValue = inputDouble("SET value", SETValue);
+		if (map.getDisplayMode() == DisplayMode.TERRAIN) {
+			final ImInt terrainType = new ImInt(this.provinceType.ordinal());
+
+			if (ImGui.combo("Terrain type", terrainType, Consts.PROVINCE_TYPE_STRINGS)) {
+				provinceType = ProvinceType.values()[terrainType.get()];
+			}
+		}
 	}
 
-	public void changeMapDisplay() {
-		editor.getProvince().shallowSetColor(
-				new float[] {
-						Math.max(editor.getProvince().populationCount / (float) map.getMaxPopulation(), 0.1f),
-						0.1f,
-						0.1f
-				}
-		);
-
-		map.setDisplayMode(DisplayMode.POPULATION);
+	private double inputDouble(final String label, final double value) {
+		final ImDouble d = new ImDouble(value);
+		if (ImGui.inputDouble(label, d, 0)) {
+			return d.get();
+		}
+		return value;
 	}
 
 	@Override
 	public void update(final double deltaTime) {
+		System.out.println(map.getDisplayMode());
 		updateBrush(deltaTime);
 		if (mousePressed) { paint(deltaTime); }
 	}
@@ -176,8 +172,10 @@ public final class PaintProvincesMode extends EditorMode {
 			}
 		}
 
+		// more like updating the display
+		editor.changeMapDisplay(map.getDisplayMode());
+
 		if (mode == PaintingMode.SET) {
-			changeMapDisplay();
 			// this will not be efficient
 			for (final Province province: map.getProvinces()) {
 				if (!province.intersectsMaxRectangle(brushSize)) { continue; } // some optimization
@@ -190,14 +188,13 @@ public final class PaintProvincesMode extends EditorMode {
 				}
 			}
 		} else if (mode == PaintingMode.ADD) {
-			changeMapDisplay();
 
 			for (final Province province: map.getProvinces()) {
 				if (!province.intersectsMaxRectangle(brushSize)) { continue; }
 
 				for (final Vector2f point: points) {
 					if (province.isInProvince(point)) {
-						ADDEditParam(province);
+						ADDEditParam(province, deltaTime);
 						break;
 					}
 				}
@@ -222,22 +219,24 @@ public final class PaintProvincesMode extends EditorMode {
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_SRC_COLOR);
-		ShaderManager.get(ShaderID.EDITOR).bind();
-		ShaderManager.get(ShaderID.EDITOR).setFloat3("color", 1F, 1F, 1F);
+		ShaderManager.get(ShaderID.BRUSH).bind();
+		ShaderManager.get(ShaderID.BRUSH).setFloat4("color", 1F, 1F, 1F, 0.5f);
 		boxMesh.draw();
 		glDisable(GL_BLEND);
 	}
 
+	@Override
+	public void dispose() {
+		boxMesh.dispose();
+	}
+
 	// It sucks java doesn't have references
 	// TODO: Figure out how to put 'em into a single switch
-	private void ADDEditParam(final Province province) {
-		switch (params[paramID.get()].toLowerCase().trim()) {
-			case "population count":
-				province.populationCount += (int) ADDValue;
-				break;
-			case "elevation":
-				province.elevation += (int) ADDValue;
-				break;
+	private void ADDEditParam(final Province province, final double deltaTime) {
+		final double ADDValue = editor.getPaintADDValue() * deltaTime;
+		switch (map.getDisplayMode()) {
+			case POPULATION -> province.populationCount += (int) ADDValue;
+			case ELEVATION -> province.elevation += (int) ADDValue;
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
@@ -245,28 +244,15 @@ public final class PaintProvincesMode extends EditorMode {
 	}
 
 	private void SETEditParam(final Province province) {
-		switch (params[paramID.get()].toLowerCase().trim()) {
-			case "population count":
-				province.populationCount = (int) SETValue;
-				break;
-			case "elevation":
-				province.elevation = (int) SETValue;
-				break;
+		final double SETValue = editor.getPaintSETValue();
+		switch (map.getDisplayMode()) {
+			case POPULATION -> province.populationCount = (int) SETValue;
+			case ELEVATION -> province.elevation = (int) SETValue;
+			case TERRAIN -> province.setType(provinceType);
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
 		}
-	}
-
-	private float getPaintingValue(final Province province) {
-		return switch (params[paramID.get()].toLowerCase().trim()) {
-			case "population count" -> province.populationCount;
-			case "elevation" -> province.elevation;
-			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
-			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
-			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
-			default -> Float.MIN_VALUE;
-		};
 	}
 
 }

@@ -46,6 +46,8 @@ public final class Province {
 	}
 
 	public void setType(final int intType) {
+		if (ProvinceType.values()[intType] == this.type) { return; }
+
 		switch (intType) {
 			case 0: type = ProvinceType.DEEP_SEA; break;
 			case 1: type = ProvinceType.SHALLOW_SEA; break;
@@ -56,6 +58,13 @@ public final class Province {
 			case 6: type = ProvinceType.MOUNTAINS; break;
 		}
 
+		setColorToType();
+	}
+
+	public void setType(final ProvinceType type) {
+		if (this.type == type) { return; }
+
+		this.type = type;
 		setColorToType();
 	}
 
@@ -137,8 +146,7 @@ public final class Province {
 		renderer.setColor(color);
 	}
 
-	private void setColorToType() {
-		// TODO: Add some variation to the colors
+	public void setColorToType() {
 		float[] color = new float[3];
 
 		switch (type) {
@@ -151,9 +159,10 @@ public final class Province {
 			case MOUNTAINS -> color = MOUNTAINS_COLORS;
 		}
 
-		color[0] += (float) Helper.rand(-0.02, 0.02);
-		color[1] += (float) Helper.rand(-0.02, 0.02);
-		color[2] += (float) Helper.rand(-0.02, 0.02);
+		//FIXME: Figure out why this is doing a party when painting other provinces using PaintProvincesMode.java
+		//color[0] += (float) Helper.rand(-0.005, 0.005); // red isn't very prevalent
+		//color[1] += (float) Helper.rand(-0.01, 0.01);
+		//color[2] += (float) Helper.rand(-0.01, 0.01);
 
 		setColor(color);
 	}

@@ -73,14 +73,15 @@ public final class Helper {
 	 * @return The string made from individual characters of the byte buffer
 	 */
 	public static String byteBufferToString(final ByteBuffer buffer) {
-		final StringBuilder string = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 
 		for (int i = 0; i < buffer.capacity(); i++) {
 			if (buffer.get(i) == 0) { break; }
-			string.append((char)buffer.get(i));
+
+			builder.append((char) buffer.get(i));
 		}
 
-		return string.toString();
+		return builder.toString();
 	}
 
 	public static int rand(final int min, final int max) {
@@ -125,6 +126,25 @@ public final class Helper {
 		}
 
 		return array;
+	}
+
+	public static String[] addStringArrays(final String[]... stringTable) {
+		int length = 0;
+		for (final String[] stringArrays: stringTable) {
+			length += stringArrays.length;
+		}
+
+		final String[] addedStrings = new String[length];
+
+		int i = 0;
+		for (final String[] stringArrays: stringTable) {
+			for (final String string: stringArrays) {
+				addedStrings[i] = string;
+				i++;
+			}
+		}
+
+		return addedStrings;
 	}
 
 	/**
@@ -201,9 +221,7 @@ public final class Helper {
 
 	public static boolean pointTriangleIntersection(final Vector2f point, final Vector2f v0, final Vector2f v1, final Vector2f v2) {
 		return inRange(
-				triangleArea(v0, point, v1)
-						+ triangleArea(v0, point, v2)
-						+ triangleArea(v1, point, v2),
+				triangleArea(v0, point, v1) + triangleArea(v0, point, v2) + triangleArea(v1, point, v2),
 				triangleArea(v0, v1, v2),
 				0.00001f // fuck floating point comparison
 		);
@@ -261,6 +279,17 @@ public final class Helper {
 		string = string.replace("]", "");
 		string = string.replace(" ", "");
 
+		final String[] nums = string.split(",");
+		final float[] floats = new float[nums.length];
+
+		for (int i = 0; i < floats.length; i++) {
+			floats[i] = FLOAT(nums[i]);
+		}
+
+		return floats;
+	}
+
+	public static float[] FLOAT_ARR_UNSAFE(String string) {
 		final String[] nums = string.split(",");
 		final float[] floats = new float[nums.length];
 

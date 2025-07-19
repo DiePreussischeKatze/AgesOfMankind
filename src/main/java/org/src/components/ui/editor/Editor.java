@@ -2,6 +2,7 @@ package org.src.components.ui.editor;
 
 import org.joml.Vector2f;
 import org.src.components.Camera;
+import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
 import org.src.components.Selection;
 import org.src.components.province.Province;
@@ -20,6 +21,9 @@ public final class Editor extends Component {
 	private final EditorCursor editorCursor;
 
 	private EditorMode mode;
+
+	private double paintSETValue;
+	private double paintADDValue;
 
 	private final Selection selection;
 	private Camera camera;
@@ -91,6 +95,7 @@ public final class Editor extends Component {
 		mode.keyReleaseAction(key);
 	};
 
+
 	public Editor(final Camera camera, final Map map, final Selection selection) {
 		this.camera = camera;
 		this.map = map;
@@ -104,6 +109,7 @@ public final class Editor extends Component {
 
 		this.drawProvincePoints = this.drawProvinceFill = true;
 
+		this.paintADDValue = this.paintSETValue = 0.0;
 		this.heldPointIndex = -1;
 
 		this.mode = new SelectProvincesMode(this, map);
@@ -126,7 +132,7 @@ public final class Editor extends Component {
 		editedProvince = map.createProvince();
 	}
 
-	public void setEditedProvince(final Province province) {
+	public void setProvince(final Province province) {
 		editedProvince = province;
 	}
 
@@ -192,6 +198,25 @@ public final class Editor extends Component {
 		editedProvince = map.createProvince();
 	}
 
+	// this should be the preferred way of changing the display hwen using the editor
+	public void changeMapDisplay(final DisplayMode mode) {
+		final int lendProvinceID = map.getLendProvinceId();
+		map.addProvinceToMesh(map.getProvince(lendProvinceID));
+		this.editedProvince = null;
+		map.setLendProvinceID(-1);
+
+		map.setDisplayMode(mode);
+
+		this.editedProvince = map.getProvince(lendProvinceID);
+		map.takeProvinceFromMesh(this.editedProvince);
+		map.setLendProvinceID(lendProvinceID);
+
+	}
+
+	public EditorMode getMode() {
+		return this.mode;
+	}
+
 	public Province getProvince() {
 		return editedProvince;
 	}
@@ -214,7 +239,7 @@ public final class Editor extends Component {
 	}
 
 	public void deselectPoint() {
-		this.heldPointIndex = 0;
+		this.heldPointIndex = -1;
 	}
 
 	public boolean isAnyPointSelected() {
@@ -241,6 +266,22 @@ public final class Editor extends Component {
 
 	public void setValueRandomizerEnabled(boolean valueRandomizerEnabled) {
 		this.valueRandomizerEnabled = valueRandomizerEnabled;
+	}
+
+	public double getPaintSETValue() {
+		return paintSETValue;
+	}
+
+	public void setPaintSETValue(final double paintSETValue) {
+		this.paintSETValue = paintSETValue;
+	}
+
+	public double getPaintADDValue() {
+		return paintADDValue;
+	}
+
+	public void setPaintADDValue(final double paintADDValue) {
+		this.paintADDValue = paintADDValue;
 	}
 
 	public boolean getDrawFill() {
@@ -283,6 +324,7 @@ public final class Editor extends Component {
 	}
 
 	public void setMode(final EEditorMode mode) {
+		this.mode.dispose();
 		switch (mode) {
 			case ADD_PROVINCES:
 				if (isModeAddProvinces()) { break; }
@@ -299,6 +341,7 @@ public final class Editor extends Component {
 			case PAINT_PROVINCES:
 				if (isModePaintProvinces()) { break; }
 				this.mode = new PaintProvincesMode(this, map);
+				break;
 		}
 	}
 

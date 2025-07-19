@@ -134,6 +134,11 @@ public final class AddProvincesMode extends EditorMode {
 
 	}
 
+	@Override
+	public void dispose() {
+
+	}
+
 	private void addPointToProvince() {
 		if (!editor.isGridAlignmentEnabled()) {
 			editor.getProvince().addPoint(

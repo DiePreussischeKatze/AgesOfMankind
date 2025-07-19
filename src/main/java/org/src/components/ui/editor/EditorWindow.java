@@ -7,6 +7,7 @@ import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
+import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
 import org.src.components.ScenarioSaver;
 import org.src.core.main.Window;
@@ -63,7 +64,21 @@ public final class EditorWindow {
 
 		ImGui.setWindowSize(new ImVec2(ImGui.getWindowSizeX(), Window.getHeight()));
 
-		ImGui.text("Modes:");
+		final ImInt mode = new ImInt(map.getDisplayMode().ordinal());
+		final String[] modes = {
+			"Terrain",
+			"Population",
+			"Elevation",
+			"Political",
+			"Ethnicity",
+			"Demographic"
+		};
+
+		if (ImGui.combo("Map rendering mode", mode, modes)) {
+			editor.changeMapDisplay(DisplayMode.values()[mode.get()]);
+		}
+
+		ImGui.separator();
 
 		if (ImGui.selectable("Add provinces (q)", editor.isModeAddProvinces())) {
 			editor.setMode(EEditorMode.ADD_PROVINCES);
@@ -127,21 +142,6 @@ public final class EditorWindow {
 		return (int) ((float) (Math.random() - 0.5) * Editor.VALUE_RANDOMIZER_RANGE * value);
 	}
 
-	static int inputInt(final String label, final int value) {
-		final ImInt i = new ImInt(value);
-		if (ImGui.inputInt(label, i, 0)) {
-			return i.get();
-		}
-		return value;
-	}
-
-	static double inputDouble(final String label, final double value) {
-		final ImDouble d = new ImDouble(value);
-		if (ImGui.inputDouble(label, d, 0)) {
-			return d.get();
-		}
-		return value;
-	}
 
 	private void setStyle() {
 		final ImGuiStyle style = ImGui.getStyle();

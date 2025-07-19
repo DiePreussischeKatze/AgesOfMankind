@@ -3,7 +3,7 @@ package org.src.core.helper;
 public enum ShaderID {
 	// THEY HAVE TO BE IN ALPHABETICAL ORDER!
 	/* A */
-	/* B */
+	/* B */ BRUSH,
 	/* C */
 	/* D */ DEFAULT,
 	/* E */ EDITOR,

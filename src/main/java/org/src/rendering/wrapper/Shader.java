@@ -1,6 +1,7 @@
 package org.src.rendering.wrapper;
 
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.src.core.helper.Helper;
 
@@ -112,6 +113,19 @@ public final class Shader {
 
 	public void setFloat3(final String parameterName, final float[] values) {
 		glUniform3f(cache.get(parameterName), values[0], values[1], values[2]);
+	}
+
+
+	public void setFloat4(final String parameterName, final float value0, final float value1, final float value2, final float value3) {
+		glUniform4f(cache.get(parameterName), value0, value1, value2, value3);
+	}
+
+	public void setFloat4(final String parameterName, final Vector4f values) {
+		glUniform4f(cache.get(parameterName), values.x, values.y, values.z, values.w);
+	}
+
+	public void setFloat4(final String parameterName, final float[] values) {
+		glUniform4f(cache.get(parameterName), values[0], values[1], values[2], values[3]);
 	}
 
 }

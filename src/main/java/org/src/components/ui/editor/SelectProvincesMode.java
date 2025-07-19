@@ -37,6 +37,11 @@ public final class SelectProvincesMode extends EditorMode {
 	}
 
 	@Override
+	public void dispose() {
+
+	}
+
+	@Override
 	public void mouseLeftPressedAction() {
 		editor.deselectPoint(); // for safety measures
 
@@ -52,9 +57,9 @@ public final class SelectProvincesMode extends EditorMode {
 			return;
 		}
 
-		map.setLendProvince(map.findProvinceIndexUnderPoint(editor.getAdjustedPos()));
+		map.setLendProvinceID(map.findProvinceIndexUnderPoint(editor.getAdjustedPos()));
 		map.addProvinceToMesh(editor.getProvince());
-		editor.setEditedProvince(nullCheck);
+		editor.setProvince(nullCheck);
 		map.takeProvinceFromMesh(nullCheck);
 
 		if (shouldChangeToEditProvincesOnClick) {

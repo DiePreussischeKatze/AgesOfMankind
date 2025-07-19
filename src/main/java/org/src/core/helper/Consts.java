@@ -20,4 +20,14 @@ public final class Consts {
 	public static final float[] LOWLANDS_COLORS = { 0.1f, 0.6f, 0.1f };
 	public static final float[] HIGHLANDS_COLORS = { 0.1f, 0.9f, 0.1f };
 	public static final float[] MOUNTAINS_COLORS = { 0.5f, 0.5f, 0.5f };
+
+	public static final String[] PROVINCE_TYPE_STRINGS = {
+		"Deep sea",
+		"Shallow sea",
+		"Costal sea",
+		"Bog",
+		"Lowlands",
+		"Highlands",
+		"Mountains"
+	};
 }

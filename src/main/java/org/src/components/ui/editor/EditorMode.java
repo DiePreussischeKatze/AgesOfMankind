@@ -23,5 +23,6 @@ public abstract class EditorMode {
 	public abstract void draw();
 
 	public abstract void update(final double deltaTime);
+	public abstract void dispose();
 
 }

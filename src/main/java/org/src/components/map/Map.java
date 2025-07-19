@@ -15,6 +15,7 @@ public final class Map extends Component {
 	private int lendProvince;
 
 	private int maxPopulation;
+	private int maxElevation;
 
 	public Map() {
 		this.renderer = new MapRenderer(this);
@@ -84,7 +85,7 @@ public final class Map extends Component {
 		renderer.setDrawProvinceFillings(drawProvinceFillings);
 	}
 
-	public void setLendProvince(int lendProvince) {
+	public void setLendProvinceID(int lendProvince) {
 		this.lendProvince = lendProvince;
 	}
 
@@ -121,13 +122,25 @@ public final class Map extends Component {
 	}
 
 	public void findMaxParams() {
+		maxPopulation = -1;
+		maxElevation = -1;
+
 		for (final Province province: provinces) {
 			maxPopulation = Math.max(maxPopulation, province.populationCount);
+			maxElevation = Math.max(maxElevation, province.elevation);
 		}
 	}
 
 	public int getMaxPopulation() {
 		return maxPopulation;
+	}
+
+	public int getMaxElevation() {
+		return maxElevation;
+	}
+
+	public DisplayMode getDisplayMode() {
+		return renderer.getDisplayMode();
 	}
 
 	@Override

@@ -10,6 +10,8 @@ import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 import org.src.rendering.wrapper.ShaderStorage;
 
+import java.util.Arrays;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_BLEND;
@@ -30,6 +32,8 @@ public final class MapRenderer {
 	private final Mesh boxMesh;
 
 	private final ShaderStorage pointShaderStorage;
+
+	private DisplayMode displayMode;
 
 	private float[] provincesPoints;
 
@@ -56,6 +60,8 @@ public final class MapRenderer {
 
 		this.drawProvinceFillings = true;
 		this.drawProvincePoints = false;
+
+		this.displayMode = DisplayMode.POLITICAL;
 
 		this.indicesOffset = 0;
 
@@ -133,6 +139,8 @@ public final class MapRenderer {
 
 	// this does not change the display mode of the editor's currently held province
 	public void setDisplayMode(final DisplayMode mode) {
+		this.displayMode = mode;
+
 		for (int i = 0; i < map.getProvinces().size(); i++) {
 			if (i == map.getLendProvinceId()) { continue; } // because the province is not in the mesh
 
@@ -140,14 +148,20 @@ public final class MapRenderer {
 
 			switch (mode) {
 				case POPULATION:
-					System.out.println("got here");
 					color[0] = Math.max(map.getProvince(i).populationCount / (float) map.getMaxPopulation(), 0.1f);
 					color[1] = 0.1f;
 					color[2] = 0.1f;
 					break;
 				case TERRAIN:
-					map.getProvince(i).shallowSetColor(map.getProvince(i).getColor());
+					map.getProvince(i).setColorToType();
+					color = map.getProvince(i).getColor();
 					break;
+				case ELEVATION:
+					color[0] = 0.1f;
+					color[1] = 0.1f;
+					color[2] = Math.max(map.getProvince(i).elevation / (float) map.getMaxElevation(), 0.1f);
+					break;
+				// We'll add the rest when we'll have countries
 			}
 
 			setProvinceColor(map.getProvince(i), color);
@@ -206,6 +220,10 @@ public final class MapRenderer {
 
 	public boolean getDrawProvinceFillings() {
 		return drawProvinceFillings;
+	}
+
+	public DisplayMode getDisplayMode() {
+		return this.displayMode;
 	}
 
 	public void setDrawProvincePoints(boolean drawProvincePoints) {
