@@ -186,7 +186,6 @@ public final class ProvinceRenderer {
 				new float[] { averagePosition.x, averagePosition.y });
 		mesh.vertices = Helper.insertElementsToFloatArray(mesh.vertices, index * mesh.getStrideSum(),
 				new float[] { averagePosition.x, averagePosition.y, color[0], color[1], color[2] });
-		System.out.println(pointsPoses.length);
 		refreshMesh();
 		// there's no need for refreshMaxPoints()
 	}

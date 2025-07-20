@@ -1,5 +1,9 @@
 package org.src.core.main;
 
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -10,7 +14,7 @@ import org.src.core.helper.Scene;
 import org.src.core.managers.InputManager;
 import org.src.core.managers.ShaderManager;
 import org.src.rendering.Renderer;
-import org.src.scenes.GameScene;
+import org.src.scenes.EditorScene;
 
 import java.nio.*;
 import java.util.Objects;
@@ -36,6 +40,9 @@ public final class Window {
 	private final Loop loop;
 	private final Renderer renderer;
 	private Scene currentScene;
+
+	private static ImGuiImplGl3 imGuiImplGl3;
+	private static ImGuiImplGlfw imGuiImplGlfw;
 
 	Window() {
 		// flip the loaded textures vertically so they agree with opengl's texture coordinates
@@ -119,12 +126,23 @@ public final class Window {
 
 		glfwGetWindowSize(id, winWidth, winHeight);
 
+		imGuiImplGl3 = new ImGuiImplGl3();
+		imGuiImplGlfw = new ImGuiImplGlfw();
+
+		ImGui.createContext();
+
+		imGuiImplGlfw.init(Window.getId(), true);
+		imGuiImplGl3.init();
+
+		final ImGuiIO imGuiIO = ImGui.getIO();
+		imGuiIO.getFonts().addFontDefault();
+
 		width = winWidth[0];
 		height = winHeight[0];
 
 		ShaderManager.loadShaders("res/shaders/");
 
-		this.currentScene = new GameScene();
+		this.currentScene = new EditorScene();
 
 		this.loop = new Loop(currentScene);
 		this.renderer = new Renderer(currentScene);
@@ -143,6 +161,9 @@ public final class Window {
 	private void die() {
 		currentScene.dispose();
 		Callbacks.glfwFreeCallbacks(Window.getId());
+		imGuiImplGlfw.shutdown();
+		imGuiImplGl3.shutdown();
+		ImGui.destroyContext();
 		glfwDestroyWindow(id);
 		glfwTerminate();
 	}
@@ -177,6 +198,20 @@ public final class Window {
 				thenFpsCounter = now;
 			}
 		}
+	}
+
+	public static void uiBegin() {
+		glDisable(GL_MULTISAMPLE);
+		imGuiImplGl3.newFrame();
+		imGuiImplGlfw.newFrame();
+		ImGui.newFrame();
+	}
+
+	public static void uiEnd() {
+		ImGui.render();
+		imGuiImplGl3.renderDrawData(ImGui.getDrawData());
+		ImGui.endFrame();
+		glEnable(GL_MULTISAMPLE);
 	}
 
 	public void changeScene(final Scene newScene) {

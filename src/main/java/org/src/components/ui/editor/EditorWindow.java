@@ -3,27 +3,15 @@ package org.src.components.ui.editor;
 import imgui.*;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.gl3.ImGuiImplGl3;
-import imgui.glfw.ImGuiImplGlfw;
-import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
 import org.src.components.ScenarioSaver;
 import org.src.core.main.Window;
 
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
-
 public final class EditorWindow {
 
 	private final ScenarioSaver scenarioSaver;
-
-	private final ImGuiImplGl3 imGuiImplGl3;
-	private final ImGuiImplGlfw imGuiImplGlfw;
-
-	private final ImGuiIO imGuiIO;
 
 	private final Editor editor;
 	private final Map map;
@@ -34,31 +22,13 @@ public final class EditorWindow {
 		this.scenarioSaver = new ScenarioSaver(this.map);
 		scenarioSaver.loadScenario();
 
-		this.imGuiImplGl3 = new ImGuiImplGl3();
-		this.imGuiImplGlfw = new ImGuiImplGlfw();
-
-		ImGui.createContext();
-
-		this.imGuiImplGlfw.init(Window.getId(), true);
-		this.imGuiImplGl3.init();
-
-		imGuiIO = ImGui.getIO();
-		imGuiIO.getFonts().addFontDefault();
 		setStyle();
 	}
 
-	public void dispose() {
-		this.imGuiImplGlfw.shutdown();
-		this.imGuiImplGl3.shutdown();
-		ImGui.destroyContext();
-	}
-
 	public void draw() {
-		glDisable(GL_MULTISAMPLE);
-		imGuiImplGl3.newFrame();
-		imGuiImplGlfw.newFrame();
 
-		ImGui.newFrame();
+		Window.uiBegin();
+
 		//ImGui.showStyleEditor();
 		ImGui.begin("Editor", ImGuiWindowFlags.NoMove);
 
@@ -132,10 +102,6 @@ public final class EditorWindow {
 
 		ImGui.end();
 
-		ImGui.render();
-		this.imGuiImplGl3.renderDrawData(ImGui.getDrawData());
-		ImGui.endFrame();
-		glEnable(GL_MULTISAMPLE);
 	}
 
 	static int randomizeValue(final int value) {
@@ -143,7 +109,7 @@ public final class EditorWindow {
 	}
 
 
-	private void setStyle() {
+	private static void setStyle() {
 		final ImGuiStyle style = ImGui.getStyle();
 		style.setCircleTessellationMaxError(5);
 		style.setFrameRounding(12);

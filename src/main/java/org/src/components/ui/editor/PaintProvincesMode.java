@@ -11,6 +11,7 @@ import org.src.components.province.ProvinceType;
 import org.src.core.helper.Consts;
 import org.src.core.helper.Rect2D;
 import org.src.core.helper.ShaderID;
+import org.src.core.main.PerfTimer;
 import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 
@@ -151,7 +152,6 @@ public final class PaintProvincesMode extends EditorMode {
 
 	@Override
 	public void update(final double deltaTime) {
-		System.out.println(map.getDisplayMode());
 		updateBrush(deltaTime);
 		if (mousePressed) { paint(deltaTime); }
 	}
@@ -174,7 +174,6 @@ public final class PaintProvincesMode extends EditorMode {
 
 		// more like updating the display
 		editor.changeMapDisplay(map.getDisplayMode());
-
 		if (mode == PaintingMode.SET) {
 			// this will not be efficient
 			for (final Province province: map.getProvinces()) {

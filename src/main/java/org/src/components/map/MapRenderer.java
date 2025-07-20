@@ -7,8 +7,10 @@ import org.src.core.helper.Helper;
 import org.src.core.helper.ShaderID;
 import org.src.core.managers.InputManager;
 import org.src.core.managers.ShaderManager;
+import org.src.core.managers.TextureManager;
 import org.src.rendering.wrapper.Mesh;
 import org.src.rendering.wrapper.ShaderStorage;
+import org.src.rendering.wrapper.Texture;
 
 import java.util.Arrays;
 
@@ -20,14 +22,14 @@ import static org.lwjgl.opengl.GL11.GL_SRC_COLOR;
 import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
+import static org.src.core.helper.Consts.RECT_INDICES;
 
 public final class MapRenderer {
 
 	// TODO: Divide the large textures into a bunch of small ones that can be unloaded (for the game consumes fucking 4GB)
-	// TODO: readd later when needed
-	//private final Texture[] mapOverlays;
-//
-	//private final Mesh overlayMapMesh;
+	private final Texture[] mapOverlays;
+
+	private final Mesh overlayMapMesh;
 	private final Mesh provinceMesh;
 	private final Mesh boxMesh;
 
@@ -48,9 +50,9 @@ public final class MapRenderer {
 			case GLFW_KEY_1:
 				activeOverlay = 0;
 				break;
-			case GLFW_KEY_2:
-				activeOverlay = 1;
-				break;
+			//case GLFW_KEY_2:
+			//	activeOverlay = 1;
+			//	break;
 		}
 	};
 
@@ -67,9 +69,9 @@ public final class MapRenderer {
 
 		this.provincesPoints = new float[0];
 
-		//this.mapOverlays = new Texture[2];
+		this.mapOverlays = new Texture[1];
 
-		//this.mapOverlays[0] = TextureManager.createTexture("res/images/map0.png");
+		this.mapOverlays[0] = TextureManager.createTexture("res/images/map0.png");
 		//this.mapOverlays[1] = TextureManager.createTexture("res/images/map1.jpg");
 
 		this.pointShaderStorage = new ShaderStorage(2);
@@ -80,27 +82,27 @@ public final class MapRenderer {
 
 		this.boxMesh = Helper.createPlainBoxMesh(0.0008f, 0.0008f);
 
-		//final float xSize = (float) mapOverlays[0].getWidth() / 1000;
-		//final float ySize = (float) mapOverlays[0].getHeight() / 1000;
+		final float xSize = (float) mapOverlays[0].getWidth() / 1000;
+		final float ySize = (float) mapOverlays[0].getHeight() / 1000;
 
-		//this.overlayMapMesh = new Mesh(new float[]{
-		//		xSize,  ySize, 1.0f, 1.0F,
-		//		xSize, -ySize, 1.0f, 0.0f,
-		//		-xSize, -ySize, 0.0f, 0.0f,
-		//		-xSize,  ySize, 0.0f, 1.0f,
-		//}, RECT_INDICES
-		//		,new byte[] {
-		//		2, 2
-		//});
+		this.overlayMapMesh = new Mesh(new float[]{
+				xSize,  ySize, 1.0f, 1.0F,
+				xSize, -ySize, 1.0f, 0.0f,
+				-xSize, -ySize, 0.0f, 0.0f,
+				-xSize,  ySize, 0.0f, 1.0f,
+		}, RECT_INDICES
+				,new byte[] {
+				2, 2
+		});
 
 		InputManager.addKeyPressCallback(pressCallback);
 	}
 
 	public void draw() {
-	//	mapOverlays[activeOverlay].bind();
+		mapOverlays[activeOverlay].bind();
 		ShaderManager.get(ShaderID.DEFAULT).bind();
-	//	ShaderManager.get(ShaderID.DEFAULT).setInt("tex", mapOverlays[activeOverlay].getSlot());
-	//	overlayMapMesh.draw();
+		ShaderManager.get(ShaderID.DEFAULT).setInt("tex", mapOverlays[activeOverlay].getSlot());
+		overlayMapMesh.draw();
 
 		if (drawProvincePoints) {
 			ShaderManager.get(ShaderID.MAP_PIVOT).bind();
@@ -207,11 +209,11 @@ public final class MapRenderer {
 	public void dispose() {
 		pointShaderStorage.dispose();
 		boxMesh.dispose();
-		//overlayMapMesh.dispose();
+		overlayMapMesh.dispose();
 		provinceMesh.dispose();
-	//	for (final Texture map: mapOverlays) {
-	//		map.dispose();
-	//	}
+		for (final Texture map: mapOverlays) {
+			map.dispose();
+		}
 	}
 
 	public boolean getDrawProvincePoints() {

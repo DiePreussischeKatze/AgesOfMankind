@@ -171,23 +171,29 @@ public final class Editor extends Component {
 
 	public void lookForNeighbors() {
 		editedProvince.clearNeighbors();
-		// this looks unoptimized but in reality its barely called even once due to the if statement
 		for (final Province province: map.getProvinces()) {
 			if (province == editedProvince ||
 				province.hasNeighbor(editedProvince) ||
 				!province.getMaxPoints().intersects(editedProvince.getMaxPoints())
 			) { continue; }
 
-			for (int i = 0; i < editedProvince.getPointsPoses().length; i += POINT_POS_STRIDE) {
-				for (int j = 0; j < province.getPointsPoses().length; j += POINT_POS_STRIDE) {
-					if (editedProvince.getPointsPoses()[i] == province.getPointsPoses()[j]
-						&& editedProvince.getPointsPoses()[i + 1] == province.getPointsPoses()[j + 1]) {
-						editedProvince.addNeighbor(province);
-						province.addNeighbor(editedProvince);
-					}
+			if (checkIfNeighbor(province)) {
+				editedProvince.addNeighbor(province);
+				province.addNeighbor(editedProvince);
+			}
+		}
+	}
+
+	private boolean checkIfNeighbor(final Province province) {
+		for (int i = 0; i < editedProvince.getPointsPoses().length; i += POINT_POS_STRIDE) {
+			for (int j = 0; j < province.getPointsPoses().length; j += POINT_POS_STRIDE) {
+				if (editedProvince.getPointsPoses()[i] == province.getPointsPoses()[j]
+					&& editedProvince.getPointsPoses()[i + 1] == province.getPointsPoses()[j + 1]) {
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
 	public void newProvince() {
