@@ -61,7 +61,7 @@ public final class MapRenderer {
 		this.drawProvinceFillings = true;
 		this.drawProvincePoints = false;
 
-		this.displayMode = DisplayMode.POLITICAL;
+		this.displayMode = DisplayMode.POPULATION;
 
 		this.indicesOffset = 0;
 

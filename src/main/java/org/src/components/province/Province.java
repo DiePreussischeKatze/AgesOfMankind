@@ -2,7 +2,6 @@ package org.src.components.province;
 
 import imgui.type.ImString;
 import org.joml.Vector2f;
-import org.src.core.helper.Helper;
 import org.src.core.helper.Rect2D;
 
 import java.util.HashSet;
@@ -49,13 +48,13 @@ public final class Province {
 		if (ProvinceType.values()[intType] == this.type) { return; }
 
 		switch (intType) {
-			case 0: type = ProvinceType.DEEP_SEA; break;
-			case 1: type = ProvinceType.SHALLOW_SEA; break;
-			case 2: type = ProvinceType.COSTAL_SEA; break;
-			case 3: type = ProvinceType.BOG; break;
-			case 4: type = ProvinceType.LOWLANDS; break;
-			case 5: type = ProvinceType.HIGHLANDS; break;
-			case 6: type = ProvinceType.MOUNTAINS; break;
+			case 0 -> type = ProvinceType.DEEP_SEA;
+			case 1 -> type = ProvinceType.SHALLOW_SEA;
+			case 2 -> type = ProvinceType.COSTAL_SEA;
+			case 3 -> type = ProvinceType.BOG;
+			case 4 -> type = ProvinceType.LOWLANDS;
+			case 5 -> type = ProvinceType.HIGHLANDS;
+			case 6 -> type = ProvinceType.MOUNTAINS;
 		}
 
 		setColorToType();
@@ -169,6 +168,30 @@ public final class Province {
 
 	public void shallowSetColor(final float[] color) {
 		renderer.shallowSetColor(color);
+	}
+
+	public String getTypeString() {
+		return switch (type) {
+			case MOUNTAINS -> "Mountains";
+			case DEEP_SEA -> "Deep sea";
+			case SHALLOW_SEA -> "Shallow sea";
+			case COSTAL_SEA -> "Costal sea";
+			case BOG -> "Bog";
+			case LOWLANDS -> "Lowlands";
+			case HIGHLANDS -> "Highlands";
+		};
+	}
+
+	public void setType(final String type) {
+		switch (type) {
+			case "Mountains" -> this.type = ProvinceType.MOUNTAINS;
+			case "Deep sea" -> this.type = ProvinceType.DEEP_SEA;
+			case "Shallow sea" -> this.type = ProvinceType.SHALLOW_SEA;
+			case "Costal sea" -> this.type = ProvinceType.COSTAL_SEA;
+			case "Bog" -> this.type = ProvinceType.BOG;
+			case "Lowlands" -> this.type = ProvinceType.LOWLANDS;
+			case "Highlands" -> this.type = ProvinceType.HIGHLANDS;
+		}
 	}
 
 	/**
