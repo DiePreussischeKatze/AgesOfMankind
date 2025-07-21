@@ -33,6 +33,7 @@ public final class EditorWindow {
 		ImGui.begin("Editor", ImGuiWindowFlags.NoMove);
 
 		ImGui.setWindowSize(new ImVec2(ImGui.getWindowSizeX(), Window.getHeight()));
+		ImGui.setWindowPos(0, 0);
 
 		final ImInt mode = new ImInt(map.getDisplayMode().ordinal());
 		final String[] modes = {
