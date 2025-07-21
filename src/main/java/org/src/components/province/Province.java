@@ -145,6 +145,10 @@ public final class Province {
 		renderer.setColor(color);
 	}
 
+	public void setColorValue(final float[] color) {
+		renderer.setColorValue(color);
+	}
+
 	public void setColorToType() {
 		float[] color = new float[3];
 

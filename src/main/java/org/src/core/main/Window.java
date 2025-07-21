@@ -138,6 +138,7 @@ public final class Window {
 		imGuiIO.getFonts().addFontDefault();
 
 		imGuiIO.setWantSaveIniSettings(false);
+		imGuiIO.setIniFilename("");
 
 		width = winWidth[0];
 		height = winHeight[0];

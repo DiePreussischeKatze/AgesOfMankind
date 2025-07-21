@@ -174,6 +174,7 @@ public final class PaintProvincesMode extends EditorMode {
 
 		// more like updating the display
 		editor.changeMapDisplay(map.getDisplayMode());
+
 		if (mode == PaintingMode.SET) {
 			// this will not be efficient
 			for (final Province province: map.getProvinces()) {

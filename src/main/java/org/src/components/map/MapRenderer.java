@@ -5,6 +5,7 @@ import org.src.core.callbacks.KeyPressCallback;
 import org.src.core.helper.Consts;
 import org.src.core.helper.Helper;
 import org.src.core.helper.ShaderID;
+import org.src.core.main.PerfTimer;
 import org.src.core.managers.InputManager;
 import org.src.core.managers.ShaderManager;
 import org.src.core.managers.TextureManager;
@@ -21,6 +22,7 @@ import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_COLOR;
 import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 import static org.src.core.helper.Consts.RECT_INDICES;
 
@@ -78,7 +80,7 @@ public final class MapRenderer {
 
 		this.provinceMesh = new Mesh(new byte[] {
 				2, 3
-		});
+		}, GL_DYNAMIC_DRAW);
 
 		this.boxMesh = Helper.createPlainBoxMesh(0.0008f, 0.0008f);
 
@@ -142,11 +144,9 @@ public final class MapRenderer {
 	// this does not change the display mode of the editor's currently held province
 	public void setDisplayMode(final DisplayMode mode) {
 		this.displayMode = mode;
-
+		float[] color = new float[3];
 		for (int i = 0; i < map.getProvinces().size(); i++) {
 			if (i == map.getLendProvinceId()) { continue; } // because the province is not in the mesh
-
-			float[] color = new float[3];
 
 			switch (mode) {
 				case POPULATION:
@@ -168,18 +168,17 @@ public final class MapRenderer {
 
 			setProvinceColor(map.getProvince(i), color);
 		}
+		provinceMesh.regenerateGeometry();
 	}
 
 	public void setProvinceColor(final Province province, final float[] color) {
-		province.shallowSetColor(color);
+		province.setColor(color);
 
 		for (int i = province.getVertexIndex(); i < province.getVertexIndex() + province.getVertices().length; i += province.getVertexStride()) {
 			provinceMesh.vertices[i + 2] = color[0];
 			provinceMesh.vertices[i + 3] = color[1];
 			provinceMesh.vertices[i + 4] = color[2];
 		}
-
-		provinceMesh.regenerate();
 	}
 
 	public void takeProvinceFromMesh(final Province province) {

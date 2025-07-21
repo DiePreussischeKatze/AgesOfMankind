@@ -8,6 +8,7 @@ import org.src.components.Selection;
 import org.src.components.province.Province;
 import org.src.core.callbacks.*;
 import org.src.core.helper.*;
+import org.src.core.main.PerfTimer;
 import org.src.core.main.Window;
 import org.src.core.managers.InputManager;
 
@@ -206,16 +207,22 @@ public final class Editor extends Component {
 
 	// this should be the preferred way of changing the display hwen using the editor
 	public void changeMapDisplay(final DisplayMode mode) {
-		final int lendProvinceID = map.getLendProvinceId();
-		map.addProvinceToMesh(map.getProvince(lendProvinceID));
-		this.editedProvince = null;
-		map.setLendProvinceID(-1);
+		int lastLendProvince = map.getLendProvinceId();
+		int lendProvinceID = 0;
+		if (lastLendProvince != map.getProvinces().size() -1) {
+			lendProvinceID = map.getLendProvinceId();
+			map.addProvinceToMesh(map.getProvince(lendProvinceID));
+			this.editedProvince = null;
+			map.setLendProvinceID(-1);
+		}
 
 		map.setDisplayMode(mode);
 
-		this.editedProvince = map.getProvince(lendProvinceID);
-		map.takeProvinceFromMesh(this.editedProvince);
-		map.setLendProvinceID(lendProvinceID);
+		if (lastLendProvince != map.getProvinces().size() -1) {
+			this.editedProvince = map.getProvince(lendProvinceID);
+			map.takeProvinceFromMesh(this.editedProvince);
+			map.setLendProvinceID(lendProvinceID);
+		}
 
 	}
 
@@ -347,6 +354,7 @@ public final class Editor extends Component {
 			case PAINT_PROVINCES:
 				if (isModePaintProvinces()) { break; }
 				this.mode = new PaintProvincesMode(this, map);
+				newProvince();
 				break;
 		}
 	}

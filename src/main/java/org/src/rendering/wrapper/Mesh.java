@@ -10,6 +10,7 @@ public final class Mesh {
 	private int ebo;
 	private int vao;
 	private int vbo;
+	private int usage;
 
 	private byte[] offsets;
 
@@ -21,7 +22,7 @@ public final class Mesh {
 		this.vertices = vertices;
 		this.offsets = offsets;
 		this.indices = indices;
-
+		this.usage = GL_STATIC_DRAW;
 		init();
 	}
 
@@ -29,6 +30,15 @@ public final class Mesh {
 		this.offsets = offsets;
 		this.vertices = new float[0];
 		this.indices = new int[0];
+		this.usage = GL_STATIC_DRAW;
+		init();
+	}
+
+	public Mesh(final byte[] offsets, final int usage) {
+		this.offsets = offsets;
+		this.vertices = new float[0];
+		this.indices = new int[0];
+		this.usage = usage;
 		init();
 	}
 
@@ -36,7 +46,7 @@ public final class Mesh {
 		this.offsets = offsets;
 		this.indices = indices;
 		this.vertices = new float[0];
-
+		this.usage = GL_STATIC_DRAW;
 		init();
 	}
 
@@ -49,8 +59,8 @@ public final class Mesh {
 	}
 
 	public void regenerate() {
-		glNamedBufferData(vbo, BufferUtils.createFloatBuffer(vertices.length).put(vertices).flip(), GL_STATIC_DRAW);
-		glNamedBufferData(ebo, BufferUtils.createIntBuffer(indices.length).put(indices).flip(), GL_STATIC_DRAW);
+		glNamedBufferData(vbo, BufferUtils.createFloatBuffer(vertices.length).put(vertices).flip(), usage);
+		glNamedBufferData(ebo, BufferUtils.createIntBuffer(indices.length).put(indices).flip(), usage);
 
 		int offsetSum = getStrideSum();
 
@@ -66,6 +76,11 @@ public final class Mesh {
 			currentPointer += offsets[i];
 		}
 
+	}
+
+	public void regenerateGeometry() {
+		glNamedBufferData(vbo, BufferUtils.createFloatBuffer(vertices.length).put(vertices).flip(), usage);
+		glNamedBufferData(ebo, BufferUtils.createIntBuffer(indices.length).put(indices).flip(), usage);
 	}
 
 	public void draw() {

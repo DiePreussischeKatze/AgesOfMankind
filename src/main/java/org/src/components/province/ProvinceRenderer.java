@@ -10,6 +10,7 @@ import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 import org.src.rendering.wrapper.ShaderStorage;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,8 +55,8 @@ public final class ProvinceRenderer {
 
 		this.vertexIndex = indicesIndex = -1;
 
-		this.minPos = new Vector2f();
-		this.maxPos = new Vector2f();
+		this.minPos = new Vector2f(Float.MAX_VALUE, Float.MAX_VALUE);
+		this.maxPos = new Vector2f(Float.MIN_VALUE, Float.MIN_VALUE);
 
 		this.shaderStorage = new ShaderStorage(1);
 		this.mesh = new Mesh(new byte[] { 2, 3 });
@@ -368,6 +369,12 @@ public final class ProvinceRenderer {
 
 	public Rect2D getMaxPoints() {
 		return new Rect2D(minPos.x, minPos.y, maxPos.x - minPos.x, maxPos.y - minPos.y);
+	}
+
+	public void setColorValue(final float[] color) {
+		this.color[0] = color[0];
+		this.color[1] = color[1];
+		this.color[2] = color[2];
 	}
 
 }
