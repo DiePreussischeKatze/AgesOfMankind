@@ -29,7 +29,7 @@ public final class EditorWindow {
 
 		Window.uiBegin();
 
-		//ImGui.showStyleEditor();
+		ImGui.showStyleEditor();
 		ImGui.begin("Editor", ImGuiWindowFlags.NoMove);
 
 		ImGui.setWindowSize(new ImVec2(ImGui.getWindowSizeX(), Window.getHeight()));
