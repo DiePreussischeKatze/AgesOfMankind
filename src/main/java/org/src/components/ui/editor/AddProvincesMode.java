@@ -3,24 +3,31 @@ package org.src.components.ui.editor;
 import imgui.ImGui;
 import org.src.components.map.Map;
 import org.src.components.province.Province;
+import org.src.core.helper.Consts;
 import org.src.core.helper.Rect2D;
+import org.src.core.managers.InputManager;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class AddProvincesMode extends EditorMode {
 
 	private final Rect2D magnetHitbox;
+	private final Rect2D autofillHitbox;
 
 	private final float MAGNET_SIZE = 0.001f;
 	private final int GRID_ALIGN = 500;
 
 	private final Map map;
 
+	private boolean autofill;
+
 	public AddProvincesMode(final Editor editor, final Map map) {
 		super(editor);
 		this.map = map;
 
 		this.magnetHitbox = new Rect2D();
+		this.autofillHitbox = new Rect2D();
+		this.autofill = false;
 
 		editor.getSelection().setEnabled(false);
 	}
@@ -65,6 +72,25 @@ public final class AddProvincesMode extends EditorMode {
 				final int index = province.getFirstIntersectedPointIndex(magnetHitbox);
 				if (index != -1) {
 					editor.updateCursorPos(province.getPointsPoses()[index], province.getPointsPoses()[index + 1]);
+				}
+			}
+		}
+
+		if (autofill) {
+			// TODO: render this
+			this.autofillHitbox.setDimensions(editor.getAdjustedPos().x - MAGNET_SIZE * 2, editor.getAdjustedPos().y - MAGNET_SIZE * 2, MAGNET_SIZE * 4, MAGNET_SIZE * 4);
+
+			if (InputManager.leftPressed()) {
+				for (final Province province: map.getProvinces()) {
+					if (province == editor.getProvince()) { continue; }
+
+					final int index = province.getFirstIntersectedPointIndex(autofillHitbox);
+					if (index != -1) {
+						editor.updateCursorPos(province.getPointsPoses()[index], province.getPointsPoses()[index + 1]);
+						editor.deselectPoint();
+						addPointToProvince();
+						editor.lookForNeighbors();
+					}
 				}
 			}
 		}
@@ -121,6 +147,10 @@ public final class AddProvincesMode extends EditorMode {
 
 		if (ImGui.checkbox("Toggle grid alignment", editor.isGridAlignmentEnabled())) {
 			editor.toggleGridAlignment();
+		}
+
+		if (ImGui.checkbox("Auto-add existing points", autofill)) {
+			this.autofill = !this.autofill;
 		}
 	}
 
