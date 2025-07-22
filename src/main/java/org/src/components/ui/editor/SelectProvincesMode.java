@@ -3,6 +3,7 @@ package org.src.components.ui.editor;
 import imgui.ImGui;
 import org.src.components.map.Map;
 import org.src.components.province.Province;
+import org.src.rendering.wrapper.Mesh;
 
 import static org.src.components.ui.editor.EEditorMode.EDIT_PROVINCES;
 
@@ -11,11 +12,14 @@ public final class SelectProvincesMode extends EditorMode {
 
 	private boolean shouldChangeToEditProvincesOnClick;
 
+	private final GhostProvince ghostProvince;
+
 	SelectProvincesMode(final Editor editor, final Map map) {
 		super(editor);
 
 		this.map = map;
 		this.shouldChangeToEditProvincesOnClick = true;
+		this.ghostProvince = new GhostProvince();
 
 		// kinda ironic
 		editor.getSelection().setEnabled(false);
@@ -23,7 +27,6 @@ public final class SelectProvincesMode extends EditorMode {
 
 	@Override
 	public void keyPressAction(int key) {
-
 	}
 
 	@Override
@@ -33,12 +36,18 @@ public final class SelectProvincesMode extends EditorMode {
 
 	@Override
 	public void mouseMovedAction() {
+		final Province highlight = map.findProvinceUnderPoint(editor.getAdjustedPos());
+		if (highlight == null) {
+			ghostProvince.changeMesh(new Mesh(new byte[] {2, 3}));
+			return;
+		}
 
+		ghostProvince.changeMesh(new Mesh(highlight.getVertices(), highlight.getIndices(), new byte[] { 2, 3}));
 	}
 
 	@Override
 	public void dispose() {
-
+		ghostProvince.dispose();
 	}
 
 	@Override
@@ -97,7 +106,7 @@ public final class SelectProvincesMode extends EditorMode {
 
 	@Override
 	public void draw() {
-
+		ghostProvince.draw();
 	}
 
 }

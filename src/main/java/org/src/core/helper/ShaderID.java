@@ -8,7 +8,7 @@ public enum ShaderID {
 	/* D */ DEFAULT,
 	/* E */ EDITOR,
 	/* F */
-	/* G */
+	/* G */ GHOST,
 	/* H */
 	/* I */
 	/* J */
