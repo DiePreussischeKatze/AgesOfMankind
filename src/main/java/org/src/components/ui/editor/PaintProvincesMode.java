@@ -11,7 +11,6 @@ import org.src.components.province.ProvinceType;
 import org.src.core.helper.Consts;
 import org.src.core.helper.Rect2D;
 import org.src.core.helper.ShaderID;
-import org.src.core.main.PerfTimer;
 import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 
@@ -38,12 +37,18 @@ public final class PaintProvincesMode extends EditorMode {
 
 	private PaintingMode mode;
 
+	private ImInt editedStateID;
+
+	private static final int NO_STATE_EDITED = -1;
+
 	private final Map map;
 	public PaintProvincesMode(final Editor editor, final Map map) {
 		super(editor);
 		this.map = map;
 
 		editor.deselectPoint();
+
+		this.editedStateID = new ImInt(NO_STATE_EDITED);
 
 		this.brushGrowth = 0;
 		this.mousePressed = false;
@@ -133,6 +138,8 @@ public final class PaintProvincesMode extends EditorMode {
 		editor.setPaintADDValue(inputDouble("ADD value", editor.getPaintADDValue()));
 		editor.setPaintSETValue(inputDouble("SET value", editor.getPaintSETValue()));
 
+		ImGui.separator();
+
 		if (map.getDisplayMode() == DisplayMode.TERRAIN) {
 			final ImInt terrainType = new ImInt(this.provinceType.ordinal());
 
@@ -140,6 +147,36 @@ public final class PaintProvincesMode extends EditorMode {
 				provinceType = ProvinceType.values()[terrainType.get()];
 			}
 		}
+
+		if (map.getDisplayMode() == DisplayMode.POLITICAL) {
+			final String[] stateNames = new String[map.getStates().size()];
+
+			for (int i = 0; i < stateNames.length; i++) {
+				// OOP in its full glory
+				stateNames[i] = map.getStates().get(i).getName().get();
+			}
+
+			ImGui.combo("States", editedStateID, stateNames);
+
+			if (editedStateID.get() != NO_STATE_EDITED && ImGui.inputText("State name", map.getStates().get(editedStateID.get()).getName())) {
+
+			}
+
+			if (ImGui.button("Add state")) {
+				map.addState();
+			}
+
+			if (editedStateID.get() != NO_STATE_EDITED && ImGui.colorPicker3("State color", map.getStates().get(editedStateID.get()).getColor())) {
+				map.getStates().get(editedStateID.get()).updateColor();
+				// update the color of the provinces in the mesh
+				for (final Province province: map.getStates().get(editedStateID.get()).getOwnedProvinces()) {
+					map.setProvinceInMeshColor(province, province.getColor());
+				}
+				map.updateMesh();
+			}
+
+		}
+
 	}
 
 	private double inputDouble(final String label, final double value) {
@@ -162,6 +199,14 @@ public final class PaintProvincesMode extends EditorMode {
 		}
 	}
 
+	private boolean isStateEdited() {
+		return editedStateID.get() != NO_STATE_EDITED;
+	}
+
+	private void unselectEditedState() {
+		editedStateID.set(NO_STATE_EDITED);
+	}
+
 	private void paint(final double deltaTime) {
 		// due to my stupid implementation we need to split the box mesh into a grid of points
 		final ArrayList<Vector2f> points = new ArrayList<>();
@@ -171,10 +216,12 @@ public final class PaintProvincesMode extends EditorMode {
 				points.add(new Vector2f(xx, yy));
 			}
 		}
-
+		//PerfTimer t1 = new PerfTimer("initial display update");
 		// more like updating the display
 		editor.changeMapDisplay(map.getDisplayMode());
+		//t1.reset();
 
+		//PerfTimer t2 = new PerfTimer("painting");
 		if (mode == PaintingMode.SET) {
 			// this will not be efficient
 			for (final Province province: map.getProvinces()) {
@@ -200,13 +247,14 @@ public final class PaintProvincesMode extends EditorMode {
 				}
 			}
 		}
+	//	t2.reset();
 		map.findMaxParams();
 	}
 
 	private void updateBrush(final double deltaTime) {
 		if (brushGrowth != 0) {
-			brushSize.setWidth((float) Math.max(brushSize.getWidth() + brushGrowth * deltaTime, 0));
-			brushSize.setHeight((float) Math.max(brushSize.getHeight() + brushGrowth * deltaTime, 0));
+			brushSize.setWidth((float) Math.max(brushSize.getWidth() + brushGrowth * deltaTime, 0.01));
+			brushSize.setHeight((float) Math.max(brushSize.getHeight() + brushGrowth * deltaTime, 0.01));
 		}
 		brushSize.setX(editor.getAdjustedPos().x);
 		brushSize.setY(editor.getAdjustedPos().y);
@@ -235,7 +283,10 @@ public final class PaintProvincesMode extends EditorMode {
 	private void ADDEditParam(final Province province, final double deltaTime) {
 		final double ADDValue = editor.getPaintADDValue() * deltaTime;
 		switch (map.getDisplayMode()) {
-			case POPULATION -> province.populationCount += (int) ADDValue;
+			case POPULATION -> {
+				if (Province.isSeaType(province)) { break; }
+				province.populationCount += (int) ADDValue;
+			}
 			case ELEVATION -> province.elevation += (int) ADDValue;
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
@@ -246,9 +297,21 @@ public final class PaintProvincesMode extends EditorMode {
 	private void SETEditParam(final Province province) {
 		final double SETValue = editor.getPaintSETValue();
 		switch (map.getDisplayMode()) {
-			case POPULATION -> province.populationCount = (int) SETValue;
+			case POPULATION -> {
+				if (Province.isSeaType(province)) { break; }
+
+				province.populationCount = (int) SETValue;
+			}
 			case ELEVATION -> province.elevation = (int) SETValue;
 			case TERRAIN -> province.setType(provinceType);
+			case POLITICAL -> {
+				if (editedStateID.get() != NO_STATE_EDITED) {
+					map.getStates().get(editedStateID.get()).addProvince(province);
+					// update the province in the mesh (we know no province is selected rn)
+					map.setProvinceInMeshColor(province, province.getColor());
+					map.updateMesh();
+				}
+			}
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!
 			// TODO: REMEMBER TO CHANGE THE OTHER SWITCH!!!!!!!!!!!!!!!!!!!

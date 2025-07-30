@@ -1,6 +1,7 @@
 package org.src.components.map;
 
 import org.src.components.province.Province;
+import org.src.components.province.ProvinceType;
 import org.src.core.callbacks.KeyPressCallback;
 import org.src.core.helper.Consts;
 import org.src.core.helper.Helper;
@@ -65,7 +66,7 @@ public final class MapRenderer {
 		this.drawProvinceFillings = true;
 		this.drawProvincePoints = false;
 
-		this.displayMode = DisplayMode.POPULATION;
+		this.displayMode = DisplayMode.POLITICAL;
 
 		this.indicesOffset = 0;
 
@@ -101,10 +102,10 @@ public final class MapRenderer {
 	}
 
 	public void draw() {
-		mapOverlays[activeOverlay].bind();
-		ShaderManager.get(ShaderID.DEFAULT).bind();
-		ShaderManager.get(ShaderID.DEFAULT).setInt("tex", mapOverlays[activeOverlay].getSlot());
-		overlayMapMesh.draw();
+		//mapOverlays[activeOverlay].bind();
+		//ShaderManager.get(ShaderID.DEFAULT).bind();
+		//ShaderManager.get(ShaderID.DEFAULT).setInt("tex", mapOverlays[activeOverlay].getSlot());
+		//overlayMapMesh.draw();
 
 		if (drawProvincePoints) {
 			ShaderManager.get(ShaderID.MAP_PIVOT).bind();
@@ -144,9 +145,11 @@ public final class MapRenderer {
 	// this does not change the display mode of the editor's currently held province
 	public void setDisplayMode(final DisplayMode mode) {
 		this.displayMode = mode;
-		float[] color = new float[3];
 		for (int i = 0; i < map.getProvinces().size(); i++) {
 			if (i == map.getLendProvinceId()) { continue; } // because the province is not in the mesh
+
+			float[] color = new float[3];
+			Arrays.fill(color, 0.0f);
 
 			switch (mode) {
 				case POPULATION:
@@ -163,11 +166,21 @@ public final class MapRenderer {
 					color[1] = 0.1f;
 					color[2] = Math.max(map.getProvince(i).elevation / (float) map.getMaxElevation(), 0.1f);
 					break;
+				case POLITICAL:
+					if (map.getProvince(i).getOwner() != null && !Province.isSeaType(map.getProvince(i))) {
+						color = map.getProvince(i).getOwner().getColor();
+					}
+					break;
 				// We'll add the rest when we'll have countries
 			}
-
+			// TODO: implement a function that wouldn't have to do this for every single province
 			setProvinceColor(map.getProvince(i), color);
 		}
+
+		provinceMesh.regenerateGeometry();
+	}
+
+	public void updateMesh() {
 		provinceMesh.regenerateGeometry();
 	}
 

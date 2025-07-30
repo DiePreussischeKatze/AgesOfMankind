@@ -1,5 +1,7 @@
 package org.src.components;
 
+import org.src.components.civilisation.State;
+import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
 import org.src.components.province.Province;
 import org.src.core.helper.Consts;
@@ -11,6 +13,8 @@ import java.util.Arrays;
 import static org.src.core.helper.Helper.INT;
 
 public final class ScenarioSaver {
+
+	private static final String NO_OWNER = "$NOWNR";
 
 	private final ArrayList<Integer> semicolonIndices;
 	private String provinceData;
@@ -26,22 +30,26 @@ public final class ScenarioSaver {
 	}
 
 	public void saveScenario() {
+		map.setDisplayMode(DisplayMode.POLITICAL); // needed for some stuff
+
 		final StringBuilder saveFile = new StringBuilder();
 		// TODO: remember when loading to not loop over the last province as it will be empty
 		for (int i = 0; i < map.getAmountOfProvinces(); i++) {
 			final Province province = map.getProvince(i);
 			saveFile
-				.append(";v:")
-				.append(Arrays.toString(province.getVertices()).replace(" ", ""))
-				.append(";n:")
-				.append(province.name)
-				.append(";p:")
-				.append(province.populationCount)
-				.append(";t:")
-				.append(province.getTypeString())
-				.append(";e:")
-				.append(province.elevation)
-				.append(";\n");
+					.append(";v:")
+					.append(Arrays.toString(province.getVertices()).replace(" ", ""))
+					.append(";n:")
+					.append(province.name)
+					.append(";p:")
+					.append(province.populationCount)
+					.append(";t:")
+					.append(province.getTypeString())
+					.append(";e:")
+					.append(province.elevation)
+					.append(";o:")
+					.append(province.getOwner() != null ? province.getOwner().getName() : NO_OWNER)
+					.append(";\n");
 		}
 
 		Helper.writeToFile("res/saves/save1.txt", saveFile.toString());
@@ -68,6 +76,7 @@ public final class ScenarioSaver {
 			loadProvinceElevation();
 			loadProvinceType();
 			loadProvincePopCount();
+			loadOwnership();
 
 			usedProvince.refreshMesh();
 			usedProvince.refreshMaxPoints();
@@ -82,6 +91,40 @@ public final class ScenarioSaver {
 			usedProvince = null;
 			// NO OTHER CODE HERE!!!
 		}
+	}
+
+	private void loadOwnership() {
+		final String ownerName = getProperty(";o:");
+
+		if (ownerName.isEmpty() || ownerName.equals(NO_OWNER)) {
+			return; // old save or no owner
+		}
+
+		State foundOwner = findOwner(ownerName);
+
+		// So an owner was found
+		if (foundOwner != null) {
+		} else {
+			map.addState(ownerName);
+			foundOwner = map.getStates().getLast();
+		}
+
+		foundOwner.changeColor(usedProvince.getColor()); // need to watch out for the order of initialization
+		foundOwner.addProvince(usedProvince);
+
+		// Get the correct color (I'll need to update this when I stop saving the color each time for every vertex
+
+
+	}
+
+	private State findOwner(final String name) {
+		for (final State owner: map.getStates()) {
+			if (owner.getName().get().equals(name)) {
+				return owner;
+			}
+		}
+
+		return null;
 	}
 
 	private void loadProvinceMeshData() {

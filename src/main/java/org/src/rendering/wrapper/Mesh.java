@@ -62,9 +62,7 @@ public final class Mesh {
 		glNamedBufferData(vbo, BufferUtils.createFloatBuffer(vertices.length).put(vertices).flip(), usage);
 		glNamedBufferData(ebo, BufferUtils.createIntBuffer(indices.length).put(indices).flip(), usage);
 
-		int offsetSum = getStrideSum();
-
-		glVertexArrayVertexBuffer(vao, 0, vbo, 0, offsetSum * Float.BYTES);
+		glVertexArrayVertexBuffer(vao, 0, vbo, 0, getStrideSum() * Float.BYTES);
 		glVertexArrayElementBuffer(vao, ebo);
 
 		int currentPointer = 0;

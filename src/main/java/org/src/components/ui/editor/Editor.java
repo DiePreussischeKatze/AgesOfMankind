@@ -216,7 +216,9 @@ public final class Editor extends Component {
 			map.setLendProvinceID(-1);
 		}
 
+		//PerfTimer t1 = new PerfTimer("display change");
 		map.setDisplayMode(mode);
+		//t1.reset();
 
 		if (lastLendProvince != map.getProvinces().size() -1) {
 			this.editedProvince = map.getProvince(lendProvinceID);

@@ -1,6 +1,7 @@
 package org.src.components.map;
 
 import org.joml.Vector2f;
+import org.src.components.civilisation.State;
 import org.src.components.province.Province;
 import org.src.core.helper.Component;
 
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 public final class Map extends Component {
 
 	private final MapRenderer renderer;
+
+	private final ArrayList<State> states;
 
 	private final ArrayList<Province> provinces;
 
@@ -21,6 +24,9 @@ public final class Map extends Component {
 		this.renderer = new MapRenderer(this);
 
 		this.provinces = new ArrayList<>();
+		this.states = new ArrayList<>();
+
+		this.states.add(new State(this, "New state" + this.states.size()));
 
 		this.lendProvince = 0;
 		this.maxPopulation = -1;
@@ -63,6 +69,14 @@ public final class Map extends Component {
 		return -1;
 	}
 
+	public void addState() {
+		states.add(new State(this, "New state" + states.size()));
+	}
+
+	public void addState(final String name) {
+		states.add(new State(this, name));
+	}
+
 	@Override
 	public void draw() {
 		renderer.draw();
@@ -73,13 +87,15 @@ public final class Map extends Component {
 		renderer.dispose();
 	}
 
-	public void setProvinceColor(final Province hwich, final float[] color) {
+	public void setProvinceInMeshColor(final Province hwich, final float[] color) {
 		renderer.setProvinceColor(hwich, color);
 	}
 
 	public void setDisplayMode(final DisplayMode mode) {
 		renderer.setDisplayMode(mode);
 	}
+
+	public void updateMesh() { renderer.updateMesh(); }
 
 	public void setDrawProvinceFillings(boolean drawProvinceFillings) {
 		renderer.setDrawProvinceFillings(drawProvinceFillings);
@@ -141,6 +157,10 @@ public final class Map extends Component {
 
 	public DisplayMode getDisplayMode() {
 		return renderer.getDisplayMode();
+	}
+
+	public ArrayList<State> getStates() {
+		return this.states;
 	}
 
 	@Override

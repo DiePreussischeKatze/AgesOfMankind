@@ -2,6 +2,7 @@ package org.src.components.province;
 
 import imgui.type.ImString;
 import org.joml.Vector2f;
+import org.src.components.civilisation.State;
 import org.src.core.helper.Rect2D;
 
 import java.util.HashSet;
@@ -9,6 +10,8 @@ import java.util.HashSet;
 import static org.src.core.helper.Consts.*;
 
 public final class Province {
+	private State owner;
+
 	private final ProvinceRenderer renderer;
 
 	private final HashSet<Province> neighbors;
@@ -37,6 +40,7 @@ public final class Province {
 
 		name = new ImString(50);
 
+		this.owner = null;
 		this.populationCount = 0;
 
 		this.type = ProvinceType.DEEP_SEA;
@@ -65,6 +69,14 @@ public final class Province {
 
 		this.type = type;
 		setColorToType();
+	}
+
+	public static boolean isSeaType(final ProvinceType type) {
+		return type == ProvinceType.DEEP_SEA || type == ProvinceType.SHALLOW_SEA || type == ProvinceType.COSTAL_SEA;
+	}
+
+	public static boolean isSeaType(final Province province) {
+		return province.type == ProvinceType.DEEP_SEA || province.type == ProvinceType.SHALLOW_SEA || province.type == ProvinceType.COSTAL_SEA;
 	}
 
 	/**
@@ -267,6 +279,15 @@ public final class Province {
 
 	public void clearNeighbors() {
 		neighbors.clear();
+	}
+
+	public State getOwner() {
+		return this.owner;
+	}
+
+	// this is expected to be only called within State.java so they do not take care of changing the color
+	public void setOwner(final State state) {
+		this.owner = state;
 	}
 
 }

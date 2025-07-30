@@ -236,7 +236,7 @@ public final class ProvinceRenderer {
 			mesh.vertices[i + 3] = color[1];
 			mesh.vertices[i + 4] = color[2];
 		}
-		mesh.regenerate();
+		mesh.regenerateGeometry();
 	}
 
 	public void shallowSetColor(final float[] color) {

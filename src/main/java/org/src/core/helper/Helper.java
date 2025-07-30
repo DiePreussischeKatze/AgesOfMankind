@@ -88,12 +88,24 @@ public final class Helper {
 		return (int) (Math.random() * (max - min)) + min;
 	}
 
-	public static double rand(final double min, final double max) {
-		return Math.random() * (max - min) + min;
+	public static float rand(final double min, final double max) {
+		return (float) (Math.random() * (max - min) + min);
 	}
 
 	public static boolean insideRange(final int value, final int max, final int min) {
 		return value >= min && value <= max;
+	}
+
+	public static float[] deepCopy(final float[] src) {
+		final float[] dest = new float[src.length];
+		System.arraycopy(src, 0, dest, 0, dest.length);
+		return dest;
+	}
+
+	public static int[] deepCopy(final int[] src) {
+		final int[] dest = new int[src.length];
+		System.arraycopy(src, 0, dest, 0, dest.length);
+		return dest;
 	}
 
 	public static boolean insideRange(final float value, final float max, final float min) {
