@@ -102,10 +102,10 @@ public final class MapRenderer {
 	}
 
 	public void draw() {
-		//mapOverlays[activeOverlay].bind();
-		//ShaderManager.get(ShaderID.DEFAULT).bind();
-		//ShaderManager.get(ShaderID.DEFAULT).setInt("tex", mapOverlays[activeOverlay].getSlot());
-		//overlayMapMesh.draw();
+		mapOverlays[activeOverlay].bind();
+		ShaderManager.get(ShaderID.DEFAULT).bind();
+		ShaderManager.get(ShaderID.DEFAULT).setInt("tex", mapOverlays[activeOverlay].getSlot());
+		overlayMapMesh.draw();
 
 		if (drawProvincePoints) {
 			ShaderManager.get(ShaderID.MAP_PIVOT).bind();
@@ -169,11 +169,13 @@ public final class MapRenderer {
 				case POLITICAL:
 					if (map.getProvince(i).getOwner() != null && !Province.isSeaType(map.getProvince(i))) {
 						color = map.getProvince(i).getOwner().getColor();
+					} else {
+						map.getProvince(i).setColorToType();
+						color = map.getProvince(i).getColor();
 					}
 					break;
-				// We'll add the rest when we'll have countries
 			}
-			// TODO: implement a function that wouldn't have to do this for every single province
+
 			setProvinceColor(map.getProvince(i), color);
 		}
 

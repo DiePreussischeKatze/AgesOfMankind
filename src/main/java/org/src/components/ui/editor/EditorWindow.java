@@ -31,7 +31,10 @@ public final class EditorWindow {
 
 		ImGui.begin("Editor", ImGuiWindowFlags.NoMove);
 
-		ImGui.setWindowSize(new ImVec2(Math.max(400, ImGui.getWindowSizeX()), Window.getHeight()));
+		if (Window.getWidth() - 100 > 299) {
+			ImGui.setWindowSize(new ImVec2(Math.clamp(ImGui.getWindowSizeX(), 300, Window.getWidth() - 100), Window.getHeight()));
+		}
+
 		ImGui.setWindowPos(0, 0);
 
 		final ImInt mode = new ImInt(map.getDisplayMode().ordinal());

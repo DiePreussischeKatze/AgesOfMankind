@@ -30,6 +30,7 @@ public final class ScenarioSaver {
 	}
 
 	public void saveScenario() {
+		DisplayMode previous = map.getDisplayMode();
 		map.setDisplayMode(DisplayMode.POLITICAL); // needed for some stuff
 
 		final StringBuilder saveFile = new StringBuilder();
@@ -53,6 +54,8 @@ public final class ScenarioSaver {
 		}
 
 		Helper.writeToFile("res/saves/save1.txt", saveFile.toString());
+
+		map.setDisplayMode(previous);
 	}
 
 	public void loadScenario() {

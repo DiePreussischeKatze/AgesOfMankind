@@ -1,6 +1,9 @@
 package org.src.components.ui.editor;
 
 import imgui.ImGui;
+import imgui.ImGuiStyle;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import org.joml.Vector2f;
@@ -9,8 +12,10 @@ import org.src.components.map.Map;
 import org.src.components.province.Province;
 import org.src.components.province.ProvinceType;
 import org.src.core.helper.Consts;
+import org.src.core.helper.Helper;
 import org.src.core.helper.Rect2D;
 import org.src.core.helper.ShaderID;
+import org.src.core.managers.InputManager;
 import org.src.core.managers.ShaderManager;
 import org.src.rendering.wrapper.Mesh;
 
@@ -22,6 +27,7 @@ import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_COLOR;
 
 import static org.src.components.ui.editor.EditorWindow.randomizeValue;
+import static org.src.core.helper.Helper.deepCopy;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class PaintProvincesMode extends EditorMode {
@@ -32,6 +38,7 @@ public final class PaintProvincesMode extends EditorMode {
 	private float brushGrowth;
 
 	private boolean mousePressed;
+	private boolean shouldDrawHelperWindow;
 
 	private ProvinceType provinceType;
 
@@ -52,6 +59,7 @@ public final class PaintProvincesMode extends EditorMode {
 
 		this.brushGrowth = 0;
 		this.mousePressed = false;
+		this.shouldDrawHelperWindow = true;
 
 		this.mode = PaintingMode.ADD;
 		this.provinceType = ProvinceType.DEEP_SEA;
@@ -131,6 +139,12 @@ public final class PaintProvincesMode extends EditorMode {
 
 		ImGui.separator();
 
+		if (ImGui.checkbox("Should draw stats window", shouldDrawHelperWindow)) {
+			shouldDrawHelperWindow = !shouldDrawHelperWindow;
+		}
+
+		ImGui.separator();
+
 		if (ImGui.button("Randomize values")) {
 			randomizeValues();
 		}
@@ -162,6 +176,8 @@ public final class PaintProvincesMode extends EditorMode {
 
 			}
 
+			if (editedStateID.get() != NO_STATE_EDITED) { ImGui.text("Province count: " + map.getStates().get(editedStateID.get()).getOwnedProvinces().size()); }
+
 			if (ImGui.button("Add state")) {
 				map.addState();
 			}
@@ -177,6 +193,25 @@ public final class PaintProvincesMode extends EditorMode {
 
 		}
 
+		drawHelperWindow();
+	}
+
+	private void drawHelperWindow() {
+		if (!shouldDrawHelperWindow) { return; }
+		final Province describedProvince = map.findProvinceUnderPoint(editor.getAdjustedPos());
+		if (describedProvince == null) { return; }
+		if (Helper.isInImGuiWindow()) { return; }
+		ImGui.begin("Stats", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs);
+
+		ImGui.setWindowPos(InputManager.getMouseX() + 10, InputManager.getMouseY() - ImGui.getWindowHeight() - 10);
+		ImGui.setWindowFocus("Editor");
+
+		ImGui.text("Pop: " + describedProvince.populationCount);
+		ImGui.text("Type: " + describedProvince.type);
+		ImGui.text("Owner: " + (describedProvince.getOwner() == null ? "None" : describedProvince.getOwner().getName()));
+
+
+		ImGui.end();
 	}
 
 	private double inputDouble(final String label, final double value) {
@@ -211,8 +246,8 @@ public final class PaintProvincesMode extends EditorMode {
 		// due to my stupid implementation we need to split the box mesh into a grid of points
 		final ArrayList<Vector2f> points = new ArrayList<>();
 		// First time I ever did a for loop on a float (looks a bit cursed)
-		for (float xx = brushSize.getX() - brushSize.getWidth(); xx < brushSize.getX() + brushSize.getWidth(); xx += 0.002f) {
-			for (float yy = brushSize.getY() - brushSize.getHeight(); yy < brushSize.getY() + brushSize.getHeight(); yy += 0.002f) {
+		for (float xx = brushSize.getX() - brushSize.getWidth(); xx <= brushSize.getX() + brushSize.getWidth(); xx += 0.002f) {
+			for (float yy = brushSize.getY() - brushSize.getHeight(); yy <= brushSize.getY() + brushSize.getHeight(); yy += 0.002f) {
 				points.add(new Vector2f(xx, yy));
 			}
 		}
@@ -253,8 +288,8 @@ public final class PaintProvincesMode extends EditorMode {
 
 	private void updateBrush(final double deltaTime) {
 		if (brushGrowth != 0) {
-			brushSize.setWidth((float) Math.max(brushSize.getWidth() + brushGrowth * deltaTime, 0.01));
-			brushSize.setHeight((float) Math.max(brushSize.getHeight() + brushGrowth * deltaTime, 0.01));
+			brushSize.setWidth((float) Math.max(brushSize.getWidth() + brushGrowth * deltaTime, 0.0001));
+			brushSize.setHeight((float) Math.max(brushSize.getHeight() + brushGrowth * deltaTime, 0.0001));
 		}
 		brushSize.setX(editor.getAdjustedPos().x);
 		brushSize.setY(editor.getAdjustedPos().y);

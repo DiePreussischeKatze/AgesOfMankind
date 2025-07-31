@@ -26,8 +26,6 @@ public final class Map extends Component {
 		this.provinces = new ArrayList<>();
 		this.states = new ArrayList<>();
 
-		this.states.add(new State(this, "New state" + this.states.size()));
-
 		this.lendProvince = 0;
 		this.maxPopulation = -1;
 	}
