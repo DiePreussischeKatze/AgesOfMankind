@@ -112,10 +112,10 @@ public final class MapRenderer {
 	}
 
 	public void draw() {
-		mapOverlays[activeOverlay].bind();
-		ShaderManager.get(ShaderID.DEFAULT).bind();
-		ShaderManager.get(ShaderID.DEFAULT).setInt("tex", mapOverlays[activeOverlay].getSlot());
-		overlayMapMesh.draw();
+		//mapOverlays[activeOverlay].bind();
+		//ShaderManager.get(ShaderID.DEFAULT).bind();
+		//ShaderManager.get(ShaderID.DEFAULT).setInt("tex", mapOverlays[activeOverlay].getSlot());
+		//overlayMapMesh.draw();
 
 		if (drawProvincePoints) {
 			ShaderManager.get(ShaderID.MAP_PIVOT).bind();
@@ -257,11 +257,12 @@ public final class MapRenderer {
 
 		final ArrayList<Float> vertices = new ArrayList<>();
 		final ArrayList<Integer> indices = new ArrayList<>();
-		final ArrayList<Integer> stopPoints = new ArrayList<>();
 
 		int indicesIndex = 0;
 		//final Province province = map.getProvince(150);
 		for (final Province province: map.getProvinces()) {
+			if (Province.isSeaType(province)) { continue; }
+
 			int i = 0;
 			for (; i < province.getPointsPoses().length - Consts.POINT_POS_STRIDE; i += Consts.POINT_POS_STRIDE) {
 
@@ -288,31 +289,44 @@ public final class MapRenderer {
 
 				vertices.add(province.getPointsPoses()[i + 2] - offset.x);
 				vertices.add(province.getPointsPoses()[i + 3] - offset.y);
+				// kinda a shitty solution but it works
+				// I mean like we don't strive for performance anyway, this is gonna be disabled in the editor n' it's a one time bake
+				if (i != province.getPointsPoses().length - 4) {
+					indices.add(indicesIndex + 2);
+					indices.add(indicesIndex + 1);
+					indices.add(indicesIndex + 3);
 
+					// first triangle
+					indices.add(indicesIndex);
+					indices.add(indicesIndex + 1); // important
+					indices.add(indicesIndex + 2);
+
+					indicesIndex += 2;
+
+					indices.add(indicesIndex + 2);
+					indices.add(indicesIndex + 1);
+					indices.add(indicesIndex + 3);
+
+					// first triangle
+					indices.add(indicesIndex);
+					indices.add(indicesIndex + 1); // important
+					indices.add(indicesIndex + 2);
+
+					indicesIndex += 2;
+				} else {
+					indices.add(indicesIndex + 2);
+					indices.add(indicesIndex + 1);
+					indices.add(indicesIndex + 3);
+
+					// first triangle
+					indices.add(indicesIndex);
+					indices.add(indicesIndex + 1); // important
+					indices.add(indicesIndex + 2);
+
+					indicesIndex += 4;
+				}
 			}
 
-			stopPoints.add(i);
-
-		}
-		System.out.println(vertices);
-
-		// i + 8 and indicesIndex + 6 = grid effect
-		for (int i = 0; i < vertices.size(); i+=4) {
-
-			indices.add(indicesIndex + 2);
-			indices.add(indicesIndex + 1);
-			indices.add(indicesIndex + 3);
-
-			// first triangle
-			indices.add(indicesIndex);
-			indices.add(indicesIndex + 1); // important
-			indices.add(indicesIndex + 2);
-
-			//indices.add(indicesIndex);
-			//indices.add(indicesIndex + 1);
-			//indices.add(indicesIndex + 3);
-
-			indicesIndex += 2;
 		}
 
 		this.borderMesh.vertices = FLOAT_ARR(vertices);
