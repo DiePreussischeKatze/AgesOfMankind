@@ -1,5 +1,6 @@
 package org.src.components.map;
 
+import org.joml.Vector2f;
 import org.src.components.province.Province;
 import org.src.components.province.ProvinceType;
 import org.src.core.callbacks.KeyPressCallback;
@@ -14,6 +15,7 @@ import org.src.rendering.wrapper.Mesh;
 import org.src.rendering.wrapper.ShaderStorage;
 import org.src.rendering.wrapper.Texture;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -26,6 +28,8 @@ import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 import static org.src.core.helper.Consts.RECT_INDICES;
+import static org.src.core.helper.Helper.FLOAT_ARR;
+import static org.src.core.helper.Helper.INT_ARR;
 
 public final class MapRenderer {
 
@@ -35,6 +39,7 @@ public final class MapRenderer {
 	private final Mesh overlayMapMesh;
 	private final Mesh provinceMesh;
 	private final Mesh boxMesh;
+	private final Mesh borderMesh;
 
 	private final ShaderStorage pointShaderStorage;
 
@@ -52,6 +57,9 @@ public final class MapRenderer {
 		switch (key) {
 			case GLFW_KEY_1:
 				activeOverlay = 0;
+				break;
+			case GLFW_KEY_Y:
+				bakeBorders();
 				break;
 			//case GLFW_KEY_2:
 			//	activeOverlay = 1;
@@ -74,7 +82,7 @@ public final class MapRenderer {
 
 		this.mapOverlays = new Texture[1];
 
-		this.mapOverlays[0] = TextureManager.createTexture("res/images/map0.png");
+		this.mapOverlays[0] = TextureManager.createTexture("res/images/map1.jpg");
 		//this.mapOverlays[1] = TextureManager.createTexture("res/images/map1.jpg");
 
 		this.pointShaderStorage = new ShaderStorage(2);
@@ -82,6 +90,8 @@ public final class MapRenderer {
 		this.provinceMesh = new Mesh(new byte[] {
 				2, 3
 		}, GL_DYNAMIC_DRAW);
+
+		this.borderMesh = new Mesh(new byte[] { 2 });
 
 		this.boxMesh = Helper.createPlainBoxMesh(0.0008f, 0.0008f);
 
@@ -121,6 +131,9 @@ public final class MapRenderer {
 			provinceMesh.draw();
 			glDisable(GL_BLEND);
 		}
+
+		ShaderManager.get(ShaderID.BORDER).bind();
+		borderMesh.draw();
 	}
 
 	public void addProvinceToMesh(final Province province) {
@@ -169,6 +182,15 @@ public final class MapRenderer {
 				case POLITICAL:
 					if (map.getProvince(i).getOwner() != null && !Province.isSeaType(map.getProvince(i))) {
 						color = map.getProvince(i).getOwner().getColor();
+					} else {
+						map.getProvince(i).setColorToType();
+						color = map.getProvince(i).getColor();
+					}
+					break;
+				case ETHNICITY:
+					if (!Province.isSeaType(map.getProvince(i))) {
+						// Actual ethnicity color
+
 					} else {
 						map.getProvince(i).setColorToType();
 						color = map.getProvince(i).getColor();
@@ -228,6 +250,75 @@ public final class MapRenderer {
 		for (final Texture map: mapOverlays) {
 			map.dispose();
 		}
+	}
+
+	public void bakeBorders() {
+		this.borderMesh.clear();
+
+		final ArrayList<Float> vertices = new ArrayList<>();
+		final ArrayList<Integer> indices = new ArrayList<>();
+		final ArrayList<Integer> stopPoints = new ArrayList<>();
+
+		int indicesIndex = 0;
+		//final Province province = map.getProvince(150);
+		for (final Province province: map.getProvinces()) {
+			int i = 0;
+			for (; i < province.getPointsPoses().length - Consts.POINT_POS_STRIDE; i += Consts.POINT_POS_STRIDE) {
+
+				// find the slope of the line connecting the two points
+				final float angle = (float) Math.atan2(
+							province.getPointsPoses()[i + Consts.POINT_POS_STRIDE] - province.getPointsPoses()[i],
+							province.getPointsPoses()[i + Consts.POINT_POS_STRIDE + 1] - province.getPointsPoses()[i + 1]
+				);
+
+				final Vector2f offset = new Vector2f(
+						(float) Math.sin(angle + (Math.PI / 2)) * 0.001f,
+						(float) Math.cos(angle + (Math.PI / 2)) * 0.001f
+				);
+
+				// DO NOT CHANGE THE ORDER!!!!!
+				vertices.add(province.getPointsPoses()[i] + offset.x);
+				vertices.add(province.getPointsPoses()[i + 1] + offset.y);
+				// DO NOT CHANGE THE ORDER!!!!!
+				vertices.add(province.getPointsPoses()[i] - offset.x);
+				vertices.add(province.getPointsPoses()[i + 1] - offset.y);
+
+				vertices.add(province.getPointsPoses()[i + 2] + offset.x);
+				vertices.add(province.getPointsPoses()[i + 3] + offset.y);
+
+				vertices.add(province.getPointsPoses()[i + 2] - offset.x);
+				vertices.add(province.getPointsPoses()[i + 3] - offset.y);
+
+			}
+
+			stopPoints.add(i);
+
+		}
+		System.out.println(vertices);
+
+		// i + 8 and indicesIndex + 6 = grid effect
+		for (int i = 0; i < vertices.size(); i+=4) {
+
+			indices.add(indicesIndex + 2);
+			indices.add(indicesIndex + 1);
+			indices.add(indicesIndex + 3);
+
+			// first triangle
+			indices.add(indicesIndex);
+			indices.add(indicesIndex + 1); // important
+			indices.add(indicesIndex + 2);
+
+			//indices.add(indicesIndex);
+			//indices.add(indicesIndex + 1);
+			//indices.add(indicesIndex + 3);
+
+			indicesIndex += 2;
+		}
+
+		this.borderMesh.vertices = FLOAT_ARR(vertices);
+		this.borderMesh.indices = INT_ARR(indices);
+
+		this.borderMesh.regenerate();
 	}
 
 	public boolean getDrawProvincePoints() {

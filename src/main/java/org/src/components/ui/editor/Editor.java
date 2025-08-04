@@ -5,6 +5,7 @@ import org.src.components.Camera;
 import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
 import org.src.components.Selection;
+import org.src.components.province.Ethnicity;
 import org.src.components.province.Province;
 import org.src.core.callbacks.*;
 import org.src.core.helper.*;
@@ -160,7 +161,6 @@ public final class Editor extends Component {
 	@Override
 	public void draw() {
 		editedProvince.drawAlone(drawProvincePoints, drawProvinceFill);
-
 		mode.draw();
 		editorWindow.draw();
 	}

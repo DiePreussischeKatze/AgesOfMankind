@@ -101,6 +101,29 @@ public final class Helper {
 		System.arraycopy(src, 0, dest, 0, dest.length);
 		return dest;
 	}
+	// TODO: make use of them when I add my own gui as "dear" imgui will not render it for me as i'd like
+	public static String readableSTR(final int value) {
+		final StringBuilder strValue = new StringBuilder(STR(value));
+
+		for (int i = strValue.length() - 3; i > 0; i -= 3) {
+			// I don't care this is inefficient
+			strValue.insert(i, ',');
+		}
+
+		return strValue.toString();
+	}
+
+	public static String readableSTR(final float value) {
+		final StringBuilder strValue = new StringBuilder(readableSTR((int)value));
+
+		strValue.append(value - (int) value);
+
+		return strValue.toString();
+	}
+
+	//public static String prefixSTR(final int value) {
+	//
+	//}
 
 	public static int[] deepCopy(final int[] src) {
 		final int[] dest = new int[src.length];
@@ -133,6 +156,16 @@ public final class Helper {
 
 	public static int[] INT_ARR(final ArrayList<Integer> arrayList) {
 		final int[] array = new int[arrayList.size()];
+		for (int i = 0; i < array.length; i++) {
+			array[i] = arrayList.get(i);
+		}
+
+		return array;
+	}
+
+	public static float[] FLOAT_ARR(final ArrayList<Float> arrayList) {
+		final float[] array = new float[arrayList.size()];
+
 		for (int i = 0; i < array.length; i++) {
 			array[i] = arrayList.get(i);
 		}

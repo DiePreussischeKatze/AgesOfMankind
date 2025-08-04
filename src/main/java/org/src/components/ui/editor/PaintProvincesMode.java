@@ -3,10 +3,12 @@ package org.src.components.ui.editor;
 import imgui.ImGui;
 import imgui.ImGuiStyle;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import org.joml.Vector2f;
+import org.src.components.civilisation.State;
 import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
 import org.src.components.province.Province;
@@ -55,7 +57,7 @@ public final class PaintProvincesMode extends EditorMode {
 
 		editor.deselectPoint();
 
-		this.editedStateID = new ImInt(NO_STATE_EDITED);
+		this.editedStateID = new ImInt(0);
 
 		this.brushGrowth = 0;
 		this.mousePressed = false;
@@ -172,20 +174,21 @@ public final class PaintProvincesMode extends EditorMode {
 
 			ImGui.combo("States", editedStateID, stateNames);
 
-			if (editedStateID.get() != NO_STATE_EDITED && ImGui.inputText("State name", map.getStates().get(editedStateID.get()).getName())) {
+			final State currentState = map.getStates().get(editedStateID.get());
 
-			}
+			ImGui.inputText("State name", currentState.getName());
 
-			if (editedStateID.get() != NO_STATE_EDITED) { ImGui.text("Province count: " + map.getStates().get(editedStateID.get()).getOwnedProvinces().size()); }
+			ImGui.text("Province count: " + currentState.getOwnedProvinces().size());
+			ImGui.text("Population: " + currentState.getPopulation());
 
 			if (ImGui.button("Add state")) {
 				map.addState();
 			}
 
-			if (editedStateID.get() != NO_STATE_EDITED && ImGui.colorPicker3("State color", map.getStates().get(editedStateID.get()).getColor())) {
-				map.getStates().get(editedStateID.get()).updateColor();
+			if (ImGui.colorPicker3("State color", currentState.getColor())) {
+				currentState.updateColor();
 				// update the color of the provinces in the mesh
-				for (final Province province: map.getStates().get(editedStateID.get()).getOwnedProvinces()) {
+				for (final Province province: currentState.getOwnedProvinces()) {
 					map.setProvinceInMeshColor(province, province.getColor());
 				}
 				map.updateMesh();
@@ -201,15 +204,20 @@ public final class PaintProvincesMode extends EditorMode {
 		final Province describedProvince = map.findProvinceUnderPoint(editor.getAdjustedPos());
 		if (describedProvince == null) { return; }
 		if (Helper.isInImGuiWindow()) { return; }
+
+		final State currentState = describedProvince.getOwner();
+
 		ImGui.begin("Stats", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs);
 
 		ImGui.setWindowPos(InputManager.getMouseX() + 10, InputManager.getMouseY() - ImGui.getWindowHeight() - 10);
 		ImGui.setWindowFocus("Editor");
 
 		ImGui.text("Pop: " + describedProvince.populationCount);
+		if (currentState != null) {
+			ImGui.text("State pop: " + currentState.getPopulation());
+		}
 		ImGui.text("Type: " + describedProvince.type);
 		ImGui.text("Owner: " + (describedProvince.getOwner() == null ? "None" : describedProvince.getOwner().getName()));
-
 
 		ImGui.end();
 	}

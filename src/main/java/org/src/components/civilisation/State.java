@@ -70,6 +70,15 @@ public final class State {
 		return name;
 	}
 
+	public int getPopulation() {
+		int population = 0;
+		for (final Province province: ownedProvinces) {
+			population += province.populationCount;
+		}
+
+		return population;
+	}
+
 	public void setName(final ImString name) {
 		this.name = name;
 	}
