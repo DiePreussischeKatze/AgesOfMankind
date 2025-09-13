@@ -9,14 +9,18 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.*;
+import org.src.core.callbacks.ResizeCallback;
 import org.src.core.helper.Config;
 import org.src.core.helper.Scene;
 import org.src.core.managers.InputManager;
 import org.src.core.managers.ShaderManager;
 import org.src.rendering.Renderer;
 import org.src.scenes.EditorScene;
+import org.src.scenes.GameplayScene;
 
 import java.nio.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -33,6 +37,8 @@ import static org.src.core.helper.Helper.*;
 public final class Window {
 	private static long id;
 
+	private static final ArrayList<ResizeCallback> resizeCallbacks;
+
 	private static float aspectRatio;
 	private static int width;
 	private static int height;
@@ -44,7 +50,12 @@ public final class Window {
 	private static ImGuiImplGl3 imGuiImplGl3;
 	private static ImGuiImplGlfw imGuiImplGlfw;
 
+	static {
+		resizeCallbacks = new ArrayList<>();
+	}
+
 	Window() {
+
 		// flip the loaded textures vertically so they agree with opengl's texture coordinates
 		stbi_set_flip_vertically_on_load(true);
 
@@ -145,7 +156,7 @@ public final class Window {
 
 		ShaderManager.loadShaders("res/shaders/");
 
-		this.currentScene = new EditorScene();
+		this.currentScene = new GameplayScene();
 
 		this.loop = new Loop(currentScene);
 		this.renderer = new Renderer(currentScene);
@@ -159,6 +170,10 @@ public final class Window {
 		aspectRatio = (float) width / (float) height;
 		Window.width = width;
 		Window.height = height;
+
+		for (final ResizeCallback callback: resizeCallbacks) {
+			callback.invoke(window, width, height);
+		}
 	}
 
 	private void die() {
@@ -220,6 +235,10 @@ public final class Window {
 	public void changeScene(final Scene newScene) {
 		currentScene.dispose();
 		currentScene = newScene;
+	}
+
+	public static void addResizeCallback(final ResizeCallback... resizeCallback) {
+		resizeCallbacks.addAll(List.of(resizeCallback));
 	}
 
 	public static float getAspectRatio() {

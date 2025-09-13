@@ -261,7 +261,7 @@ public final class Helper {
 				 xScale, -yScale,
 				-xScale, -yScale,
 				-xScale,  yScale,
-		}, RECT_INDICES, new byte[] { Consts.POINT_POS_STRIDE});
+		}, RECT_INDICES, new byte[] { Consts.POINT_POS_STRIDE });
 	}
 
 	public static boolean pointTriangleIntersection(final Vector2f point, final Vector2f v0, final Vector2f v1, final Vector2f v2) {

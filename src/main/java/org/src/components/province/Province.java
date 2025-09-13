@@ -3,6 +3,7 @@ package org.src.components.province;
 import imgui.type.ImString;
 import org.joml.Vector2f;
 import org.src.components.civilisation.State;
+import org.src.core.helper.Helper;
 import org.src.core.helper.Rect2D;
 
 import java.util.HashSet;
@@ -165,13 +166,13 @@ public final class Province {
 		float[] color = new float[3];
 
 		switch (type) {
-			case DEEP_SEA -> color = DEEP_SEA_COLORS;
-			case SHALLOW_SEA -> color = SHALLOW_SEA_COLORS;
-			case COSTAL_SEA -> color = COSTAL_SEA_COLORS;
-			case BOG -> color = BOG_COLORS;
-			case LOWLANDS -> color = LOWLANDS_COLORS;
-			case HIGHLANDS -> color = HIGHLANDS_COLORS;
-			case MOUNTAINS -> color = MOUNTAINS_COLORS;
+			case DEEP_SEA -> color = Helper.deepCopy(DEEP_SEA_COLORS);
+			case SHALLOW_SEA -> color = Helper.deepCopy(SHALLOW_SEA_COLORS);
+			case COSTAL_SEA -> color = Helper.deepCopy(COSTAL_SEA_COLORS);
+			case BOG -> color = Helper.deepCopy(BOG_COLORS);
+			case LOWLANDS -> color = Helper.deepCopy(LOWLANDS_COLORS);
+			case HIGHLANDS -> color = Helper.deepCopy(HIGHLANDS_COLORS);
+			case MOUNTAINS -> color = Helper.deepCopy(MOUNTAINS_COLORS);
 		}
 
 		//FIXME: Figure out why this is doing a party when painting other provinces using PaintProvincesMode.java

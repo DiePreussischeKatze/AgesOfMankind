@@ -37,6 +37,7 @@ public final class ScenarioSaver {
 		// TODO: remember when loading to not loop over the last province as it will be empty
 		for (int i = 0; i < map.getAmountOfProvinces(); i++) {
 			final Province province = map.getProvince(i);
+			
 			saveFile
 					.append(";v:")
 					.append(Arrays.toString(province.getVertices()).replace(" ", ""))
@@ -58,7 +59,7 @@ public final class ScenarioSaver {
 		map.setDisplayMode(previous);
 	}
 
-	public void loadScenario() {
+	public void loadScenario(final boolean loadingAsGameplayMode) {
 		// TODO: Organize into a bunch of smaller methods
 		final String[] lines = Helper.loadFileAsString("res/saves/save1.txt").split("\n");
 
@@ -89,7 +90,7 @@ public final class ScenarioSaver {
 
 			map.findMaxParams();
 
-			if (i == 0) { continue; }
+			if (i == 0 && !loadingAsGameplayMode) { continue; }
 			map.addProvinceToMesh(usedProvince);
 			usedProvince = null;
 			// NO OTHER CODE HERE!!!

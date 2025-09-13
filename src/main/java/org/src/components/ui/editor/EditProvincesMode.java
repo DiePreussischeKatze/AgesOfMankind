@@ -207,7 +207,6 @@ public final class EditProvincesMode extends EditorMode {
 	private void drawSelected() {
 		if (!editor.isAnyPointSelected() || editor.getProvince().getPointsPoses().length == 0) { return; }
 
-		// TODO: Find the cause
 		if (editor.getHeldPointIndex() >= editor.getProvince().getPointsPoses().length || editor.getHeldPointIndex() < 0) {
 			System.err.println("A crash was prevented!");
 			return;

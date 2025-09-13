@@ -33,8 +33,6 @@ public final class Editor extends Component {
 
 	private Province editedProvince;
 
-	private Vector2f adjustedPos;
-
 	private boolean gridAlignmentEnabled;
 
 	private boolean magnetEnabled;
@@ -49,8 +47,6 @@ public final class Editor extends Component {
 	public static final float VALUE_RANDOMIZER_RANGE = 0.07f; // percent
 
 	private final MouseMoveCallback moveCallback = () -> {
-		adjustedPos.x = -camera.getPos().x + camera.getAccumulatedDragDist().x + (InputManager.getCenteredMouseX() / Window.getWidth()) / camera.getPos().z * 2;
-		adjustedPos.y = -camera.getPos().y - camera.getAccumulatedDragDist().y - (InputManager.getCenteredMouseY() / Window.getWidth()) / camera.getPos().z * 2;
 		mode.mouseMovedAction();
 	};
 
@@ -103,8 +99,6 @@ public final class Editor extends Component {
 		this.map = map;
 		this.selection = selection;
 
-		this.adjustedPos = new Vector2f();
-
 		this.editedProvince = map.createProvince();
 
 		this.gridAlignmentEnabled = true;
@@ -151,7 +145,7 @@ public final class Editor extends Component {
 	}
 
 	public Vector2f getAdjustedPos() {
-		return adjustedPos;
+		return camera.getAdjustedMousePos();
 	}
 
 	public void drawModeUI() {

@@ -51,4 +51,16 @@ public final class Notification {
 		style.setColor(ImGuiCol.WindowBg, 0, 0, 0, 255);
 	}
 
+	public void setX(final int newX) {
+		this.pos.x = newX;
+	}
+
+	public void setY(final int newY) {
+		this.pos.y = newY;
+	}
+
+	public int getY() {
+		return (int) this.pos.y;
+	}
+
 }

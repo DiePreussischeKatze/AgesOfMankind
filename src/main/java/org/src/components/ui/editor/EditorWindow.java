@@ -20,7 +20,7 @@ public final class EditorWindow {
 		this.map = map;
 
 		this.scenarioSaver = new ScenarioSaver(this.map);
-		scenarioSaver.loadScenario();
+		scenarioSaver.loadScenario(false);
 
 		setStyle();
 	}
@@ -100,11 +100,12 @@ public final class EditorWindow {
 		}
 
 		if (ImGui.button("Load scenario")) {
-			scenarioSaver.loadScenario();
+			scenarioSaver.loadScenario(false);
 		}
 
 		ImGui.end();
 
+		Window.uiEnd();
 	}
 
 	static int randomizeValue(final int value) {
@@ -112,7 +113,7 @@ public final class EditorWindow {
 	}
 
 
-	private static void setStyle() {
+	public static void setStyle() {
 		final ImGuiStyle style = ImGui.getStyle();
 		style.setCircleTessellationMaxError(5);
 		style.setFrameRounding(12);

@@ -104,7 +104,6 @@ public final class Selection extends Component {
 	@Override
 	public void draw() {
 		if (!used || !movedMouse) { return; }
-
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		ShaderManager.get(ShaderID.SELECTION).bind();
@@ -114,8 +113,12 @@ public final class Selection extends Component {
 
 	public void clear() {
 		used = false;
-
 		movedMouse = false;
+
+		start.x = Float.MIN_VALUE;
+		start.y = Float.MIN_VALUE;
+		end.x = Float.MIN_VALUE;
+		end.y = Float.MIN_VALUE;
 
 		box.vertices = new float[1];
 		box.regenerate();

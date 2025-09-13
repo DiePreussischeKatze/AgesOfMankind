@@ -8,5 +8,5 @@ public enum DisplayMode {
 	ELEVATION,
 	POLITICAL,
 	ETHNICITY,
-	DEMOGRAPHIC,
+	DEMOGRAPHIC;
 }

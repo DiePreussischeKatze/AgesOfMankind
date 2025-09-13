@@ -7,6 +7,8 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
+import imgui.type.ImString;
+
 import org.joml.Vector2f;
 import org.src.components.civilisation.State;
 import org.src.components.map.DisplayMode;
@@ -177,6 +179,9 @@ public final class PaintProvincesMode extends EditorMode {
 			final State currentState = map.getStates().get(editedStateID.get());
 
 			ImGui.inputText("State name", currentState.getName());
+
+			// these characters are reserved for the scenario saver
+			currentState.getName().set(currentState.getName().get().replace(":", "").replace(";", ""), false);
 
 			ImGui.text("Province count: " + currentState.getOwnedProvinces().size());
 			ImGui.text("Population: " + currentState.getPopulation());

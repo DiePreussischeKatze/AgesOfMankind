@@ -247,6 +247,7 @@ public final class MapRenderer {
 		boxMesh.dispose();
 		overlayMapMesh.dispose();
 		provinceMesh.dispose();
+
 		for (final Texture map: mapOverlays) {
 			map.dispose();
 		}
@@ -291,6 +292,8 @@ public final class MapRenderer {
 				vertices.add(province.getPointsPoses()[i + 3] - offset.y);
 				// kinda a shitty solution but it works
 				// I mean like we don't strive for performance anyway, this is gonna be disabled in the editor n' it's a one time bake
+
+				// TODO: Make it not look as shitty
 				if (i != province.getPointsPoses().length - 4) {
 					indices.add(indicesIndex + 2);
 					indices.add(indicesIndex + 1);
@@ -298,7 +301,7 @@ public final class MapRenderer {
 
 					// first triangle
 					indices.add(indicesIndex);
-					indices.add(indicesIndex + 1); // important
+					indices.add(indicesIndex + 1);
 					indices.add(indicesIndex + 2);
 
 					indicesIndex += 2;
@@ -309,7 +312,7 @@ public final class MapRenderer {
 
 					// first triangle
 					indices.add(indicesIndex);
-					indices.add(indicesIndex + 1); // important
+					indices.add(indicesIndex + 1);
 					indices.add(indicesIndex + 2);
 
 					indicesIndex += 2;
@@ -320,7 +323,7 @@ public final class MapRenderer {
 
 					// first triangle
 					indices.add(indicesIndex);
-					indices.add(indicesIndex + 1); // important
+					indices.add(indicesIndex + 1);
 					indices.add(indicesIndex + 2);
 
 					indicesIndex += 4;

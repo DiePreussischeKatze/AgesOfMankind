@@ -77,7 +77,6 @@ public final class AddProvincesMode extends EditorMode {
 		}
 
 		if (autofill) {
-			// TODO: render this
 			this.autofillHitbox.setDimensions(editor.getAdjustedPos().x - MAGNET_SIZE * 2, editor.getAdjustedPos().y - MAGNET_SIZE * 2, MAGNET_SIZE * 4, MAGNET_SIZE * 4);
 
 			if (InputManager.leftPressed()) {

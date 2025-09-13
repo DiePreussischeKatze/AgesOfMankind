@@ -9,12 +9,15 @@ import org.src.core.main.Window;
 import org.src.rendering.wrapper.UniformBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
 import static org.lwjgl.opengl.GL31.*;
 import static org.src.core.helper.Helper.FLOAT;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class Camera extends Component {
 	private Vector3f position;
+
+	private Vector2f adjustedMousePos;
 
 	private final float RAW_SPEED = FLOAT(Config.get("cameraMoveSpeed"));
 	private final float MAX_ZOOM = FLOAT(Config.get("cameraMaxZoom"));
@@ -60,6 +63,9 @@ public final class Camera extends Component {
 	};
 
 	private final MouseMoveCallback moveCallback = () -> {
+		adjustedMousePos.x = -position.x + accumulatedDragDistance.x + (InputManager.getCenteredMouseX() / Window.getWidth()) / position.z * 2;
+		adjustedMousePos.y = -position.y - accumulatedDragDistance.y - (InputManager.getCenteredMouseY() / Window.getWidth()) / position.z * 2;
+
 		if (!dragging) {
 			return;
 		}
@@ -72,6 +78,7 @@ public final class Camera extends Component {
 
 		accumulatedDragDistance.x = draggedDistance.x + dragDelta.x;
 		accumulatedDragDistance.y = draggedDistance.y + dragDelta.y;
+
 	};
 
 	private final KeyPressCallback pressCallback = (final long window, final int key, final int action, final int mods) -> {
@@ -155,15 +162,17 @@ public final class Camera extends Component {
 	};
 
 	public Camera() {
+		
 		this.sPressed = this.wPressed = this.aPressed = this.dPressed = false;
 		this.dragging = false;
-
+		
 		this.uniformBuffer = new UniformBuffer(16, 0, GL_DYNAMIC_DRAW);
-
+		
 		// position - (x - y), (y - y) (z - scaling factor)
 		this.position = new Vector3f(0.0f, 0.0f, 5.0f);
 		this.acceleration = new Vector3f(0.0f, 0.0f, 0.0f);
-
+		
+		this.adjustedMousePos = new Vector2f();
 		this.dragStart = new Vector2f();
 		this.draggedDistance = new Vector2f();
 		this.dragDelta = new Vector2f();
@@ -272,6 +281,10 @@ public final class Camera extends Component {
 		}
 
 		position.add(acceleration);
+	}
+
+	public Vector2f getAdjustedMousePos() {
+		return new Vector2f(adjustedMousePos);
 	}
 
 }
