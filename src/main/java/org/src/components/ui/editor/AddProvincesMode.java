@@ -35,15 +35,9 @@ public final class AddProvincesMode extends EditorMode {
 	@Override
 	public void keyPressAction(final int key) {
 		switch (key) {
-			case GLFW_KEY_Z:
-				editor.getProvince().deleteLastPoint();
-				break;
-			case GLFW_KEY_N:
-				editor.newProvince();
-				break;
-			case GLFW_KEY_T:
-				editor.setEnabledMagnet(!editor.getMagnetEnabled());
-				break;
+			case GLFW_KEY_Z -> editor.getProvince().deleteLastPoint();
+			case GLFW_KEY_N -> editor.newProvince();
+			case GLFW_KEY_T -> editor.setEnabledMagnet(!editor.getMagnetEnabled());
 		}
 	}
 

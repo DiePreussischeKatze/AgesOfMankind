@@ -5,12 +5,9 @@ import org.src.components.Camera;
 import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
 import org.src.components.Selection;
-import org.src.components.province.Ethnicity;
 import org.src.components.province.Province;
 import org.src.core.callbacks.*;
 import org.src.core.helper.*;
-import org.src.core.main.PerfTimer;
-import org.src.core.main.Window;
 import org.src.core.managers.InputManager;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -61,30 +58,14 @@ public final class Editor extends Component {
 
 	private final KeyPressCallback pressCallback = (final long window, final int key, final int action, final int mods) -> {
 		switch (key) {
-			case GLFW_KEY_Q:
-				setMode(ADD_PROVINCES);
-				break;
-			case GLFW_KEY_E:
-				setMode(EDIT_PROVINCES);
-				break;
-			case GLFW_KEY_L:
-				setMode(SELECT_PROVINCES);
-				break;
-			case GLFW_KEY_P:
-				setMode(PAINT_PROVINCES);
-				break;
-			case GLFW_KEY_F:
-				toggleDrawFill();
-				break;
-			case GLFW_KEY_G:
-				toggleDrawPoints();
-				break;
-			case GLFW_KEY_J:
-				map.toggleDrawProvinceFillings();
-				break;
-			case GLFW_KEY_H:
-				map.toggleDrawProvincePoints();
-				break;
+			case GLFW_KEY_Q -> setMode(ADD_PROVINCES);
+			case GLFW_KEY_E -> setMode(EDIT_PROVINCES);
+			case GLFW_KEY_L -> setMode(SELECT_PROVINCES);
+			case GLFW_KEY_P -> setMode(PAINT_PROVINCES);
+			case GLFW_KEY_F -> toggleDrawFill();
+			case GLFW_KEY_G -> toggleDrawPoints();
+			case GLFW_KEY_J -> map.toggleDrawProvinceFillings();
+			case GLFW_KEY_H -> map.toggleDrawProvincePoints();
 		}
 		mode.keyPressAction(key);
 	};
@@ -335,23 +316,23 @@ public final class Editor extends Component {
 	public void setMode(final EEditorMode mode) {
 		this.mode.dispose();
 		switch (mode) {
-			case ADD_PROVINCES:
+			case ADD_PROVINCES -> {
 				if (isModeAddProvinces()) { break; }
 				this.mode = new AddProvincesMode(this, map);
-				break;
-			case EDIT_PROVINCES:
+			}
+			case EDIT_PROVINCES -> {
 				if (isModeEditProvinces()) { break; }
 				this.mode = new EditProvincesMode(this, map);
-				break;
-			case SELECT_PROVINCES:
+			}
+			case SELECT_PROVINCES -> {
 				if (isModeSelectProvinces()) { break; }
 				this.mode = new SelectProvincesMode(this, map);
-				break;
-			case PAINT_PROVINCES:
+			}
+			case PAINT_PROVINCES -> {
 				if (isModePaintProvinces()) { break; }
 				this.mode = new PaintProvincesMode(this, map);
 				newProvince();
-				break;
+			}
 		}
 	}
 

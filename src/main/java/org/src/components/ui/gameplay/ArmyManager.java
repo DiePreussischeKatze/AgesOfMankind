@@ -19,6 +19,7 @@ import org.src.core.callbacks.MouseLeftPressCallback;
 import org.src.core.callbacks.MouseLeftReleaseCallback;
 import org.src.core.callbacks.MouseMoveCallback;
 import org.src.core.callbacks.MouseRightPressCallback;
+import org.src.core.callbacks.MouseRightReleaseCallback;
 import org.src.core.helper.Component;
 import org.src.core.helper.Helper;
 import org.src.core.helper.Rect2D;
@@ -43,6 +44,8 @@ public final class ArmyManager extends Component {
     private ArrayList<Army> selectedArmies;
 
     private boolean movedMouseWhilePressing;
+
+    private Vector2f lastMousePos;
 
     private final KeyPressCallback keyPressed = (long window, int key, int action, int mods) -> {
         switch (key) {
@@ -87,6 +90,13 @@ public final class ArmyManager extends Component {
     };
 
     private final MouseRightPressCallback mouseRightPress = () -> {
+        lastMousePos.x = InputManager.getMouseX();
+        lastMousePos.y = InputManager.getMouseY();
+    };
+
+    private final MouseRightReleaseCallback mouseRightRelease = () -> {
+        if (lastMousePos.x != InputManager.getMouseX() || lastMousePos.y != InputManager.getMouseY()) { return; }
+
         for (final Army army: selectedArmies) {
             army.setOrderedPosition(camera.getAdjustedMousePos());
         }
@@ -96,6 +106,8 @@ public final class ArmyManager extends Component {
         this.camera = camera;
         this.selection = selection;
         this.map = map;
+
+        this.lastMousePos = new Vector2f();
 
         selection.setEnabled(true);
 
@@ -111,6 +123,7 @@ public final class ArmyManager extends Component {
         InputManager.addMouseLeftPressCallback(mouseLeftPress);
         InputManager.addMouseLeftReleaseCallback(mouseLeftRelease);
         InputManager.addMouseRightPressCallback(mouseRightPress);
+        InputManager.addMouseRightReleaseCallback(mouseRightRelease);
     }
 
     private void clearSelectedArmies() {

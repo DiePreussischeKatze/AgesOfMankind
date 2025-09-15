@@ -91,28 +91,12 @@ public final class Camera extends Component {
 
 	private void keyHeld(final int key, final boolean value) {
 		switch (key) {
-			case GLFW_KEY_W:
-			case GLFW_KEY_UP:
-				wPressed = value;
-				break;
-			case GLFW_KEY_S:
-			case GLFW_KEY_DOWN:
-				sPressed = value;
-				break;
-			case GLFW_KEY_A:
-			case GLFW_KEY_LEFT:
-				aPressed = value;
-				break;
-			case GLFW_KEY_D:
-			case GLFW_KEY_RIGHT:
-				dPressed = value;
-				break;
-			case GLFW_KEY_SPACE:
-				spacePressed = value;
-				break;
-			case GLFW_KEY_LEFT_SHIFT:
-				shiftPressed = value;
-				break;
+			case GLFW_KEY_W, GLFW_KEY_UP    -> wPressed     = value;
+			case GLFW_KEY_S, GLFW_KEY_DOWN  -> sPressed     = value;
+			case GLFW_KEY_A, GLFW_KEY_LEFT  -> aPressed     = value;
+			case GLFW_KEY_D, GLFW_KEY_RIGHT -> dPressed     = value;
+			case GLFW_KEY_SPACE             -> spacePressed = value;
+			case GLFW_KEY_LEFT_SHIFT        -> shiftPressed = value;
 		}
 	}
 

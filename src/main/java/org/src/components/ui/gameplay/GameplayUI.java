@@ -3,19 +3,29 @@ package org.src.components.ui.gameplay;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.type.ImInt;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F1;
 
+import org.src.components.civilisation.State;
 import org.src.components.environment.WorldCalendar;
+import org.src.components.map.Map;
 import org.src.components.ui.editor.EditorWindow;
 import org.src.core.callbacks.KeyPressCallback;
 import org.src.core.helper.Component;
+import org.src.core.helper.Helper;
 import org.src.core.main.Window;
 import org.src.core.managers.InputManager;
+import org.src.scenes.GameplayScene;
 
 public final class GameplayUI extends Component {
-	private final WorldCalendar worldCalendar;
+	private WorldCalendar worldCalendar;
 	private final NotificationManager notificationManager;
+
+	private Map map;
+	private final GameplayScene gameplayScene;
+
+	private State selectedState;
 
 	private boolean drawHud;
 	private boolean isBottomBarNeeded;
@@ -26,12 +36,21 @@ public final class GameplayUI extends Component {
 		switch (key) {
 			case GLFW_KEY_F1 -> drawHud = !drawHud;
 		}
+		// worldCalendar.incrementQuarter();
 	};
 
-	public GameplayUI() {
-		this.worldCalendar = new WorldCalendar(2025, 7, 20, 13);
+	public GameplayUI(final Map map, final GameplayScene gameplayScene) {
+		this.worldCalendar = new WorldCalendar(1934, 3, 2, 2, 0);
 		this.notificationManager = new NotificationManager();
 
+		this.gameplayScene = gameplayScene;
+		this.map = map;
+		
+		this.selectedState = map.getState("Germany");
+		if (this.selectedState == null) {
+			this.selectedState = map.getStates().getFirst();
+		}
+		
 		notificationManager.addNotification("Some important info");
 		notificationManager.addNotification("Some important info2");
 		
@@ -58,12 +77,33 @@ public final class GameplayUI extends Component {
 	private void drawDate() {
 		ImGui.begin("Date", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
 		ImGui.setWindowPos(Window.getWidth() - ImGui.getWindowWidth(), 0);
+		ImGui.setWindowSize(250, 90);
+
+		// display the text at the center
+		float textWidth = ImGui.calcTextSize(worldCalendar.getDate().year + " " + worldCalendar.getDate().month + " " + worldCalendar.getDate().day + " " + worldCalendar.toStringHour()).x;
+		ImGui.setCursorPosX((ImGui.getWindowWidth() - textWidth) / 2);
 		ImGui.text(worldCalendar.getDate().year + " " + worldCalendar.getDate().month + " " + worldCalendar.getDate().day + " " + worldCalendar.toStringHour());
+		
+		// time control buttons
+		if (ImGui.button("<<")) {
+			gameplayScene.decrementGameSpeed();
+		} // TODO: add some floating popups when hovered
+
+		ImGui.sameLine();
+		if (ImGui.button(gameplayScene.isGamePaused() ? "Unpause" : "Pause")) {
+			gameplayScene.togglePause();
+		}
+
+		ImGui.sameLine();
+		if (ImGui.button(">>")) {
+			gameplayScene.incrementGameSpeed();
+		}
+
 		ImGui.end();
 	}
 
 	private void drawSidePanel() {
-		ImGui.begin("[INSERT STATE NAME]", ImGuiWindowFlags.NoMove);
+		ImGui.begin(selectedState.getName().get(), ImGuiWindowFlags.NoMove);
 
 		if (Window.getWidth() - 100 > 299) {
 			ImGui.setWindowSize(new ImVec2(Math.clamp(ImGui.getWindowSizeX(), 300, Window.getWidth() - 100), Window.getHeight()));
@@ -74,11 +114,11 @@ public final class GameplayUI extends Component {
 		ImGui.setWindowPos(0, 0);
 
 		// WINDOW CODE HERE
-		
+		ImGui.text("State population: " + Helper.readableSTR(selectedState.getPopulation()));
 
 		ImGui.end();
 	}
-
+	
 	private void drawBottomPanel() {
 		if (!isBottomBarNeeded) { return; }
 
@@ -88,6 +128,10 @@ public final class GameplayUI extends Component {
 		ImGui.setWindowSize(new ImVec2(Window.getWidth() - mainBarWidth, 300));
 
 		ImGui.end();
+	}
+
+	public void tickCalendar() {
+		worldCalendar.incrementQuarter();
 	}
 
 	@Override
@@ -100,7 +144,7 @@ public final class GameplayUI extends Component {
 		notificationManager.dispose();
 	}
 
-	private void setIsBottomBarNeeded(final boolean value) {
+	public void setIsBottomBarNeeded(final boolean value) {
 		this.isBottomBarNeeded = value;
 	}
 

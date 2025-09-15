@@ -18,12 +18,14 @@ public final class WorldCalendar {
 	private int month;
 	private int day;
 	private int hour;
+	private int quarter;
 
-	public WorldCalendar(final int year, final int month, final int day, final int hour) {
+	public WorldCalendar(final int year, final int month, final int day, final int hour, final int quarter) {
 		this.hour = hour;
 		this.year = year;
 		this.month = month;
 		this.day = day;
+		this.quarter = quarter;
 
 		// Just for me
 		if (month == 0 || day == 0 || year == 0) {
@@ -31,7 +33,7 @@ public final class WorldCalendar {
 		}
 	}
 
-	public void incrementHour() {
+	private void incrementHour() {
 		hour++;
 		if (hour % 24 == 0) {
 			hour = 0;
@@ -41,17 +43,25 @@ public final class WorldCalendar {
 
 	private void incrementDay() {
 		day++;
-		if (day == 31 && (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12)) {
-			day = 0;
+		if (day == 32 && (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12)) {
+			day = 1;
 			incrementMonth();
-		} else if (day == 30 && (month == 4 || month == 6 || month == 9 || month == 11)) {
-			day = 0;
+		} else if (day == 31 && (month == 4 || month == 6 || month == 9 || month == 11)) {
+			day = 1;
 			incrementMonth();
-		} else if (((day == 27 && !isLeapYear()) || (day == 28 && isLeapYear())) && month == 2) {
-			day = 0;
+		} else if (((day == 28 && !isLeapYear()) || (day == 29 && isLeapYear())) && month == 2) {
+			day = 1;
 			incrementMonth();
 		}
 
+	}
+
+	public void incrementQuarter() {
+		quarter++;
+		if (quarter % 4 == 0) {
+			quarter = 0;
+			incrementHour();
+		} 
 	}
 
 	private boolean isLeapYear() {
@@ -69,13 +79,14 @@ public final class WorldCalendar {
 
 	private void incrementMonth() {
 		month++;
-		if (month % 12 == 0) {
+		if (month % 13 == 0) {
 			incrementYear();
 		}
 	}
 
 	private void incrementYear() {
 		year++;
+		month = 1;
 		if (year == 0) {
 			year = 1;
 		}
@@ -105,7 +116,7 @@ public final class WorldCalendar {
 	}
 
 	public String toStringHour() {
-		return hour + ":00";
+		return (hour > 9 ? hour : "0" + hour) + ":" + (quarter == 0 ? "00" : (quarter * 15));
 	}
 
 	public int getHour() {

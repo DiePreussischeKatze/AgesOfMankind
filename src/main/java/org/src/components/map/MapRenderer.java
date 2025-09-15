@@ -55,12 +55,8 @@ public final class MapRenderer {
 
 	private final KeyPressCallback pressCallback = (win, key, action, mods) -> {
 		switch (key) {
-			case GLFW_KEY_1:
-				activeOverlay = 0;
-				break;
-			case GLFW_KEY_Y:
-				bakeBorders();
-				break;
+			case GLFW_KEY_1 -> activeOverlay = 0;
+			case GLFW_KEY_Y -> bakeBorders();
 			//case GLFW_KEY_2:
 			//	activeOverlay = 1;
 			//	break;
@@ -165,29 +161,29 @@ public final class MapRenderer {
 			Arrays.fill(color, 0.0f);
 
 			switch (mode) {
-				case POPULATION:
+				case POPULATION -> {
 					color[0] = Math.max(map.getProvince(i).populationCount / (float) map.getMaxPopulation(), 0.1f);
 					color[1] = 0.1f;
 					color[2] = 0.1f;
-					break;
-				case TERRAIN:
+				}
+				case TERRAIN -> {
 					map.getProvince(i).setColorToType();
 					color = map.getProvince(i).getColor();
-					break;
-				case ELEVATION:
+				}
+				case ELEVATION -> {
 					color[0] = 0.1f;
 					color[1] = 0.1f;
 					color[2] = Math.max(map.getProvince(i).elevation / (float) map.getMaxElevation(), 0.1f);
-					break;
-				case POLITICAL:
+				}
+				case POLITICAL -> {
 					if (map.getProvince(i).getOwner() != null && !Province.isSeaType(map.getProvince(i))) {
 						color = map.getProvince(i).getOwner().getColor();
 					} else {
 						map.getProvince(i).setColorToType();
 						color = map.getProvince(i).getColor();
 					}
-					break;
-				case ETHNICITY:
+				}
+				case ETHNICITY -> {
 					if (!Province.isSeaType(map.getProvince(i))) {
 						// Actual ethnicity color
 
@@ -195,7 +191,7 @@ public final class MapRenderer {
 						map.getProvince(i).setColorToType();
 						color = map.getProvince(i).getColor();
 					}
-					break;
+				}
 			}
 
 			setProvinceColor(map.getProvince(i), color);

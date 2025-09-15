@@ -88,12 +88,12 @@ public final class PaintProvincesMode extends EditorMode {
 
 	private void keyHeld(final int key, final boolean value) {
 		switch (key) {
-			case GLFW_KEY_MINUS:
+			case GLFW_KEY_MINUS -> {
 				brushGrowth = value ? -0.001f : 0;
-				break;
-			case GLFW_KEY_EQUAL:
+			}
+			case GLFW_KEY_EQUAL -> {
 				brushGrowth = value ? 0.001f : 0;
-				break;
+			}
 		}
 	}
 
@@ -217,9 +217,9 @@ public final class PaintProvincesMode extends EditorMode {
 		ImGui.setWindowPos(InputManager.getMouseX() + 10, InputManager.getMouseY() - ImGui.getWindowHeight() - 10);
 		ImGui.setWindowFocus("Editor");
 
-		ImGui.text("Pop: " + describedProvince.populationCount);
+		ImGui.text("Pop: " + Helper.readableSTR(describedProvince.populationCount));
 		if (currentState != null) {
-			ImGui.text("State pop: " + currentState.getPopulation());
+			ImGui.text("State pop: " + Helper.readableSTR(currentState.getPopulation()));
 		}
 		ImGui.text("Type: " + describedProvince.type);
 		ImGui.text("Owner: " + (describedProvince.getOwner() == null ? "None" : describedProvince.getOwner().getName()));

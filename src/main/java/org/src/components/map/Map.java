@@ -75,6 +75,10 @@ public final class Map extends Component {
 		states.add(new State(this, name));
 	}
 
+	public void bakeBorders() {
+		renderer.bakeBorders();
+	}
+
 	@Override
 	public void draw() {
 		renderer.draw();
@@ -159,6 +163,16 @@ public final class Map extends Component {
 
 	public ArrayList<State> getStates() {
 		return this.states;
+	}
+
+	public State getState(final String name) {
+		for (final State state: states) {
+			if (state.getName().get().equals(name)) {
+				return state;
+			}
+		}
+
+		return null;
 	}
 
 	@Override

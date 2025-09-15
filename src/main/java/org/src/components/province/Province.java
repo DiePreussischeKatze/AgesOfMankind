@@ -166,13 +166,13 @@ public final class Province {
 		float[] color = new float[3];
 
 		switch (type) {
-			case DEEP_SEA -> color = Helper.deepCopy(DEEP_SEA_COLORS);
+			case DEEP_SEA    -> color = Helper.deepCopy(DEEP_SEA_COLORS);
 			case SHALLOW_SEA -> color = Helper.deepCopy(SHALLOW_SEA_COLORS);
-			case COSTAL_SEA -> color = Helper.deepCopy(COSTAL_SEA_COLORS);
-			case BOG -> color = Helper.deepCopy(BOG_COLORS);
-			case LOWLANDS -> color = Helper.deepCopy(LOWLANDS_COLORS);
-			case HIGHLANDS -> color = Helper.deepCopy(HIGHLANDS_COLORS);
-			case MOUNTAINS -> color = Helper.deepCopy(MOUNTAINS_COLORS);
+			case COSTAL_SEA  -> color = Helper.deepCopy(COSTAL_SEA_COLORS);
+			case BOG         -> color = Helper.deepCopy(BOG_COLORS);
+			case LOWLANDS    -> color = Helper.deepCopy(LOWLANDS_COLORS);
+			case HIGHLANDS   -> color = Helper.deepCopy(HIGHLANDS_COLORS);
+			case MOUNTAINS   -> color = Helper.deepCopy(MOUNTAINS_COLORS);
 		}
 
 		//FIXME: Figure out why this is doing a party when painting other provinces using PaintProvincesMode.java
@@ -201,13 +201,13 @@ public final class Province {
 
 	public void setType(final String type) {
 		switch (type) {
-			case "Mountains" -> this.type = ProvinceType.MOUNTAINS;
-			case "Deep sea" -> this.type = ProvinceType.DEEP_SEA;
+			case "Mountains"   -> this.type = ProvinceType.MOUNTAINS;
+			case "Deep sea"    -> this.type = ProvinceType.DEEP_SEA;
 			case "Shallow sea" -> this.type = ProvinceType.SHALLOW_SEA;
-			case "Costal sea" -> this.type = ProvinceType.COSTAL_SEA;
-			case "Bog" -> this.type = ProvinceType.BOG;
-			case "Lowlands" -> this.type = ProvinceType.LOWLANDS;
-			case "Highlands" -> this.type = ProvinceType.HIGHLANDS;
+			case "Costal sea"  -> this.type = ProvinceType.COSTAL_SEA;
+			case "Bog"         -> this.type = ProvinceType.BOG;
+			case "Lowlands"    -> this.type = ProvinceType.LOWLANDS;
+			case "Highlands"   -> this.type = ProvinceType.HIGHLANDS;
 		}
 	}
 

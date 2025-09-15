@@ -40,26 +40,26 @@ public final class EditProvincesMode extends EditorMode {
 	@Override
 	public void keyPressAction(int key) {
 		switch (key) {
-			case GLFW_KEY_X:
+			case GLFW_KEY_X -> {
 				if (!editor.isAnyPointSelected()) {
 					return;
 				}
 				editor.deleteProvincePoint(editor.getHeldPointIndex());
 				editor.deselectPoint();
-				break;
-			case GLFW_KEY_C:
+			}
+			case GLFW_KEY_C -> {
 				if (!editor.isAnyPointSelected()) {
 					return;
 				}
 				editor.getProvince().insertPointBackwards(editor.getHeldPointIndex());
 				editor.deselectPoint();
-				break;
-			case GLFW_KEY_DELETE:
+			}
+			case GLFW_KEY_DELETE -> {
 				deleteAllSelectedPoints();
-				break;
-			case GLFW_KEY_V:
+			}
+			case GLFW_KEY_V -> {
 				editor.setValueRandomizerEnabled(!editor.isValueRandomizerEnabled());
-				break;
+			}
 		}
 	}
 

@@ -92,32 +92,32 @@ public final class InputManager {
 	) {
 		if (action == GLFW_PRESS) {
 			switch (button) {
-				case GLFW_MOUSE_BUTTON_LEFT:
+				case GLFW_MOUSE_BUTTON_LEFT -> {
 					mouseLeftPressed = true;
 					mouseLeftPressCallbacks.forEach(MouseLeftPressCallback::invoke);
-					break;
-				case GLFW_MOUSE_BUTTON_RIGHT:
+				}
+				case GLFW_MOUSE_BUTTON_RIGHT -> {
 					mouseRightPressed = true;
 					mouseRightPressCallbacks.forEach(MouseRightPressCallback::invoke);
-					break;
-				case GLFW_MOUSE_BUTTON_MIDDLE:
+				}
+				case GLFW_MOUSE_BUTTON_MIDDLE -> {
 					mouseMiddlePressed = true;
-					break;
+				}
 			}
 
 		} else if (action == GLFW_RELEASE) {
 			switch (button) {
-				case GLFW_MOUSE_BUTTON_LEFT:
+				case GLFW_MOUSE_BUTTON_LEFT -> {
 					mouseLeftPressed = false;
 					mouseLeftReleaseCallbacks.forEach(MouseLeftReleaseCallback::invoke);
-					break;
-				case GLFW_MOUSE_BUTTON_RIGHT:
+				}
+				case GLFW_MOUSE_BUTTON_RIGHT -> {
 					mouseRightPressed = false;
 					mouseRightReleaseCallbacks.forEach(MouseRightReleaseCallback::invoke);
-					break;
-				case GLFW_MOUSE_BUTTON_MIDDLE:
+				}
+				case GLFW_MOUSE_BUTTON_MIDDLE -> {
 					mouseMiddlePressed = false;
-					break;
+				}
 			}
 
 		}
