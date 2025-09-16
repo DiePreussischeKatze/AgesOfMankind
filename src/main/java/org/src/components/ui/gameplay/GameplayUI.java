@@ -9,6 +9,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_F1;
 
 import org.src.components.civilisation.State;
 import org.src.components.environment.WorldCalendar;
+import org.src.components.map.DisplayMode;
 import org.src.components.map.Map;
 import org.src.components.ui.editor.EditorWindow;
 import org.src.core.callbacks.KeyPressCallback;
@@ -70,6 +71,7 @@ public final class GameplayUI extends Component {
 		drawDate();
 		drawSidePanel();
 		drawBottomPanel();
+		drawMapSelection();
 		notificationManager.draw();
 		Window.uiEnd();
 	}
@@ -126,6 +128,20 @@ public final class GameplayUI extends Component {
 		
 		ImGui.setWindowPos(new ImVec2(mainBarWidth, Window.getHeight() - 300));
 		ImGui.setWindowSize(new ImVec2(Window.getWidth() - mainBarWidth, 300));
+
+		ImGui.end();
+	}
+
+	private void drawMapSelection() {
+		ImGui.begin("Modes", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+		ImGui.setWindowPos(new ImVec2(mainBarWidth + 10, 0));
+		ImGui.setWindowSize(new ImVec2(150, 40));
+
+		final ImInt currentMode = new ImInt(map.getDisplayMode().ordinal());
+
+		if (ImGui.combo(" ", currentMode, Map.RENDERING_MODES)) {
+			map.setDisplayMode(DisplayMode.values()[currentMode.get()]);
+		}
 
 		ImGui.end();
 	}

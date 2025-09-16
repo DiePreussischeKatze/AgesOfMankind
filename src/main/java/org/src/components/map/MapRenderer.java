@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.src.components.province.Province;
 import org.src.components.province.ProvinceType;
 import org.src.core.callbacks.KeyPressCallback;
+import org.src.core.helper.Config;
 import org.src.core.helper.Consts;
 import org.src.core.helper.Helper;
 import org.src.core.helper.ShaderID;
@@ -28,6 +29,7 @@ import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
 import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 import static org.src.core.helper.Consts.RECT_INDICES;
+import static org.src.core.helper.Helper.FLOAT;
 import static org.src.core.helper.Helper.FLOAT_ARR;
 import static org.src.core.helper.Helper.INT_ARR;
 
@@ -46,6 +48,8 @@ public final class MapRenderer {
 	private DisplayMode displayMode;
 
 	private float[] provincesPoints;
+
+	private final float BORDER_WIDTH = FLOAT(Config.get("borderWidth")) / 10_000.0f;
 
 	private int indicesOffset;
 	private int activeOverlay;
@@ -256,22 +260,20 @@ public final class MapRenderer {
 		final ArrayList<Integer> indices = new ArrayList<>();
 
 		int indicesIndex = 0;
-		//final Province province = map.getProvince(150);
 		for (final Province province: map.getProvinces()) {
 			if (Province.isSeaType(province)) { continue; }
 
-			int i = 0;
-			for (; i < province.getPointsPoses().length - Consts.POINT_POS_STRIDE; i += Consts.POINT_POS_STRIDE) {
+			for (int i = 0; i < province.getPointsPoses().length - Consts.POINT_POS_STRIDE; i += Consts.POINT_POS_STRIDE) {
 
 				// find the slope of the line connecting the two points
 				final float angle = (float) Math.atan2(
-							province.getPointsPoses()[i + Consts.POINT_POS_STRIDE] - province.getPointsPoses()[i],
-							province.getPointsPoses()[i + Consts.POINT_POS_STRIDE + 1] - province.getPointsPoses()[i + 1]
+					province.getPointsPoses()[i + Consts.POINT_POS_STRIDE] - province.getPointsPoses()[i],
+					province.getPointsPoses()[i + Consts.POINT_POS_STRIDE + 1] - province.getPointsPoses()[i + 1]
 				);
 
 				final Vector2f offset = new Vector2f(
-						(float) Math.sin(angle + (Math.PI / 2)) * 0.001f,
-						(float) Math.cos(angle + (Math.PI / 2)) * 0.001f
+					(float) Math.sin(angle + (Math.PI / 2)) * BORDER_WIDTH,
+					(float) Math.cos(angle + (Math.PI / 2)) * BORDER_WIDTH
 				);
 
 				// DO NOT CHANGE THE ORDER!!!!!
@@ -288,43 +290,41 @@ public final class MapRenderer {
 				vertices.add(province.getPointsPoses()[i + 3] - offset.y);
 				// kinda a shitty solution but it works
 				// I mean like we don't strive for performance anyway, this is gonna be disabled in the editor n' it's a one time bake
-
-				// TODO: Make it not look as shitty
-				if (i != province.getPointsPoses().length - 4) {
-					indices.add(indicesIndex + 2);
-					indices.add(indicesIndex + 1);
-					indices.add(indicesIndex + 3);
-
-					// first triangle
-					indices.add(indicesIndex);
-					indices.add(indicesIndex + 1);
-					indices.add(indicesIndex + 2);
-
-					indicesIndex += 2;
-
-					indices.add(indicesIndex + 2);
-					indices.add(indicesIndex + 1);
-					indices.add(indicesIndex + 3);
-
-					// first triangle
-					indices.add(indicesIndex);
-					indices.add(indicesIndex + 1);
-					indices.add(indicesIndex + 2);
-
-					indicesIndex += 2;
-				} else {
-					indices.add(indicesIndex + 2);
-					indices.add(indicesIndex + 1);
-					indices.add(indicesIndex + 3);
-
-					// first triangle
-					indices.add(indicesIndex);
-					indices.add(indicesIndex + 1);
-					indices.add(indicesIndex + 2);
-
-					indicesIndex += 4;
-				}
 			}
+			
+			for (int i = 0; i < province.getPointsPoses().length - Consts.POINT_POS_STRIDE * 2; i += Consts.POINT_POS_STRIDE) {
+				indices.add(indicesIndex + 2);
+				indices.add(indicesIndex + 1);
+				indices.add(indicesIndex + 3);
+
+				// first triangle
+				indices.add(indicesIndex);
+				indices.add(indicesIndex + 1);
+				indices.add(indicesIndex + 2);
+
+				indicesIndex += 2;
+
+				indices.add(indicesIndex + 2);
+				indices.add(indicesIndex + 1);
+				indices.add(indicesIndex + 3);
+
+				// first triangle
+				indices.add(indicesIndex);
+				indices.add(indicesIndex + 1);
+				indices.add(indicesIndex + 2);
+
+				indicesIndex += 2;
+			}
+
+			indices.add(indicesIndex + 2);
+			indices.add(indicesIndex + 1);
+			indices.add(indicesIndex + 3);
+			// first triangle
+			indices.add(indicesIndex);
+			indices.add(indicesIndex + 1);
+			indices.add(indicesIndex + 2);
+
+			indicesIndex += 4;
 
 		}
 

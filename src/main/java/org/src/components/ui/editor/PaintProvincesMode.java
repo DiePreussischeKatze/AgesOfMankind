@@ -88,12 +88,8 @@ public final class PaintProvincesMode extends EditorMode {
 
 	private void keyHeld(final int key, final boolean value) {
 		switch (key) {
-			case GLFW_KEY_MINUS -> {
-				brushGrowth = value ? -0.001f : 0;
-			}
-			case GLFW_KEY_EQUAL -> {
-				brushGrowth = value ? 0.001f : 0;
-			}
+			case GLFW_KEY_MINUS -> brushGrowth = value ? -0.001f : 0;
+			case GLFW_KEY_EQUAL -> brushGrowth = value ? 0.001f : 0;
 		}
 	}
 

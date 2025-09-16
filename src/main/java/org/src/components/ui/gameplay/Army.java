@@ -19,7 +19,7 @@ public class Army {
 
 	public Army(final Vector2f pos, final State owner) {
 		this.owner = owner;
-		this.speed = 0.00004f;
+		this.speed = 0.0001f;
 		this.orderedPosition = new Vector2f(pos);
 		this.color = new float[3];
 
@@ -53,22 +53,21 @@ public class Army {
 
 	private void move(final double deltaTime) {
 		// System.out.println(pos.distance(orderedPosition));
-		if (pos.distance(orderedPosition) < 0.002f) {
+		if (pos.distance(orderedPosition) < 0.01f) {
 			return;
 		}
 
-		final float actualSpeed = (float) (speed * deltaTime);
 		// temporary solution, gotta use the pythagorean theorem and trigonometry
 		if (pos.x > orderedPosition.x) {
-			pos.x -= actualSpeed;
+			pos.x -= speed;
 		} else {
-			pos.x += actualSpeed;
+			pos.x += speed;
 		}
 
 		if (pos.y > orderedPosition.y) {
-			pos.y -= actualSpeed;
+			pos.y -= speed;
 		} else {
-			pos.y += actualSpeed;
+			pos.y += speed;
 		}
 	}
 

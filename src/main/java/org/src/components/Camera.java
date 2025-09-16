@@ -12,10 +12,12 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
 import static org.lwjgl.opengl.GL31.*;
 import static org.src.core.helper.Helper.FLOAT;
+import static org.src.core.helper.Helper.BOOL;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class Camera extends Component {
 	private Vector3f position;
+	private Vector3f finalPosition; // the position including WASD movement and dragging
 
 	private Vector2f adjustedMousePos;
 
@@ -23,6 +25,8 @@ public final class Camera extends Component {
 	private final float MAX_ZOOM = FLOAT(Config.get("cameraMaxZoom"));
 	private final float MIN_ZOOM = FLOAT(Config.get("cameraMinZoom"));
 	private final float DECELERATION = FLOAT(Config.get("cameraDeceleration"));
+
+	private final boolean SHOULD_BE_LIMITED = BOOL(Config.get("limitCamera"));
 
 	public final UniformBuffer uniformBuffer;
 
@@ -153,7 +157,7 @@ public final class Camera extends Component {
 		this.uniformBuffer = new UniformBuffer(16, 0, GL_DYNAMIC_DRAW);
 		
 		// position - (x - y), (y - y) (z - scaling factor)
-		this.position = new Vector3f(0.0f, 0.0f, 5.0f);
+		this.position = new Vector3f(-0.4f, -3.0f, 5.0f);
 		this.acceleration = new Vector3f(0.0f, 0.0f, 0.0f);
 		
 		this.adjustedMousePos = new Vector2f();
@@ -162,6 +166,7 @@ public final class Camera extends Component {
 		this.dragDelta = new Vector2f();
 		this.dragEnd = new Vector2f();
 		this.accumulatedDragDistance = new Vector2f();
+		this.finalPosition = new Vector3f();
 
 		InputManager.addKeyPressCallback(pressCallback);
 		InputManager.addKeyReleaseCallback(releaseCallback);
@@ -176,9 +181,9 @@ public final class Camera extends Component {
 	public void draw() {
 		uniformBuffer.bind();
 		uniformBuffer.regenerate(new float[]{
-			position.x - accumulatedDragDistance.x,
-			position.y + accumulatedDragDistance.y,
-			position.z,
+			finalPosition.x,
+			finalPosition.y,
+			finalPosition.z,
 			Window.getAspectRatio(),
 		});
 	}
@@ -186,6 +191,7 @@ public final class Camera extends Component {
 	@Override
 	public void update(final double deltaTime) {
 		move(deltaTime);
+		if (SHOULD_BE_LIMITED) { limit(); }
 	}
 
 	public Vector3f getPos() {
@@ -265,10 +271,17 @@ public final class Camera extends Component {
 		}
 
 		position.add(acceleration);
+
+		finalPosition.set(position.x - accumulatedDragDistance.x, position.y + accumulatedDragDistance.y, position.z);
 	}
 
 	public Vector2f getAdjustedMousePos() {
 		return new Vector2f(adjustedMousePos);
+	}
+	// TODO: Implement a better way of doing it
+	private void limit() {
+		finalPosition.x = Math.clamp(finalPosition.x, -4f, 4f);
+		finalPosition.y = Math.clamp(finalPosition.y, -4f, 4f);
 	}
 
 }

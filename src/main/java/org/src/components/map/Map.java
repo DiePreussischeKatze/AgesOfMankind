@@ -20,6 +20,15 @@ public final class Map extends Component {
 	private int maxPopulation;
 	private int maxElevation;
 
+	public static final String[] RENDERING_MODES = {
+		"Terrain",
+		"Population",
+		"Elevation",
+		"Political",
+		"Ethnicity",
+		"Demographic"
+	};
+
 	public Map() {
 		this.renderer = new MapRenderer(this);
 

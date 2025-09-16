@@ -38,16 +38,8 @@ public final class EditorWindow {
 		ImGui.setWindowPos(0, 0);
 
 		final ImInt mode = new ImInt(map.getDisplayMode().ordinal());
-		final String[] modes = {
-			"Terrain",
-			"Population",
-			"Elevation",
-			"Political",
-			"Ethnicity",
-			"Demographic"
-		};
 
-		if (ImGui.combo("Map rendering mode", mode, modes)) {
+		if (ImGui.combo("Map rendering mode", mode, Map.RENDERING_MODES)) {
 			editor.changeMapDisplay(DisplayMode.values()[mode.get()]);
 		}
 
