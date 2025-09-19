@@ -95,6 +95,10 @@ public final class ScenarioSaver {
 			usedProvince = null;
 			// NO OTHER CODE HERE!!!
 		}
+
+		for (Province province: map.getProvinces()) {
+			map.lookForNeighbors(province);
+		}
 	}
 
 	private void loadOwnership() {

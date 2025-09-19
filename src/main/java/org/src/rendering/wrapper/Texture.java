@@ -52,6 +52,7 @@ public final class Texture {
 
 		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
 		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameterf(id, GL_TEXTURE_LOD_BIAS, 0.5f);
 		glTextureStorage2D(id, 3, GL_RGB8, width, height);
 
 		glTextureSubImage2D(id, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);

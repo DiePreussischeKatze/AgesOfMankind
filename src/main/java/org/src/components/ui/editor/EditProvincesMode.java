@@ -233,7 +233,7 @@ public final class EditProvincesMode extends EditorMode {
 
 		editor.getProvince().refreshMesh();
 		editor.getProvince().refreshMaxPoints();
-		editor.lookForNeighbors();
+		map.lookForNeighbors(editor.getProvince());
 	}
 
 	private void deleteAllSelectedPoints() {
@@ -249,7 +249,7 @@ public final class EditProvincesMode extends EditorMode {
 		selectedPointsIndices = new int[0];
 		editor.getProvince().refreshMaxPoints();
 		editor.getProvince().refreshMesh();
-		editor.lookForNeighbors();
+		map.lookForNeighbors(editor.getProvince());
 	}
 
 }

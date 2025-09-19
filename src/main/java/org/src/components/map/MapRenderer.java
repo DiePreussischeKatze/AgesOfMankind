@@ -77,6 +77,7 @@ public final class MapRenderer {
 		this.displayMode = DisplayMode.POLITICAL;
 
 		this.indicesOffset = 0;
+		map.setLendProvinceID(-1);
 
 		this.provincesPoints = new float[0];
 
@@ -99,8 +100,8 @@ public final class MapRenderer {
 		final float ySize = (float) mapOverlays[0].getHeight() / 1000;
 
 		this.overlayMapMesh = new Mesh(new float[]{
-				xSize,  ySize, 1.0f, 1.0F,
-				xSize, -ySize, 1.0f, 0.0f,
+				 xSize,  ySize, 1.0f, 1.0F,
+				 xSize, -ySize, 1.0f, 0.0f,
 				-xSize, -ySize, 0.0f, 0.0f,
 				-xSize,  ySize, 0.0f, 1.0f,
 		}, RECT_INDICES
@@ -112,10 +113,10 @@ public final class MapRenderer {
 	}
 
 	public void draw() {
-		//mapOverlays[activeOverlay].bind();
-		//ShaderManager.get(ShaderID.DEFAULT).bind();
-		//ShaderManager.get(ShaderID.DEFAULT).setInt("tex", mapOverlays[activeOverlay].getSlot());
-		//overlayMapMesh.draw();
+		mapOverlays[activeOverlay].bind();
+		ShaderManager.get(ShaderID.DEFAULT).bind();
+		ShaderManager.get(ShaderID.DEFAULT).setInt("tex", mapOverlays[activeOverlay].getSlot());
+		overlayMapMesh.draw();
 
 		if (drawProvincePoints) {
 			ShaderManager.get(ShaderID.MAP_PIVOT).bind();
@@ -166,7 +167,7 @@ public final class MapRenderer {
 
 			switch (mode) {
 				case POPULATION -> {
-					color[0] = Math.max(map.getProvince(i).populationCount / (float) map.getMaxPopulation(), 0.1f);
+					color[0] = Math.max((float) Math.pow(map.getProvince(i).populationCount / (float) map.getMaxPopulation(), 1.0/2.2), 0.1f);
 					color[1] = 0.1f;
 					color[2] = 0.1f;
 				}
@@ -261,8 +262,21 @@ public final class MapRenderer {
 
 		int indicesIndex = 0;
 		for (final Province province: map.getProvinces()) {
-			if (Province.isSeaType(province)) { continue; }
+		//final Province province = map.getProvince(74);
+			//if (Province.isSeaType(province)) { continue; }
 
+			boolean bordersAnyStates = false;
+//
+			for (final Province neighbor: province.getNeighbors()) {
+				if (neighbor.getOwner() != province.getOwner()) {
+					bordersAnyStates = true;
+				}
+			}
+//x
+			//if (!bordersAnyStates) { continue; }
+			boolean shouldRemoveIndices = false;
+			boolean removedIndices = false;
+			int startIndicesIndex = indicesIndex;
 			for (int i = 0; i < province.getPointsPoses().length - Consts.POINT_POS_STRIDE; i += Consts.POINT_POS_STRIDE) {
 
 				// find the slope of the line connecting the two points
@@ -276,55 +290,128 @@ public final class MapRenderer {
 					(float) Math.cos(angle + (Math.PI / 2)) * BORDER_WIDTH
 				);
 
-				// DO NOT CHANGE THE ORDER!!!!!
-				vertices.add(province.getPointsPoses()[i] + offset.x);
-				vertices.add(province.getPointsPoses()[i + 1] + offset.y);
-				// DO NOT CHANGE THE ORDER!!!!!
-				vertices.add(province.getPointsPoses()[i] - offset.x);
-				vertices.add(province.getPointsPoses()[i + 1] - offset.y);
+				final Province provinceUnderPoint = map.findProvinceUnderPoint(new Vector2f(province.getPointsPoses()[i] + offset.x / 1000, province.getPointsPoses()[i + 1] + offset.y / 1000));
+				final Province provinceUnderPoint2 = map.findProvinceUnderPoint(new Vector2f(province.getPointsPoses()[i + 2] + offset.x / 1000, province.getPointsPoses()[i + 3] + offset.y / 1000));
+				final Province provinceUnderPoint3 = map.findProvinceUnderPoint(new Vector2f(province.getPointsPoses()[i] - offset.x / 1000, province.getPointsPoses()[i + 1] - offset.y / 1000));
+				final Province provinceUnderPoint4 = map.findProvinceUnderPoint(new Vector2f(province.getPointsPoses()[i + 2] - offset.x / 1000, province.getPointsPoses()[i + 3] - offset.y / 1000));
+				
+				if ((provinceUnderPoint != null && provinceUnderPoint.getOwner() != province.getOwner()) ||
+					(provinceUnderPoint2 != null && provinceUnderPoint2.getOwner() != province.getOwner()) ||
+					(provinceUnderPoint3 != null && provinceUnderPoint3.getOwner() != province.getOwner()) ||
+					(provinceUnderPoint4 != null && provinceUnderPoint4.getOwner() != province.getOwner())
+				) {
+					
+					// DO NOT CHANGE THE ORDER!!!!!
+					vertices.add(province.getPointsPoses()[i] + offset.x);
+					vertices.add(province.getPointsPoses()[i + 1] + offset.y);
+					// DO NOT CHANGE THE ORDER!!!!!
+					vertices.add(province.getPointsPoses()[i] - offset.x);
+					vertices.add(province.getPointsPoses()[i + 1] - offset.y);
 
-				vertices.add(province.getPointsPoses()[i + 2] + offset.x);
-				vertices.add(province.getPointsPoses()[i + 3] + offset.y);
+					vertices.add(province.getPointsPoses()[i + 2] + offset.x);
+					vertices.add(province.getPointsPoses()[i + 3] + offset.y);
 
-				vertices.add(province.getPointsPoses()[i + 2] - offset.x);
-				vertices.add(province.getPointsPoses()[i + 3] - offset.y);
-				// kinda a shitty solution but it works
-				// I mean like we don't strive for performance anyway, this is gonna be disabled in the editor n' it's a one time bake
+					vertices.add(province.getPointsPoses()[i + 2] - offset.x);
+					vertices.add(province.getPointsPoses()[i + 3] - offset.y);
+					//if (i - previousI >= 2) {
+					//if (i < province.getPointsPoses().length - Consts.POINT_POS_STRIDE * 2) {
+					if (shouldRemoveIndices) {
+						indices.removeLast();
+						indices.removeLast();
+						indices.removeLast();
+						
+						indices.removeLast();
+						indices.removeLast();
+						indices.removeLast();
+
+						indices.removeLast();
+						indices.removeLast();
+						indices.removeLast();
+
+						indices.removeLast();
+						indices.removeLast();
+						indices.removeLast();
+
+						//indicesIndex -= 2;
+						shouldRemoveIndices = false;
+						removedIndices = true;
+					}
+						indices.add(indicesIndex + 2);
+						indices.add(indicesIndex + 1);
+						indices.add(indicesIndex + 3);
+
+						// first triangle
+						indices.add(indicesIndex);
+						indices.add(indicesIndex + 1);
+						indices.add(indicesIndex + 2);
+
+						indicesIndex += 2;
+
+						indices.add(indicesIndex + 2);
+						indices.add(indicesIndex + 1);
+						indices.add(indicesIndex + 3);
+
+						// first triangle
+						indices.add(indicesIndex);
+						indices.add(indicesIndex + 1);
+						indices.add(indicesIndex + 2);
+
+						indicesIndex += 2;
+				//	}
+					//}
+					//previousI = i;
+					//startedDrawingBorder = true;
+
+				} else {
+					if (indices.size() > 0) {
+						shouldRemoveIndices = true;
+					}
+					//indices.add(indicesIndex + 2);
+					//indices.add(indicesIndex + 1);
+					//indices.add(indicesIndex + 3);
+	////
+					//indices.add(indicesIndex);
+					//indices.add(indicesIndex + 1);
+					//indices.add(indicesIndex + 2);
+					//indicesIndex += 2;indices.removeLast();
+					
+					//indicesIndex += 4;
+				}
 			}
+			try {
+				//if (removedIndices) {
+					indices.removeLast();
+					indices.removeLast();
+					indices.removeLast();
+					indices.removeLast();
+					indices.removeLast();
+					indices.removeLast();
+				//}
+			} catch (Exception e) { }
+			// Connect the first point with the last. Though this still needs to be improved			
+			//indices.add(indicesIndex + 2);
+			//indices.add(startIndicesIndex);
+			//indices.add(indicesIndex + 3);
+			//
+			//indices.add(startIndicesIndex);
+			//indices.add(startIndicesIndex + 1);
+			//indices.add(indicesIndex + 3);
 			
-			for (int i = 0; i < province.getPointsPoses().length - Consts.POINT_POS_STRIDE * 2; i += Consts.POINT_POS_STRIDE) {
-				indices.add(indicesIndex + 2);
-				indices.add(indicesIndex + 1);
-				indices.add(indicesIndex + 3);
+			// Stop the "spaghetti"
+			//indices.add(indicesIndex + 2);
+			//indices.add(indicesIndex + 1);
+			//indices.add(indicesIndex + 3);
+////
+			//indices.add(indicesIndex);
+			//indices.add(indicesIndex + 1);
+			//indices.add(indicesIndex + 2);
+			//indicesIndex += 4;
+			//
+			//for (int i = 0; i < province.getPointsPoses().length - Consts.POINT_POS_STRIDE * 2; i += Consts.POINT_POS_STRIDE) {
+			//	
+			//}
 
-				// first triangle
-				indices.add(indicesIndex);
-				indices.add(indicesIndex + 1);
-				indices.add(indicesIndex + 2);
-
-				indicesIndex += 2;
-
-				indices.add(indicesIndex + 2);
-				indices.add(indicesIndex + 1);
-				indices.add(indicesIndex + 3);
-
-				// first triangle
-				indices.add(indicesIndex);
-				indices.add(indicesIndex + 1);
-				indices.add(indicesIndex + 2);
-
-				indicesIndex += 2;
-			}
-
-			indices.add(indicesIndex + 2);
-			indices.add(indicesIndex + 1);
-			indices.add(indicesIndex + 3);
-			// first triangle
-			indices.add(indicesIndex);
-			indices.add(indicesIndex + 1);
-			indices.add(indicesIndex + 2);
-
-			indicesIndex += 4;
+			
 
 		}
 

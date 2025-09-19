@@ -82,7 +82,7 @@ public final class AddProvincesMode extends EditorMode {
 						editor.updateCursorPos(province.getPointsPoses()[index], province.getPointsPoses()[index + 1]);
 						editor.deselectPoint();
 						addPointToProvince();
-						editor.lookForNeighbors();
+						map.lookForNeighbors(editor.getProvince());
 					}
 				}
 			}
@@ -94,7 +94,7 @@ public final class AddProvincesMode extends EditorMode {
 	public void mouseLeftPressedAction() {
 		editor.deselectPoint();
 		addPointToProvince();
-		editor.lookForNeighbors();
+		map.lookForNeighbors(editor.getProvince());
 	}
 
 	@Override

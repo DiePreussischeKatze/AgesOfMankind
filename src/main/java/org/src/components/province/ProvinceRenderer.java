@@ -154,7 +154,7 @@ public final class ProvinceRenderer {
 
 	public void refreshMaxPoints() {
 		for (int i = 0; i < pointsPoses.length; i += Consts.POINT_POS_STRIDE) {
-			// i is x, i + 1 i y
+			// i is x, i + 1 is y
 			if (pointsPoses[i] > maxPos.x) {
 				maxPos.x = pointsPoses[i];
 			} else if (pointsPoses[i] < minPos.x) {

@@ -5,6 +5,8 @@ import org.src.components.civilisation.State;
 import org.src.components.province.Province;
 import org.src.core.helper.Component;
 
+import static org.src.core.helper.Consts.POINT_POS_STRIDE;
+
 import java.util.ArrayList;
 
 public final class Map extends Component {
@@ -37,6 +39,32 @@ public final class Map extends Component {
 
 		this.lendProvince = 0;
 		this.maxPopulation = -1;
+	}
+
+	public void lookForNeighbors(final Province province) {
+		province.clearNeighbors();
+		for (final Province presumedNeighbor: provinces) {
+			if (presumedNeighbor == province ||
+				!presumedNeighbor.getMaxPoints().intersects(province.getMaxPoints())
+			) { continue; }
+
+			if (checkIfNeighbor(province, presumedNeighbor)) {
+				province.addNeighbor(presumedNeighbor);
+				presumedNeighbor.addNeighbor(province);
+			}
+		}
+	}
+
+	private boolean checkIfNeighbor(final Province province, final Province presumedNeighbor) {
+		for (int i = 0; i < province.getPointsPoses().length; i += POINT_POS_STRIDE) {
+			for (int j = 0; j < presumedNeighbor.getPointsPoses().length; j += POINT_POS_STRIDE) {
+				if (province.getPointsPoses()[i] == presumedNeighbor.getPointsPoses()[j]
+					&& province.getPointsPoses()[i + 1] == presumedNeighbor.getPointsPoses()[j + 1]) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public Province createProvince() {

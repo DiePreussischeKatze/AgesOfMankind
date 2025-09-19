@@ -142,34 +142,7 @@ public final class Editor extends Component {
 
 	public void deleteProvincePoint(final int id) {
 		editedProvince.deletePoint(id);
-		lookForNeighbors();
-	}
-
-	public void lookForNeighbors() {
-		editedProvince.clearNeighbors();
-		for (final Province province: map.getProvinces()) {
-			if (province == editedProvince ||
-				province.hasNeighbor(editedProvince) ||
-				!province.getMaxPoints().intersects(editedProvince.getMaxPoints())
-			) { continue; }
-
-			if (checkIfNeighbor(province)) {
-				editedProvince.addNeighbor(province);
-				province.addNeighbor(editedProvince);
-			}
-		}
-	}
-
-	private boolean checkIfNeighbor(final Province province) {
-		for (int i = 0; i < editedProvince.getPointsPoses().length; i += POINT_POS_STRIDE) {
-			for (int j = 0; j < province.getPointsPoses().length; j += POINT_POS_STRIDE) {
-				if (editedProvince.getPointsPoses()[i] == province.getPointsPoses()[j]
-					&& editedProvince.getPointsPoses()[i + 1] == province.getPointsPoses()[j + 1]) {
-					return true;
-				}
-			}
-		}
-		return false;
+		map.lookForNeighbors(editedProvince);
 	}
 
 	public void newProvince() {
