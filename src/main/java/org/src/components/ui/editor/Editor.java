@@ -79,7 +79,7 @@ public final class Editor extends Component {
 		this.camera = camera;
 		this.map = map;
 		this.selection = selection;
-
+		
 		this.editedProvince = map.createProvince();
 
 		this.gridAlignmentEnabled = true;

@@ -17,23 +17,25 @@ public final class GameplayScene extends Scene {
 	private boolean gamePaused;
 	private int currentTick;
   
-    private final Camera camera;
-    private final Map map;
-    private final Selection selection;
-    private final ArmyManager armyManager;
-    private final GameplayUI gameplayUI;
+   	private final Camera camera;
+   	private final Map map;
+   	private final Selection selection;
+   	private final ArmyManager armyManager;
+   	private final GameplayUI gameplayUI;
 
     private final KeyPressCallback keyPressed = (long window, int key, int action, int mods) -> {
-        switch (key) {
-            case GLFW_KEY_P -> togglePause();
-            case GLFW_KEY_EQUAL -> incrementGameSpeed(); // the '=+' on the keyboard
-            case GLFW_KEY_MINUS -> decrementGameSpeed(); // the '-_' on the keyboard
-        }
+    	switch (key) {
+    	 	case GLFW_KEY_P     -> togglePause();
+    		case GLFW_KEY_EQUAL -> incrementGameSpeed(); // the '=+' on the keyboard
+    	 	case GLFW_KEY_MINUS -> decrementGameSpeed(); // the '-_' on the keyboard
+    	}
     };
 
     public GameplayScene() {
         super();
        
+        gameSpeed = 3;
+    
 		camera = new Camera();
         map = new Map();
         selection = new Selection(camera);

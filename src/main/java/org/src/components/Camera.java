@@ -10,9 +10,7 @@ import org.src.rendering.wrapper.UniformBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
-import static org.lwjgl.opengl.GL31.*;
 import static org.src.core.helper.Helper.FLOAT;
-import static org.src.core.helper.Helper.BOOL;
 import static org.src.core.helper.Helper.isInImGuiWindow;
 
 public final class Camera extends Component {
@@ -25,8 +23,6 @@ public final class Camera extends Component {
 	private final float MAX_ZOOM = FLOAT(Config.get("cameraMaxZoom"));
 	private final float MIN_ZOOM = FLOAT(Config.get("cameraMinZoom"));
 	private final float DECELERATION = FLOAT(Config.get("cameraDeceleration"));
-
-	private final boolean SHOULD_BE_LIMITED = BOOL(Config.get("limitCamera"));
 
 	public final UniformBuffer uniformBuffer;
 
@@ -191,7 +187,6 @@ public final class Camera extends Component {
 	@Override
 	public void update(final double deltaTime) {
 		move(deltaTime);
-		if (SHOULD_BE_LIMITED) { limit(); }
 	}
 
 	public Vector3f getPos() {
@@ -277,11 +272,6 @@ public final class Camera extends Component {
 
 	public Vector2f getAdjustedMousePos() {
 		return new Vector2f(adjustedMousePos);
-	}
-	// TODO: Implement a better way of doing it
-	private void limit() {
-		finalPosition.x = Math.clamp(finalPosition.x, -4f, 4f);
-		finalPosition.y = Math.clamp(finalPosition.y, -4f, 4f);
 	}
 
 }

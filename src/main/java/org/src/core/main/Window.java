@@ -156,7 +156,7 @@ public final class Window {
 
 		ShaderManager.loadShaders("res/shaders/");
 
-		this.currentScene = new GameplayScene();
+		this.currentScene = new EditorScene();
 
 		this.loop = new Loop(currentScene);
 		this.renderer = new Renderer(currentScene);

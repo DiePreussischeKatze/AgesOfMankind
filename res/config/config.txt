@@ -12,5 +12,4 @@ cameraMinZoom: 0.1
 fullscreen: false
 cameraMaxZoom: 40
 cameraDeceleration: 0.0005
-limitCamera: true
-borderWidth: 50
+borderWidth: 20

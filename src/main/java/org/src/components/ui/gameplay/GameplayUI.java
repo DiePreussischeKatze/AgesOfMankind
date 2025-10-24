@@ -72,8 +72,24 @@ public final class GameplayUI extends Component {
 		drawSidePanel();
 		drawBottomPanel();
 		drawMapSelection();
+		drawPauseNotificationWindow();
 		notificationManager.draw();
 		Window.uiEnd();
+	}
+
+	private void drawPauseNotificationWindow() {
+		if (!gameplayScene.isGamePaused()) { return; }
+
+		ImGui.begin("Pause notification", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoScrollbar);
+		ImGui.setWindowPos((Window.getWidth() + mainBarWidth - 200) / 2, Window.getHeight() / 10);
+		ImGui.setWindowSize(200, 30);
+		
+		final String text = "Game Paused";
+		final float textWidth = ImGui.calcTextSize(text).x;
+		ImGui.setCursorPosX((ImGui.getWindowWidth() - textWidth) / 2);
+		ImGui.text(text);
+
+		ImGui.end();
 	}
 
 	private void drawDate() {
@@ -82,9 +98,11 @@ public final class GameplayUI extends Component {
 		ImGui.setWindowSize(250, 90);
 
 		// display the text at the center
-		float textWidth = ImGui.calcTextSize(worldCalendar.getDate().year + " " + worldCalendar.getDate().month + " " + worldCalendar.getDate().day + " " + worldCalendar.toStringHour()).x;
+		final String worldCalendarText = worldCalendar.getDate().year + " " + worldCalendar.getDate().month + " " + worldCalendar.getDate().day + " " + worldCalendar.toStringHour();
+		final float textWidth = ImGui.calcTextSize(worldCalendarText).x;
+		
 		ImGui.setCursorPosX((ImGui.getWindowWidth() - textWidth) / 2);
-		ImGui.text(worldCalendar.getDate().year + " " + worldCalendar.getDate().month + " " + worldCalendar.getDate().day + " " + worldCalendar.toStringHour());
+		ImGui.text(worldCalendarText);
 		
 		// time control buttons
 		if (ImGui.button("<<")) {

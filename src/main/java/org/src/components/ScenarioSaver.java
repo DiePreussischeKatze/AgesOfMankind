@@ -89,6 +89,7 @@ public final class ScenarioSaver {
 			semicolonIndices.clear();
 
 			map.findMaxParams();
+			usedProvince.calculateParams();
 
 			if (i == 0 && !loadingAsGameplayMode) { continue; }
 			map.addProvinceToMesh(usedProvince);

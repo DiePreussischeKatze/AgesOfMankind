@@ -6,6 +6,8 @@ import org.src.components.civilisation.State;
 import org.src.core.helper.Helper;
 import org.src.core.helper.Rect2D;
 
+import earcut4j.Earcut;
+
 import java.util.HashSet;
 
 import static org.src.core.helper.Consts.*;
@@ -32,8 +34,14 @@ public final class Province {
 
 	public ProvinceType type;
 
+	// TODO: Make it account for Mercator's effect
+	public float landArea;
+
 	public int populationCount;
 	public int elevation;
+	// birth rate per 1 million inhabitants
+	public float birthRate;
+	public float deathRate;
 
 	public Province() {
 		renderer = new ProvinceRenderer();
@@ -70,6 +78,46 @@ public final class Province {
 
 		this.type = type;
 		setColorToType();
+	}
+
+	public void calculateParams() {
+		calculateBirthsAndDeaths();
+		calculateLandArea();
+	}
+
+	public void calculateBirthsAndDeaths() {
+		if (isSeaType(type)) {
+			birthRate = 0;
+		} else {
+			birthRate = type.ordinal();
+		}
+
+		deathRate = birthRate / 2;
+
+	}
+
+	public void calculateLandArea() {
+		landArea = 0;
+		for (int i = 0; i < renderer.getIndices().length; i += 3) {
+			final Vector2f A = new Vector2f(
+				renderer.getPointsPoses()[renderer.getIndices()[i] * 2],
+				renderer.getPointsPoses()[renderer.getIndices()[i] * 2 + 1]
+			);
+
+			final Vector2f B = new Vector2f(
+				renderer.getPointsPoses()[renderer.getIndices()[i + 1] * 2],
+				renderer.getPointsPoses()[renderer.getIndices()[i + 1] * 2 + 1]
+			);
+
+			final Vector2f C = new Vector2f(
+				renderer.getPointsPoses()[renderer.getIndices()[i + 2] * 2],
+				renderer.getPointsPoses()[renderer.getIndices()[i + 2] * 2 + 1]
+			);
+			// Formula taken from: https://math.stackexchange.com/questions/516219/finding-out-the-area-of-a-triangle-if-the-coordinates-of-the-three-vertices-are
+			landArea += 0.5 * Math.abs( (B.x - A.x)*(C.y - A.y) - (C.x-A.x)*(B.y - A.y) );
+			
+		}
+		landArea *= 1_000_000;
 	}
 
 	public static boolean isSeaType(final ProvinceType type) {

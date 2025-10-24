@@ -1,5 +1,7 @@
 package org.src.core.helper;
 
+import java.util.ArrayList;
+
 import org.joml.Vector2f;
 
 public final class Rect2D {
@@ -32,6 +34,15 @@ public final class Rect2D {
 
 	public boolean intersects(final Vector2f start, final Vector2f end) {
 		return this.x + this.width < end.x && this.x > start.x && this.y + this.height < end.y && this.y > start.y;
+	}
+
+	public boolean intersects(final ArrayList<Rect2D> whats) {
+		for (final Rect2D what: whats) {
+			if (this.intersects(what)) {
+				return true;
+			}	
+		}
+		return false;
 	}
 
 	public float getX() {
