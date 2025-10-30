@@ -16,6 +16,7 @@ public final class ShaderManager {
 	private static void loadShader(final String vertexPath, final String fragmentPath, final ShaderID shaderID) {
 		System.out.println("Loading vertex shader: " + vertexPath + " ,and fragment shader: " + fragmentPath + " for ShaderID: " + shaderID);
 		shaders.put(shaderID, new Shader(vertexPath, fragmentPath));
+		System.out.println("Shader: " + shaderID + " loaded successfully!");
 	}
 
 	public static void loadShaders(final String loadingDirectory) {

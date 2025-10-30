@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public final class Map extends Component {
 
 	private final MapRenderer renderer;
+	private final StateTextRenderer textRenderer;
 
 	private final ArrayList<State> states;
 
@@ -33,6 +34,7 @@ public final class Map extends Component {
 
 	public Map() {
 		this.renderer = new MapRenderer(this);
+		this.textRenderer = new StateTextRenderer();
 
 		this.provinces = new ArrayList<>();
 		this.states = new ArrayList<>();
@@ -119,11 +121,13 @@ public final class Map extends Component {
 	@Override
 	public void draw() {
 		renderer.draw();
+		textRenderer.draw();
 	}
 
 	@Override
 	public void dispose() {
 		renderer.dispose();
+		textRenderer.dispose();
 	}
 
 	public void setProvinceInMeshColor(final Province hwich, final float[] color) {

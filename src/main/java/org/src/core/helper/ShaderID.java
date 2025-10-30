@@ -20,8 +20,8 @@ public enum ShaderID {
 	/* P */ PIVOT, POLYGON,
 	/* Q */
 	/* R */
-	/* S */ SELECTION
-	/* T */
+	/* S */ SELECTION,
+	/* T */ TEXT,
 	/* U */
 	/* V */
 	/* X */

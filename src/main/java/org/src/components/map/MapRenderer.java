@@ -135,6 +135,8 @@ public final class MapRenderer {
 
 		ShaderManager.get(ShaderID.BORDER).bind();
 		borderMesh.draw();
+
+		
 	}
 
 	public void addProvinceToMesh(final Province province) {
